@@ -1,0 +1,115 @@
+networks:
+    BoardGamesApp-dev:
+        driver: bridge
+    traefik-proxy-blumilk-local-environment:
+      external: true
+
+volumes:
+    BoardGamesApp-postgres-data:
+        name: BoardGamesApp-postgres-data
+    BoardGamesApp-redis-data:
+        name: BoardGamesApp-redis-data
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: environment/.docker/app/Dockerfile
+            target: local
+            args:
+                - INSTALL_XDEBUG=${DOCKER_INSTALL_XDEBUG:-true}
+                - USER_ID=${DOCKER_HOST_USER_ID:-1000}
+        labels:
+            - "traefik.enable=true"
+            - "traefik.blumilk.local.environment=true"
+            # HTTP
+            - "traefik.http.routers.BoardGamesApp-http-router.rule=Host(`${APP_DOMAIN}`)"
+            - "traefik.http.routers.BoardGamesApp-http-router.entrypoints=web"
+            - "traefik.http.routers.BoardGamesApp-http-router.service=BoardGamesApp"
+          # HTTP to HTTPS redirect
+            #      - "traefik.http.routers.BoardGamesApp-http-router.middlewares=https-redirect@file"
+            # HTTPS
+            - "traefik.http.routers.BoardGamesApp-https-router.rule=Host(`${APP_DOMAIN}`)"
+            - "traefik.http.routers.BoardGamesApp-https-router.entrypoints=websecure"
+            - "traefik.http.routers.BoardGamesApp-https-router.tls=true"
+            - "traefik.http.routers.BoardGamesApp-https-router.service=BoardGamesApp"
+            # APP LOADBALANCER
+            - "traefik.http.services.BoardGamesApp.loadbalancer.server.port=80"
+            # VITE DEV SERVER
+            - "traefik.http.routers.BoardGamesApp-vite-dev-server-https-router.rule=Host(`${VITE_DEV_SERVER_DOCKER_HOST_NAME}`)"
+            - "traefik.http.routers.BoardGamesApp-vite-dev-server-https-router.entrypoints=websecure"
+            - "traefik.http.routers.BoardGamesApp-vite-dev-server-https-router.tls=true"
+            - "traefik.http.routers.BoardGamesApp-vite-dev-server-https-router.service=BoardGamesApp-vite-dev-server"
+            - "traefik.http.services.BoardGamesApp-vite-dev-server.loadbalancer.server.port=5173"
+        container_name: BoardGamesApp-app-dev
+        working_dir: /application
+        volumes:
+          - ./environment/local/app/php.ini:/usr/local/etc/php/conf.d/zzz-overrides.ini:ro
+          - ./environment/local/app/php-fpm.conf:/usr/local/etc/php-fpm.d/zzz-overrides.conf:ro
+          - ./environment/local/app/supervisord.conf:/etc/supervisor/custom-supervisord.conf:ro
+          - .:/application
+        ports:
+            - ${DOCKER_APP_HOST_PORT:-63851}:80
+        networks:
+            - BoardGamesApp-dev
+            - traefik-proxy-blumilk-local-environment
+        restart: unless-stopped
+        depends_on:
+            database:
+                condition: service_healthy
+
+    database:
+        image: postgres:16.3-alpine3.18@sha256:64e18e8fb3e9c9aac89ac590c5dd8306b862478404f76cd9b5f7720d012b4c47
+        container_name: BoardGamesApp-db-dev
+        environment:
+            - POSTGRES_USER=${DB_USERNAME}
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+            - POSTGRES_DB=${DB_DATABASE}
+            - PGDATA=/var/lib/postgresql/data
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready --dbname ${DB_DATABASE} --username ${DB_USERNAME}"]
+            interval: 3s
+            timeout: 3s
+            retries: 5
+        ports:
+            - ${DOCKER_DATABASE_HOST_PORT:-63853}:5432
+        volumes:
+            - BoardGamesApp-postgres-data:/var/lib/postgresql/data
+        networks:
+            - BoardGamesApp-dev
+        restart: unless-stopped
+
+    mailpit:
+      image: axllent/mailpit:v1.27.11@sha256:e22dce5b36f93c77082e204a3942fb6b283b7896e057458400a4c88344c3df68
+      container_name: BoardGamesApp-mailpit-dev
+      labels:
+        - "traefik.enable=true"
+        - "traefik.blumilk.environment=true"
+        # HTTP
+        - "traefik.http.routers.BoardGamesApp-mailpit-http-router.rule=Host(`BoardGamesApp-mailpit.blumilk.localhost`)"
+        - "traefik.http.routers.BoardGamesApp-mailpit-http-router.entrypoints=web"
+        # HTTP to HTTPS redirect
+        #      - "traefik.http.routers.erasmus-mailpit-http-router.middlewares=https-redirect@file"
+        # HTTPS
+        - "traefik.http.routers.BoardGamesApp-mailpit-https-router.rule=Host(`BoardGamesApp-mailpit.blumilk.localhost`)"
+        - "traefik.http.routers.BoardGamesApp-mailpit-https-router.entrypoints=websecure"
+        - "traefik.http.routers.BoardGamesApp-mailpit-https-router.tls=true"
+        # LOADBALANCER MAILPIT PORT
+        - "traefik.http.services.BoardGamesApp-mailpit.loadbalancer.server.port=8025"
+      networks:
+        - BoardGamesApp-dev
+        - traefik-proxy-blumilk-local-environment
+      ports:
+        - ${DOCKER_MAILPIT_DASHBOARD_HOST_PORT:-63854}:8025
+      restart: unless-stopped
+
+    redis:
+        image: redis:7.2.5-alpine3.19@sha256:8f157725f8eee31e65a8d4765f1f986d76aedc1a0503345dfb63a2b1b5a441ee
+        container_name: BoardGamesApp-redis-dev
+        ports:
+            - ${DOCKER_REDIS_HOST_PORT:-63852}:6379
+        volumes:
+            - BoardGamesApp-redis-data:/data
+        networks:
+            - BoardGamesApp-dev
+        restart: unless-stopped
