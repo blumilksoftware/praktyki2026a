@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
