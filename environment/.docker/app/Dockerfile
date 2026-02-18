@@ -23,7 +23,9 @@ RUN apt-get update \
         supervisor \
         libpq-dev \
     && docker-php-ext-install \
-        pdo_pgsql 
+        pdo_pgsql \
+        && pecl install redis \
+        && docker-php-ext-enable redis
 
 COPY ./environment/.docker/app/entrypoint.sh /entrypoint.sh
 COPY ./environment/.docker/app/nginx.conf /etc/nginx/nginx.conf
