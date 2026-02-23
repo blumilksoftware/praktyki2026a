@@ -1,17 +1,7 @@
 <?php
 
-declare(strict_types=1);
+it('returns a successful response', function () {
+    $response = $this->get('/');
 
-namespace Tests\Feature;
-
-use Tests\TestCase;
-
-class ExampleTest extends TestCase
-{
-    public function testTheApplicationReturnsASuccessfulResponse(): void
-    {
-        $response = $this->get("/");
-
-        $response->assertStatus(200);
-    }
-}
+    $response->assertStatus(200);
+});
