@@ -1,5 +1,3 @@
-@import 'tailwindcss';
-@plugin '@tailwindcss/forms';
-@plugin '@tailwindcss/typography';
-
-@source '../**/*.{vue,js,ts}';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

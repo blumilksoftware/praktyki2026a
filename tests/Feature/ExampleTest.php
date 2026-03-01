@@ -2,16 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature;
+it("returns a successful response", function (): void {
+    $response = $this->get("/");
 
-use Tests\TestCase;
-
-class ExampleTest extends TestCase
-{
-    public function testTheApplicationReturnsASuccessfulResponse(): void
-    {
-        $response = $this->get("/");
-
-        $response->assertStatus(200);
-    }
-}
+    $response->assertStatus(200);
+});
