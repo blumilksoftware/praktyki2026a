@@ -18,7 +18,7 @@
         </include>
     </source>
     <php>
-        <env name="APP_KEY" value="base64:SKEJSy9oF9chQBCMbxqgj5zhtAvug9kwZ+cDiP1Y8A8="/>
+        <env name="APP_KEY" value="base64:XPPrVsjqRwgokbmCeg4tK+U2gnI5bsSCxYEgFQNYuVk="/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_LOCALE" value="pl"/>
 
