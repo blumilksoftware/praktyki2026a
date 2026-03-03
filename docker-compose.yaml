@@ -88,14 +88,14 @@ services:
       container_name: boardgameapp-mailpit-dev
       labels:
         - "traefik.enable=true"
-        - "traefik.blumilk.environment=true"
+        - "traefik.blumilk.local.environment=true"
         # HTTP
-        - "traefik.http.routers.boardgameapp-mailpit-http-router.rule=Host(`boardgameapp-mailpit.blumilk.localhost`)"
+        - "traefik.http.routers.boardgameapp-mailpit-http-router.rule=Host(`boardgameapp-mailpit.blumilk.local.env`)"
         - "traefik.http.routers.boardgameapp-mailpit-http-router.entrypoints=web"
         # HTTP to HTTPS redirect
         #      - "traefik.http.routers.erasmus-mailpit-http-router.middlewares=https-redirect@file"
         # HTTPS
-        - "traefik.http.routers.boardgameapp-mailpit-https-router.rule=Host(`boardgameapp-mailpit.blumilk.localhost`)"
+        - "traefik.http.routers.boardgameapp-mailpit-https-router.rule=Host(`boardgameapp-mailpit.blumilk.local.env`)"
         - "traefik.http.routers.boardgameapp-mailpit-https-router.entrypoints=websecure"
         - "traefik.http.routers.boardgameapp-mailpit-https-router.tls=true"
         # LOADBALANCER MAILPIT PORT
