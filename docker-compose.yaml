@@ -50,6 +50,9 @@ services:
           - .:/application
         ports:
             - ${DOCKER_APP_HOST_PORT:-63851}:80
+            - ${DOCKER_VITE_HOST_PORT:-5173}:5173
+            - "5173:5173"
+
         networks:
             - boardgameapp-dev
             - traefik-proxy-blumilk-local-environment
@@ -59,7 +62,8 @@ services:
                 condition: service_healthy
 
     database:
-        image: postgres:16.3-alpine3.18@sha256:64e18e8fb3e9c9aac89ac590c5dd8306b862478404f76cd9b5f7720d012b4c47
+        build:
+          context: environment/.docker/postgres
         container_name: boardgameapp-db-dev
         environment:
             - POSTGRES_USER=${DB_USERNAME}
@@ -84,14 +88,14 @@ services:
       container_name: boardgameapp-mailpit-dev
       labels:
         - "traefik.enable=true"
-        - "traefik.blumilk.environment=true"
+        - "traefik.blumilk.local.environment=true"
         # HTTP
-        - "traefik.http.routers.boardgameapp-mailpit-http-router.rule=Host(`boardgameapp-mailpit.blumilk.localhost`)"
+        - "traefik.http.routers.boardgameapp-mailpit-http-router.rule=Host(`boardgameapp-mailpit.blumilk.local.env`)"
         - "traefik.http.routers.boardgameapp-mailpit-http-router.entrypoints=web"
         # HTTP to HTTPS redirect
         #      - "traefik.http.routers.erasmus-mailpit-http-router.middlewares=https-redirect@file"
         # HTTPS
-        - "traefik.http.routers.boardgameapp-mailpit-https-router.rule=Host(`boardgameapp-mailpit.blumilk.localhost`)"
+        - "traefik.http.routers.boardgameapp-mailpit-https-router.rule=Host(`boardgameapp-mailpit.blumilk.local.env`)"
         - "traefik.http.routers.boardgameapp-mailpit-https-router.entrypoints=websecure"
         - "traefik.http.routers.boardgameapp-mailpit-https-router.tls=true"
         # LOADBALANCER MAILPIT PORT
