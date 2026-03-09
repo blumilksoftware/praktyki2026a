@@ -19,7 +19,7 @@
         "larastan/larastan": "^3.8.1",
         "mockery/mockery": "^1.6.12",
         "nunomaduro/collision": "^8.8.3",
-        "phpunit/phpunit": "^12.5.4",
+        "phpunit/phpunit": "^13.0.5",
         "spatie/laravel-ignition": "^2.9.1"
     },
     "autoload": {
