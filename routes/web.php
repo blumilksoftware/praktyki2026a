@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\FriendController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -17,9 +18,11 @@ Route::get("/", fn() => Inertia::render("Welcome", [
 
 Route::get("/dashboard", fn() => Inertia::render("Dashboard"))->middleware(["auth", "verified"])->name("dashboard");
 
-Route::resource("games", GameController::class)
+Route::resource("/games", GameController::class)
     ->middleware(["auth", "verified"])
     ->except(["show"]);
+
+Route::resource("/friends", FriendController::class)->middleware(["auth","verified"])->except(["show"]);
 
 Route::middleware("auth")->group(function (): void {
     Route::get("/profile", [ProfileController::class, "edit"])->name("profile.edit");
