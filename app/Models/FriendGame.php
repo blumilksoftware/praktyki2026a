@@ -20,21 +20,13 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  */
 class FriendGame extends Pivot
 {
-    protected $table = "friend_game";
     public $incrementing = true;
-
+    protected $table = "friend_game";
     protected $fillable = [
         "friend_id",
         "game_id",
         "rating",
     ];
-
-    protected function casts(): array
-    {
-        return [
-            "rating" => "integer",
-        ];
-    }
 
     public function friend(): BelongsTo
     {
@@ -44,5 +36,12 @@ class FriendGame extends Pivot
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            "rating" => "integer",
+        ];
     }
 }

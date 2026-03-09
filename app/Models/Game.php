@@ -35,13 +35,6 @@ class Game extends Model
         "max_players",
     ];
 
-    protected function casts(): array
-    {
-        return [
-            "is_shared" => "boolean",
-        ];
-    }
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -53,5 +46,12 @@ class Game extends Model
             ->using(FriendGame::class)
             ->withPivot("rating")
             ->withTimestamps();
+    }
+
+    protected function casts(): array
+    {
+        return [
+            "is_shared" => "boolean",
+        ];
     }
 }

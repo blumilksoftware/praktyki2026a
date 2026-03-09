@@ -38,14 +38,6 @@ class User extends Authenticatable
         "remember_token",
     ];
 
-    protected function casts(): array
-    {
-        return [
-            "email_verified_at" => "datetime",
-            "password" => "hashed",
-        ];
-    }
-
     public function friends(): HasMany
     {
         return $this->hasMany(Friend::class);
@@ -54,5 +46,13 @@ class User extends Authenticatable
     public function games(): HasMany
     {
         return $this->hasMany(Game::class);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            "email_verified_at" => "datetime",
+            "password" => "hashed",
+        ];
     }
 }
