@@ -7,8 +7,10 @@ env:
   CURRENT_USER_ID:
     sh: id --user
   DOCKER_COMPOSE_APP_CONTAINER: app
+  DOCKER_COMPOSE_DATABASE_CONTAINER: database
 
 vars:
+  DOCKER_EXEC: docker compose exec $DOCKER_COMPOSE_DATABASE_CONTAINER
   DOCKER_EXEC_USER: docker compose exec --user $CURRENT_USER_ID $DOCKER_COMPOSE_APP_CONTAINER
   DOCKER_EXEC_ROOT: docker compose exec --user root $DOCKER_COMPOSE_APP_CONTAINER
 
@@ -28,8 +30,10 @@ tasks:
     cmds:
       - cmd: "{{.DOCKER_EXEC_USER}} composer install"
       - task: _set-app-key
+      - cmd: "{{.DOCKER_EXEC_USER}} php artisan migrate:fresh --seed"
       - cmd: "{{.DOCKER_EXEC_USER}} npm install"
-      - cmd: "{{.DOCKER_EXEC_USER}} php artisan migrate"
+      - task: create-test-database
+      - cmd: "{{.DOCKER_EXEC_USER}} php artisan storage:link"
 
   vite:
     desc: "Run Vite dev server"
@@ -119,3 +123,12 @@ tasks:
           echo "APP_KEY is not set. Creating:"
           docker compose exec {{.DOCKER_COMPOSE_APP_CONTAINER}} php artisan key:generate
         fi
+
+  create-test-database:
+    desc: "Create test database"
+    aliases: [create-test-db]
+    vars:
+      TEST_DB_NAME: boardgameapp-test
+    cmds:
+      - cmd: '{{.DOCKER_EXEC}} bash -c "createdb --username=$DB_USERNAME {{ .TEST_DB_NAME }} && echo \"Created database for tests ({{ .TEST_DB_NAME }}).\""'
+        ignore_error: true

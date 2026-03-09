@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -17,6 +19,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon $email_verified_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property Collection<int, Friend> $friends
+ * @property Collection<int, Game> $games
  */
 class User extends Authenticatable
 {
@@ -33,6 +37,16 @@ class User extends Authenticatable
         "password",
         "remember_token",
     ];
+
+    public function friends(): HasMany
+    {
+        return $this->hasMany(Friend::class);
+    }
+
+    public function games(): HasMany
+    {
+        return $this->hasMany(Game::class);
+    }
 
     protected function casts(): array
     {
