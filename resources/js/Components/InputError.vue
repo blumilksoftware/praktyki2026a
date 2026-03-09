@@ -2,6 +2,7 @@
 defineProps({
   message: {
     type: String,
+    default: null,
   },
 })
 </script>
