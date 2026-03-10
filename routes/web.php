@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 use App\Http\Controllers\FriendController;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
 
 Route::get("/", fn() => Inertia::render("Welcome", [
     "canLogin" => Route::has("login"),
@@ -23,6 +25,10 @@ Route::resource("/games", GameController::class)
     ->except(["show"]);
 
 Route::resource("/friends", FriendController::class)->middleware(["auth", "verified"])->except(["show"]);
+
+Route::get("/friends/{friend}/preferences",[PreferenceController::class,"show"])->middleware(["auth","verified"])->name("preferences.show");
+
+Route::put("/friends/{friend}/preferences",[PreferenceController::class,"update"])->middleware(["auth","verified"])->name("preferences.update");
 
 Route::middleware("auth")->group(function (): void {
     Route::get("/profile", [ProfileController::class, "edit"])->name("profile.edit");
