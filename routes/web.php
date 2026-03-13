@@ -6,7 +6,8 @@ use App\Http\Controllers\FriendController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Models\Friend;
+use App\Models\Game;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,11 +15,15 @@ use Inertia\Inertia;
 Route::get("/", fn() => Inertia::render("Welcome", [
     "canLogin" => Route::has("login"),
     "canRegister" => Route::has("register"),
-    "laravelVersion" => Application::VERSION,
-    "phpVersion" => PHP_VERSION,
 ]));
 
-Route::get("/dashboard", fn() => Inertia::render("Dashboard"))->middleware(["auth", "verified"])->name("dashboard");
+Route::get("/dashboard", function () {
+    $userId = auth()->id();
+    return Inertia::render("Dashboard", [
+        "gamesCount" => Game::where("user_id", $userId)->orWhere("is_shared", true)->count(),
+        "friendsCount" => Friend::where("user_id", $userId)->count(),
+    ]);
+})->middleware(["auth", "verified"])->name("dashboard");
 
 Route::resource("/games", GameController::class)
     ->middleware(["auth", "verified"])

@@ -39,6 +39,18 @@ const showingNavigationDropdown = ref(false)
                 >
                   Dashboard
                 </NavLink>
+                <NavLink
+                  :href="route('games.index')"
+                  :active="route().current('games.*')"
+                >
+                  Gry
+                </NavLink>
+                <NavLink
+                  :href="route('friends.index')"
+                  :active="route().current('friends.*')"
+                >
+                  Znajomi
+                </NavLink>
               </div>
             </div>
 
@@ -145,6 +157,18 @@ const showingNavigationDropdown = ref(false)
               :active="route().current('dashboard')"
             >
               Dashboard
+            </ResponsiveNavLink>
+            <ResponsiveNavLink
+              :href="route('games.index')"
+              :active="route().current('games.*')"
+            >
+              Gry
+            </ResponsiveNavLink>
+            <ResponsiveNavLink
+              :href="route('friends.index')"
+              :active="route().current('friends.*')"
+            >
+              Znajomi
             </ResponsiveNavLink>
           </div>
 
