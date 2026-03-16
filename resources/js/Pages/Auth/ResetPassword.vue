@@ -4,7 +4,7 @@ import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
-import { Head, useForm } from '@inertiajs/vue3'
+import { Head, Link, useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
   email: {
@@ -34,6 +34,13 @@ const submit = () => {
 <template>
   <GuestLayout>
     <Head title="Reset Password" />
+
+    <Link
+      :href="route('login')"
+      class="mb-4 inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+    >
+      &larr; Back
+    </Link>
 
     <form @submit.prevent="submit">
       <div>
