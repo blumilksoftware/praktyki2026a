@@ -87,7 +87,7 @@ function setRating(gameId: number, rating: number) {
 
                     <form v-else @submit.prevent="submit" class="space-y-4">
                         <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
-                            Kliknij gwiazdki aby ocenic gry od 1 do 10. Kliknij ponownie aby usunac ocene.
+                            Kliknij cyfry aby ocenić gry od 1 do 10. Kliknij ponownie aby usunąć ocenę.
                         </p>
 
                         <div
