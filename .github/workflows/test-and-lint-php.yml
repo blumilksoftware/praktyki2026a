@@ -22,7 +22,7 @@ jobs:
       PHP_VERSION: 8.4.16
     services:
       pgsql:
-        image: postgis/postgis:18-3.6@sha256:c8ec4cf290ed06e8a87df34e89462c84dc3cffbc8c2185463db6bb2d721cbefe
+        image: postgres:16.3-alpine3.18@sha256:64e18e8fb3e9c9aac89ac590c5dd8306b862478404f76cd9b5f7720d012b4c47
         env:
           POSTGRES_DB: boardgameapp-test
           POSTGRES_USER: boardgameapp
