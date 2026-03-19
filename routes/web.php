@@ -40,4 +40,12 @@ Route::middleware("auth")->group(function (): void {
     Route::delete("/profile", [ProfileController::class, "destroy"])->name("profile.destroy");
 });
 
+Route::post("/locale/{locale}", function (string $locale) {
+    if (in_array($locale, ["pl", "en"], true)) {
+        session()->put("locale", $locale);
+    }
+
+    return back();
+})->name("locale.switch");
+
 require __DIR__ . "/auth.php";

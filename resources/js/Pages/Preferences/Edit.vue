@@ -3,6 +3,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
+import { useTranslate } from '@/composables/useTranslate'
+
+const { t } = useTranslate()
 
 interface Game {
     id: number
@@ -61,45 +64,45 @@ function setRating(gameId: number, rating: number) {
 </script>
 
 <template>
-    <Head :title="`Preferencje — ${friend.first_name} ${friend.last_name}`" />
+    <Head :title="t('preferences.title', { name: `${friend.first_name} ${friend.last_name}` })" />
 
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                    Preferencje — {{ friend.first_name }} {{ friend.last_name }}
+                    {{ t('preferences.title', { name: `${friend.first_name} ${friend.last_name}` }) }}
                 </h2>
                 <Link
                     :href="route('friends.index')"
                     class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
                 >
-                    &larr; Wstecz
+                    {{ t('preferences.back') }}
                 </Link>
             </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-3xl sm:px-6 lg:px-8">
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
+        <div class="py-6 sm:py-12">
+            <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+                <div class="bg-white p-4 shadow-sm sm:rounded-lg sm:p-6 dark:bg-gray-800">
                     <p v-if="games.length === 0" class="text-gray-500 dark:text-gray-400">
-                        Brak dostepnych gier. Najpierw dodaj gry do swojej kolekcji.
+                        {{ t('preferences.noGames') }}
                     </p>
 
                     <form v-else @submit.prevent="submit" class="space-y-4">
                         <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
-                            Kliknij gwiazdki aby ocenic gry od 1 do 10. Kliknij ponownie aby usunac ocene.
+                            {{ t('preferences.hint') }}
                         </p>
 
                         <div
                             v-for="game in games"
                             :key="game.id"
-                            class="flex items-center justify-between rounded-lg border border-gray-100 p-4 dark:border-gray-700"
+                            class="space-y-2 rounded-lg border border-gray-100 p-3 sm:flex sm:items-center sm:justify-between sm:space-y-0 sm:p-4 dark:border-gray-700"
                         >
-                            <div>
+                            <div class="min-w-0">
                                 <p class="font-medium text-gray-900 dark:text-gray-100">{{ game.name }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ game.min_players }}–{{ game.max_players }} graczy</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ game.min_players }}–{{ game.max_players }} {{ t('preferences.playersCount') }}</p>
                             </div>
-                            <div class="flex items-center gap-1">
+                            <div class="flex flex-wrap items-center gap-1">
                                 <button
                                     v-for="n in 10"
                                     :key="n"
@@ -116,7 +119,7 @@ function setRating(gameId: number, rating: number) {
                         </div>
 
                         <div class="pt-4">
-                            <PrimaryButton :disabled="form.processing">Zapisz preferencje</PrimaryButton>
+                            <PrimaryButton :disabled="form.processing">{{ t('preferences.save') }}</PrimaryButton>
                         </div>
                     </form>
                 </div>

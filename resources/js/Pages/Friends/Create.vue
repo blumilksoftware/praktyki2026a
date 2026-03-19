@@ -5,6 +5,9 @@ import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import { useTranslate } from '@/composables/useTranslate'
+
+const { t } = useTranslate()
 
 const form = useForm({
     first_name: '',
@@ -18,22 +21,22 @@ function submit() {
 </script>
 
 <template>
-    <Head title="Dodaj znajomego" />
+    <Head :title="t('friends.addTitle')" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                Dodaj znajomego
+                {{ t('friends.addTitle') }}
             </h2>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-2xl sm:px-6 lg:px-8">
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
+        <div class="py-6 sm:py-12">
+            <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+                <div class="bg-white p-4 shadow-sm sm:rounded-lg sm:p-6 dark:bg-gray-800">
                     <form @submit.prevent="submit" class="space-y-6">
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
-                                <InputLabel for="first_name" value="Imie" />
+                                <InputLabel for="first_name" :value="t('friends.firstName')" />
                                 <TextInput
                                     id="first_name"
                                     v-model="form.first_name"
@@ -45,7 +48,7 @@ function submit() {
                             </div>
 
                             <div>
-                                <InputLabel for="last_name" value="Nazwisko" />
+                                <InputLabel for="last_name" :value="t('friends.lastName')" />
                                 <TextInput
                                     id="last_name"
                                     v-model="form.last_name"
@@ -57,7 +60,7 @@ function submit() {
                         </div>
 
                         <div>
-                            <InputLabel for="email" value="Email (opcjonalny)" />
+                            <InputLabel for="email" :value="t('friends.emailOptional')" />
                             <TextInput
                                 id="email"
                                 v-model="form.email"
@@ -68,12 +71,12 @@ function submit() {
                         </div>
 
                         <div class="flex items-center gap-4">
-                            <PrimaryButton :disabled="form.processing">Zapisz</PrimaryButton>
+                            <PrimaryButton :disabled="form.processing">{{ t('friends.save') }}</PrimaryButton>
                             <Link
                                 :href="route('friends.index')"
                                 class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
                             >
-                                Anuluj
+                                {{ t('friends.cancel') }}
                             </Link>
                         </div>
                     </form>
