@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property Carbon $updated_at
  * @property User $user
  * @property Collection<int, Game> $games
+ * @property Collection<int, Session> $sessions
  */
 class Friend extends Model
 {
@@ -43,6 +44,12 @@ class Friend extends Model
         return $this->belongsToMany(Game::class)
             ->using(FriendGame::class)
             ->withPivot("rating")
+            ->withTimestamps();
+    }
+
+    public function sessions(): BelongsToMany
+    {
+        return $this->belongsToMany(Session::class, "friend_session")
             ->withTimestamps();
     }
 }

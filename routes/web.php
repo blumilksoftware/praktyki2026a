@@ -6,8 +6,10 @@ use App\Http\Controllers\FriendController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SessionController;
 use App\Models\Friend;
 use App\Models\Game;
+use App\Models\Session;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -21,6 +23,7 @@ Route::get("/dashboard", function () {
     return Inertia::render("Dashboard", [
         "gamesCount" => Game::where("user_id", $userId)->orWhere("is_shared", true)->count(),
         "friendsCount" => Friend::where("user_id", $userId)->count(),
+        "sessionsCount" => Session::where("user_id", $userId)->count(),
     ]);
 })->middleware(["auth", "verified"])->name("dashboard");
 
@@ -29,6 +32,8 @@ Route::resource("/games", GameController::class)
     ->except(["show"]);
 
 Route::resource("/friends", FriendController::class)->middleware(["auth", "verified"])->except(["show"]);
+
+Route::resource("/sessions", SessionController::class)->middleware(["auth", "verified"]);
 
 Route::get("/friends/{friend}/preferences",[PreferenceController::class,"show"])->middleware(["auth","verified"])->name("preferences.show");
 

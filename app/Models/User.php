@@ -21,6 +21,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon $updated_at
  * @property Collection<int, Friend> $friends
  * @property Collection<int, Game> $games
+ * @property Collection<int, Session> $sessions
  */
 class User extends Authenticatable
 {
@@ -46,6 +47,11 @@ class User extends Authenticatable
     public function games(): HasMany
     {
         return $this->hasMany(Game::class);
+    }
+
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(Session::class);
     }
 
     protected function casts(): array

@@ -51,6 +51,12 @@ const showingNavigationDropdown = ref(false)
                 >
                   {{ t('nav.friends') }}
                 </NavLink>
+                <NavLink
+                  :href="route('sessions.index')"
+                  :active="route().current('sessions.*')"
+                >
+                  {{ t('nav.sessions') }}
+                </NavLink>
               </div>
             </div>
 
@@ -168,6 +174,12 @@ const showingNavigationDropdown = ref(false)
               :active="route().current('friends.*')"
             >
               {{ t('nav.friends') }}
+            </ResponsiveNavLink>
+            <ResponsiveNavLink
+              :href="route('sessions.index')"
+              :active="route().current('sessions.*')"
+            >
+              {{ t('nav.sessions') }}
             </ResponsiveNavLink>
           </div>
 

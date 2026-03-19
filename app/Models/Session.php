@@ -13,27 +13,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property int $id
+ * @property int $user_id
  * @property string $name
- * @property int|null $user_id
- * @property bool $is_shared
- * @property int $min_players
- * @property int $max_players
+ * @property Carbon $date
+ * @property string|null $notes
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property User|null $user
+ * @property User $user
  * @property Collection<int, Friend> $friends
- * @property Collection<int, Session> $sessions
+ * @property Collection<int, Game> $games
  */
-class Game extends Model
+class Session extends Model
 {
     use HasFactory;
 
+    protected $table = "sessions_game";
+
     protected $fillable = [
-        "name",
         "user_id",
-        "is_shared",
-        "min_players",
-        "max_players",
+        "name",
+        "date",
+        "notes",
     ];
 
     public function user(): BelongsTo
@@ -43,22 +43,20 @@ class Game extends Model
 
     public function friends(): BelongsToMany
     {
-        return $this->belongsToMany(Friend::class)
-            ->using(FriendGame::class)
-            ->withPivot("rating")
+        return $this->belongsToMany(Friend::class, "friend_session")
             ->withTimestamps();
     }
 
-    public function sessions(): BelongsToMany
+    public function games(): BelongsToMany
     {
-        return $this->belongsToMany(Session::class, "game_session")
+        return $this->belongsToMany(Game::class, "game_session")
             ->withTimestamps();
     }
 
     protected function casts(): array
     {
         return [
-            "is_shared" => "boolean",
+            "date" => "date",
         ];
     }
 }

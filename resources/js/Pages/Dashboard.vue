@@ -8,6 +8,7 @@ const { t } = useTranslate()
 defineProps<{
     gamesCount: number
     friendsCount: number
+    sessionsCount: number
 }>()
 </script>
 
@@ -29,7 +30,7 @@ defineProps<{
                     </p>
                 </div>
 
-                <div class="grid gap-6 sm:grid-cols-2">
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <div class="overflow-hidden bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
                         <div class="flex items-center justify-between">
                             <div>
@@ -67,6 +68,26 @@ defineProps<{
                             class="mt-4 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
                         >
                             {{ t('dashboard.addFriend') }}
+                        </Link>
+                    </div>
+
+                    <div class="overflow-hidden bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('dashboard.sessions') }}</p>
+                                <p class="mt-1 text-3xl font-bold text-gray-900 dark:text-white">{{ sessionsCount }}</p>
+                            </div>
+                            <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/50">
+                                <svg class="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                </svg>
+                            </div>
+                        </div>
+                        <Link
+                            :href="route('sessions.create')"
+                            class="mt-4 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                        >
+                            {{ t('dashboard.addSession') }}
                         </Link>
                     </div>
                 </div>
