@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       # renovate: datasource=node-version depName=node
-      NODE_VERSION: 24.12.0
+      NODE_VERSION: 24.14.0
 
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1 # https://github.com/actions/checkout
@@ -32,7 +32,7 @@ jobs:
           restore-keys: ${{ runner.os }}-npm-dependencies
 
       - name: Set up node
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0 # https://github.com/actions/setup-node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0 # https://github.com/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
 
