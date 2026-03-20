@@ -84,7 +84,7 @@ services:
         restart: unless-stopped
 
     mailpit:
-      image: axllent/mailpit:v1.27.11@sha256:e22dce5b36f93c77082e204a3942fb6b283b7896e057458400a4c88344c3df68
+      image: axllent/mailpit:v1.29.3@sha256:fdaf09bd71dc0829ce8b62e4bfb5180bc5c0674c3e444283fc90681853f5a3c0
       container_name: boardgameapp-mailpit-dev
       labels:
         - "traefik.enable=true"
