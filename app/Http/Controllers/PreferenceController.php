@@ -45,9 +45,7 @@ class PreferenceController extends Controller
             "ratings.*.rating" => ["required", "integer", "min:1", "max:10"],
         ]);
 
-        $data = collect($request->ratings)->mapWithKeys(function ($item) {
-            return [$item["game_id"] => ["rating" => $item["rating"]]];
-        })->toArray();
+        $data = collect($request->ratings)->mapWithKeys(fn($item) => [$item["game_id"] => ["rating" => $item["rating"]]])->toArray();
 
         $friend->games()->sync($data);
 

@@ -20,6 +20,7 @@ Route::get("/", fn() => Inertia::render("Welcome", [
 
 Route::get("/dashboard", function () {
     $userId = auth()->id();
+
     return Inertia::render("Dashboard", [
         "gamesCount" => Game::where("user_id", $userId)->orWhere("is_shared", true)->count(),
         "friendsCount" => Friend::where("user_id", $userId)->count(),
@@ -35,9 +36,9 @@ Route::resource("/friends", FriendController::class)->middleware(["auth", "verif
 
 Route::resource("/sessions", SessionController::class)->middleware(["auth", "verified"]);
 
-Route::get("/friends/{friend}/preferences",[PreferenceController::class,"show"])->middleware(["auth","verified"])->name("preferences.show");
+Route::get("/friends/{friend}/preferences", [PreferenceController::class, "show"])->middleware(["auth", "verified"])->name("preferences.show");
 
-Route::put("/friends/{friend}/preferences",[PreferenceController::class,"update"])->middleware(["auth","verified"])->name("preferences.update");
+Route::put("/friends/{friend}/preferences", [PreferenceController::class, "update"])->middleware(["auth", "verified"])->name("preferences.update");
 
 Route::middleware("auth")->group(function (): void {
     Route::get("/profile", [ProfileController::class, "edit"])->name("profile.edit");
