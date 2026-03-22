@@ -32,6 +32,10 @@ Route::resource("/games", GameController::class)
     ->middleware(["auth", "verified"])
     ->except(["show"]);
 
+Route::post("/games/import-from-bgg", [GameController::class, "importFromBgg"])
+    ->name("games.importFromBgg")
+    ->middleware("auth");
+
 Route::resource("/friends", FriendController::class)->middleware(["auth", "verified"])->except(["show"]);
 
 Route::resource("/sessions", SessionController::class)->middleware(["auth", "verified"]);

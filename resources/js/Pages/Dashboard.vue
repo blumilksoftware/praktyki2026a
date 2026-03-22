@@ -9,7 +9,7 @@ defineProps<{
     gamesCount: number
     friendsCount: number
     sessionsCount: number
-}>()
+}>();
 </script>
 
 <template>

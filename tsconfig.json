@@ -5,6 +5,7 @@
         "module": "ESNext",
         "moduleResolution": "node",
         "jsx": "preserve",
+        "jsxImportSource": "vue",
         "isolatedModules": true,
         "skipLibCheck": true,
         "strict": true,

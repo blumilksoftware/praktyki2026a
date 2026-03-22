@@ -5,11 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Game;
+use App\Services\BoardGameGeekService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use InvalidArgumentException;
+use RuntimeException;
 
 class GameController extends Controller
 {
@@ -36,6 +40,13 @@ class GameController extends Controller
             "name" => ["required", "string", "max:255"],
             "min_players" => ["required", "integer", "min:1"],
             "max_players" => ["required", "integer", "min:1", "gte:min_players"],
+            // BGG fields are optional — present when coming from BGG import,
+            // absent when coming from the manual form.
+            "bgg_id" => ["nullable", "integer"],
+            "bgg_url" => ["nullable", "string", "url", "max:500"],
+            "description" => ["nullable", "string"],
+            "year" => ["nullable", "integer", "min:1900", "max:2100"],
+            "min_age" => ["nullable", "integer", "min:0"],
         ]);
 
         Game::create([
@@ -44,6 +55,23 @@ class GameController extends Controller
         ]);
 
         return Redirect::route("games.index");
+    }
+
+    public function importFromBgg(Request $request, BoardGameGeekService $bgg): JsonResponse
+    {
+        $request->validate([
+            "url" => ["required", "string", "url"],
+        ]);
+
+        try {
+            $data = $bgg->fetchPreview($request->input("url"));
+
+            return response()->json(["game" => $data]);
+        } catch (InvalidArgumentException $e) {
+            return response()->json(["message" => $e->getMessage()], 422);
+        } catch (RuntimeException $e) {
+            return response()->json(["message" => $e->getMessage()], 502);
+        }
     }
 
     public function edit(Request $request, Game $game): Response

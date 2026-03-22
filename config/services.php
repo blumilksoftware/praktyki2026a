@@ -17,4 +17,8 @@ return [
             "channel" => env("SLACK_BOT_USER_DEFAULT_CHANNEL"),
         ],
     ],
+    "bgg" => [
+        "token" => env("BGG_API_TOKEN"),
+        "base_url" => env("BGG_API_BASE_URL", "https://boardgamegeek.com/xmlapi2"),
+    ],
 ];
