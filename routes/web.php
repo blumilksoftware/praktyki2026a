@@ -36,6 +36,10 @@ Route::resource("/friends", FriendController::class)->middleware(["auth", "verif
 
 Route::resource("/sessions", SessionController::class)->middleware(["auth", "verified"]);
 
+Route::post("/sessions/{session}/arrange", [SessionController::class, "arrange"])
+    ->middleware(["auth", "verified"])
+    ->name("sessions.arrange");
+
 Route::get("/friends/{friend}/preferences", [PreferenceController::class, "show"])->middleware(["auth", "verified"])->name("preferences.show");
 
 Route::put("/friends/{friend}/preferences", [PreferenceController::class, "update"])->middleware(["auth", "verified"])->name("preferences.update");

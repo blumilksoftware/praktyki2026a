@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Game;
 use App\Models\Session;
+use App\Services\SeatingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -14,6 +15,10 @@ use Inertia\Response;
 
 class SessionController extends Controller
 {
+    public function __construct(
+        private SeatingService $seatingService,
+    ) {}
+
     public function index(Request $request): Response
     {
         $sessions = Session::where("user_id", $request->user()->id)
@@ -58,7 +63,7 @@ class SessionController extends Controller
         $session->friends()->sync($validated["friend_ids"] ?? []);
         $session->games()->sync($validated["game_ids"] ?? []);
 
-        return Redirect::route("sessions.index");
+        return Redirect::route("sessions.show", $session);
     }
 
     public function show(Request $request, Session $session): Response
@@ -115,7 +120,7 @@ class SessionController extends Controller
         $session->friends()->sync($validated["friend_ids"] ?? []);
         $session->games()->sync($validated["game_ids"] ?? []);
 
-        return Redirect::route("sessions.index");
+        return Redirect::route("sessions.show", $session);
     }
 
     public function destroy(Request $request, Session $session): RedirectResponse
@@ -127,5 +132,41 @@ class SessionController extends Controller
         $session->delete();
 
         return Redirect::route("sessions.index");
+    }
+
+    public function arrange(Request $request, Session $session): Response
+    {
+        if ($session->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $session->load(["friends.games", "games"]);
+
+        $result = $this->seatingService->arrange($session->friends, $session->games);
+
+        return Inertia::render("Sessions/Show", [
+            "session" => $session,
+            "arrangement" => [
+                "tables" => collect($result["tables"])->map(fn($table) => [
+                    "game" => [
+                        "id" => $table["game"]->id,
+                        "name" => $table["game"]->name,
+                        "min_players" => $table["game"]->min_players,
+                        "max_players" => $table["game"]->max_players,
+                    ],
+                    "friends" => $table["friends"]->map(fn($friend) => [
+                        "id" => $friend->id,
+                        "first_name" => $friend->first_name,
+                        "last_name" => $friend->last_name,
+                    ])->values(),
+                    "avg_rating" => $table["avg_rating"],
+                ]),
+                "unseated" => $result["unseated"]->map(fn($friend) => [
+                    "id" => $friend->id,
+                    "first_name" => $friend->first_name,
+                    "last_name" => $friend->last_name,
+                ])->values(),
+            ],
+        ]);
     }
 }

@@ -57,8 +57,8 @@ class SeatingService
             }
 
             $avgRating = $this->averageRating($eligible, $game);
-            $coverageWeight = 0.5; 
-            $satisfactionWeight = 0.5;
+            $coverageWeight = 0.7;
+            $satisfactionWeight = 0.3;
             $score = $this->compositeScore($count, $avgRating, $remaining->count(), $coverageWeight, $satisfactionWeight);
 
             if ($score > $bestScore) {
@@ -112,6 +112,10 @@ class SeatingService
 
         if ($bestGame === null || $bestFriends->isEmpty()) {
             return null;
+        }
+
+        if ($bestFriends->count() > $bestGame->max_players) {
+            $bestFriends = $this->topRatedFriends($bestFriends, $bestGame, $bestGame->max_players);
         }
 
         return [

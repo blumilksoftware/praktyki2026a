@@ -49,6 +49,6 @@ class PreferenceController extends Controller
 
         $friend->games()->sync($data);
 
-        return Redirect::route("preferences.show", $friend);
+        return Redirect::route("friends.index");
     }
 }
