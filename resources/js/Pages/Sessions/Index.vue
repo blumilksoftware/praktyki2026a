@@ -22,24 +22,24 @@ interface Session {
 </script>
 
 <script setup lang="ts">
-import { useTranslate } from '@/composables/useTranslate';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { useTranslate } from '@/composables/useTranslate'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
 
-const { t } = useTranslate();
+const { t } = useTranslate()
 
 defineProps<{
   sessions: Session[];
-}>();
+}>()
 
 function deleteSession(session: Session) {
   const translations = (usePage().props as Record<string, unknown>)
-    .translations as Record<string, string>;
+    .translations as Record<string, string>
   const msg = (
     translations?.['sessions.deleteConfirm'] ?? 'Delete "{name}"?'
-  ).replace('{name}', session.name);
+  ).replace('{name}', session.name)
   if (confirm(msg)) {
-    router.delete(route('sessions.destroy', session.id));
+    router.delete(route('sessions.destroy', session.id))
   }
 }
 </script>

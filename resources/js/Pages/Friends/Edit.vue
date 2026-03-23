@@ -21,78 +21,78 @@ const props = defineProps<{
 }>()
 
 const form = useForm({
-    first_name: props.friend.first_name,
-    last_name: props.friend.last_name,
-    email: props.friend.email || '',
+  first_name: props.friend.first_name,
+  last_name: props.friend.last_name,
+  email: props.friend.email || '',
 })
 
 function submit() {
-    form.put(route('friends.update', props.friend.id))
+  form.put(route('friends.update', props.friend.id))
 }
 </script>
 
 <template>
-    <Head :title="t('friends.editTitle')" />
+  <Head :title="t('friends.editTitle')" />
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                {{ t('friends.editTitle') }}
-            </h2>
-        </template>
+  <AuthenticatedLayout>
+    <template #header>
+      <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+        {{ t('friends.editTitle') }}
+      </h2>
+    </template>
 
-        <div class="py-6 sm:py-12">
-            <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-                <div class="bg-white p-4 shadow-sm sm:rounded-lg sm:p-6 dark:bg-gray-800">
-                    <form @submit.prevent="submit" class="space-y-6">
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div>
-                                <InputLabel for="first_name" :value="t('friends.firstName')" />
-                                <TextInput
-                                    id="first_name"
-                                    v-model="form.first_name"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    autofocus
-                                />
-                                <InputError :message="form.errors.first_name" class="mt-2" />
-                            </div>
+    <div class="py-6 sm:py-12">
+      <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+        <div class="bg-white p-4 shadow-sm sm:rounded-lg sm:p-6 dark:bg-gray-800">
+          <form class="space-y-6" @submit.prevent="submit">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <InputLabel for="first_name" :value="t('friends.firstName')" />
+                <TextInput
+                  id="first_name"
+                  v-model="form.first_name"
+                  type="text"
+                  class="mt-1 block w-full"
+                  autofocus
+                />
+                <InputError :message="form.errors.first_name" class="mt-2" />
+              </div>
 
-                            <div>
-                                <InputLabel for="last_name" :value="t('friends.lastName')" />
-                                <TextInput
-                                    id="last_name"
-                                    v-model="form.last_name"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                />
-                                <InputError :message="form.errors.last_name" class="mt-2" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <InputLabel for="email" :value="t('friends.emailOptional')" />
-                            <TextInput
-                                id="email"
-                                v-model="form.email"
-                                type="email"
-                                class="mt-1 block w-full"
-                            />
-                            <InputError :message="form.errors.email" class="mt-2" />
-                        </div>
-
-                        <div class="flex items-center gap-4">
-                            <PrimaryButton :disabled="form.processing">{{ t('friends.save') }}</PrimaryButton>
-                            <Link
-                                :href="route('friends.index')"
-                                class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-                            >
-                                {{ t('friends.cancel') }}
-                            </Link>
-                        </div>
-                    </form>
-                </div>
+              <div>
+                <InputLabel for="last_name" :value="t('friends.lastName')" />
+                <TextInput
+                  id="last_name"
+                  v-model="form.last_name"
+                  type="text"
+                  class="mt-1 block w-full"
+                />
+                <InputError :message="form.errors.last_name" class="mt-2" />
+              </div>
             </div>
+
+            <div>
+              <InputLabel for="email" :value="t('friends.emailOptional')" />
+              <TextInput
+                id="email"
+                v-model="form.email"
+                type="email"
+                class="mt-1 block w-full"
+              />
+              <InputError :message="form.errors.email" class="mt-2" />
+            </div>
+
+            <div class="flex items-center gap-4">
+              <PrimaryButton :disabled="form.processing">{{ t('friends.save') }}</PrimaryButton>
+              <Link
+                :href="route('friends.index')"
+                class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+              >
+                {{ t('friends.cancel') }}
+              </Link>
+            </div>
+          </form>
         </div>
-    </AuthenticatedLayout>
+      </div>
+    </div>
+  </AuthenticatedLayout>
 </template>

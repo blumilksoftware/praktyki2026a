@@ -46,7 +46,7 @@ const bggPreview    = ref<null | {
 
 // BGG URLs always contain /boardgame/{digits}
 const looksLikeBggUrl = computed(() =>
-  /boardgamegeek\.com\/boardgame\/\d+/i.test(bggUrl.value)
+  /boardgamegeek\.com\/boardgame\/\d+/i.test(bggUrl.value),
 )
 
 async function fetchFromBgg() {
@@ -129,15 +129,14 @@ const bggFieldState = computed(() => {
     <div class="py-6 sm:py-12">
       <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
         <div class="bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-
           <!-- ── Mode toggle tabs ──────────────────────────────── -->
           <div class="flex border-b border-gray-200 dark:border-gray-700">
             <button
               type="button"
               class="flex-1 px-4 py-3 text-sm font-medium transition-colors focus:outline-none"
               :class="mode === 'manual'
-                                ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
               @click="mode = 'manual'"
             >
               <span class="mr-2 inline-block">✍️</span>
@@ -147,8 +146,8 @@ const bggFieldState = computed(() => {
               type="button"
               class="flex-1 px-4 py-3 text-sm font-medium transition-colors focus:outline-none"
               :class="mode === 'bgg'
-                                ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
               @click="mode = 'bgg'; resetBgg()"
             >
               <span class="mr-2 inline-block">🤓</span>
@@ -157,12 +156,11 @@ const bggFieldState = computed(() => {
           </div>
 
           <div class="p-4 sm:p-6">
-
             <!-- ─────────────────── MANUAL FORM ───────────────────── -->
             <form
               v-if="mode === 'manual'"
-              @submit.prevent="submit"
               class="space-y-6"
+              @submit.prevent="submit"
             >
               <div>
                 <InputLabel for="name" :value="t('games.name')" />
@@ -216,9 +214,7 @@ const bggFieldState = computed(() => {
 
             <!-- ── BGG IMPORT FLOW ────────────────────────────── -->
             <div v-else class="space-y-6">
-
               <template v-if="!bggPreview">
-
                 <!-- BGG attribution logo — required by BGG API terms -->
                 <a
                   href="https://boardgamegeek.com"
@@ -231,7 +227,7 @@ const bggFieldState = computed(() => {
                     src="/images/powered_by_BGG.png"
                     alt="Powered by BoardGameGeek"
                     class="h-7 w-auto dark:brightness-90"
-                  />
+                  >
                 </a>
 
                 <div>
@@ -281,11 +277,11 @@ const bggFieldState = computed(() => {
                   >
                     <svg
                       v-if="bggLoading"
-                      class="-ml-1 mr-2 h-4 w-4 animate-spin"
+                      class="-ml-1 mr-2 size-4 animate-spin"
                       fill="none" viewBox="0 0 24 24"
                     >
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                     </svg>
                     {{ bggLoading ? t('games.bggFetching') : t('games.bggFetch') }}
                   </PrimaryButton>
@@ -314,11 +310,9 @@ const bggFieldState = computed(() => {
                     </li>
                   </ol>
                 </details>
-
               </template>
 
               <template v-else>
-
                 <div class="flex items-center gap-2 rounded-md bg-green-50 px-4 py-3 text-sm font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
                   <span>✓</span>
                   {{ t('games.bggFound') }}
@@ -340,7 +334,7 @@ const bggFieldState = computed(() => {
                           src="/images/powered_by_BGG.png"
                           alt="Powered by BoardGameGeek"
                           class="h-5 w-auto dark:brightness-90"
-                        />
+                        >
                       </a>
                       <a
                         :href="bggPreview.bgg_url"
@@ -355,15 +349,15 @@ const bggFieldState = computed(() => {
 
                   <!-- Meta chips -->
                   <div class="mt-3 flex flex-wrap gap-2">
-                                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                                            👥 {{ bggPreview.min_players }}–{{ bggPreview.max_players }} {{ t('games.players') }}
-                                        </span>
+                    <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                      👥 {{ bggPreview.min_players }}–{{ bggPreview.max_players }} {{ t('games.players') }}
+                    </span>
                     <span v-if="bggPreview.year" class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                                            📅 {{ bggPreview.year }}
-                                        </span>
+                      📅 {{ bggPreview.year }}
+                    </span>
                     <span v-if="bggPreview.min_age" class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                                            🔞 {{ t('games.age') }} {{ bggPreview.min_age }}+
-                                        </span>
+                      🔞 {{ t('games.age') }} {{ bggPreview.min_age }}+
+                    </span>
                   </div>
 
                   <p
@@ -389,10 +383,8 @@ const bggFieldState = computed(() => {
                     {{ t('games.bggTryAnother') }}
                   </button>
                 </div>
-
               </template>
             </div>
-
           </div>
         </div>
       </div>
