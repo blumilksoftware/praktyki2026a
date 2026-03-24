@@ -10,23 +10,29 @@ import { useTranslate } from '@/composables/useTranslate'
 const { t } = useTranslate()
 
 interface Game {
-    id: number
-    name: string
-    min_players: number
-    max_players: number
+  id: number
+  name: string
+  min_players: number
+  max_players: number
+  description: string | null
+  year: number | null
+  copies: number
 }
 
 const props = defineProps<{
-    game: Game
+  game: Game
 }>()
 
 const form = useForm({
   name: props.game.name,
   min_players: props.game.min_players,
   max_players: props.game.max_players,
+  description: props.game.description ?? '',
+  year: props.game.year,
+  copies: props.game.copies,
 })
 
-function submit() {
+function submit(): void {
   form.put(route('games.update', props.game.id))
 }
 </script>
@@ -69,7 +75,6 @@ function submit() {
                 />
                 <InputError :message="form.errors.min_players" class="mt-2" />
               </div>
-
               <div>
                 <InputLabel for="max_players" :value="t('games.maxPlayers')" />
                 <TextInput
@@ -83,8 +88,47 @@ function submit() {
               </div>
             </div>
 
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <InputLabel for="year" :value="t('games.year')" />
+                <TextInput
+                  id="year"
+                  v-model.number="form.year"
+                  type="number"
+                  min="1900"
+                  max="2100"
+                  class="mt-1 block w-full"
+                />
+                <InputError :message="form.errors.year" class="mt-2" />
+              </div>
+              <div>
+                <InputLabel for="copies" :value="t('games.copies')" />
+                <TextInput
+                  id="copies"
+                  v-model.number="form.copies"
+                  type="number"
+                  min="1"
+                  class="mt-1 block w-full"
+                />
+                <InputError :message="form.errors.copies" class="mt-2" />
+              </div>
+            </div>
+
+            <div>
+              <InputLabel for="description" :value="t('games.description')" />
+              <textarea
+                id="description"
+                v-model="form.description"
+                rows="4"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 sm:text-sm"
+              />
+              <InputError :message="form.errors.description" class="mt-2" />
+            </div>
+
             <div class="flex items-center gap-4">
-              <PrimaryButton :disabled="form.processing">{{ t('games.save') }}</PrimaryButton>
+              <PrimaryButton :disabled="form.processing">
+                {{ t('games.save') }}
+              </PrimaryButton>
               <Link
                 :href="route('games.index')"
                 class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"

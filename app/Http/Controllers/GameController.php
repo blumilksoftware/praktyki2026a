@@ -19,13 +19,29 @@ class GameController extends Controller
 {
     public function index(Request $request): Response
     {
+        $perPage = min(max($request->integer("per_page", 10), 10), 50);
+
         $games = Game::where("user_id", $request->user()->id)
             ->orWhere("is_shared", true)
             ->orderBy("name")
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         return Inertia::render("Games/Index", [
-            "games" => $games,
+            // We manually reshape the paginator into a { data, meta } structure
+            // so the frontend always receives a consistent shape regardless of
+            // how Laravel internally serializes the paginator.
+            "games" => [
+                "data" => $games->items(),
+                "meta" => [
+                    "current_page" => $games->currentPage(),
+                    "last_page" => $games->lastPage(),
+                    "per_page" => $games->perPage(),
+                    "total" => $games->total(),
+                    "from" => $games->firstItem(),
+                    "to" => $games->lastItem(),
+                ],
+            ],
         ]);
     }
 
@@ -34,25 +50,63 @@ class GameController extends Controller
         return Inertia::render("Games/Create");
     }
 
+    public function checkDuplicate(Request $request): JsonResponse
+    {
+        $request->validate([
+            "name" => ["required", "string", "max:255"],
+        ]);
+
+        $match = Game::where(function ($query) use ($request): void {
+            $query->where("user_id", $request->user()->id)
+                ->orWhere("is_shared", true);
+        })
+            ->whereRaw("LOWER(name) = LOWER(?)", [$request->input("name")])
+            ->first();
+
+        if ($match === null) {
+            return response()->json(["duplicate" => null]);
+        }
+
+        return response()->json([
+            "duplicate" => [
+                "id" => $match->id,
+                "name" => $match->name,
+                "copies" => $match->copies,
+                "is_shared" => $match->is_shared,
+            ],
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             "name" => ["required", "string", "max:255"],
             "min_players" => ["required", "integer", "min:1"],
             "max_players" => ["required", "integer", "min:1", "gte:min_players"],
-            // BGG fields are optional — present when coming from BGG import,
-            // absent when coming from the manual form.
-            "bgg_id" => ["nullable", "integer"],
-            "bgg_url" => ["nullable", "string", "url", "max:500"],
             "description" => ["nullable", "string"],
             "year" => ["nullable", "integer", "min:1900", "max:2100"],
+            "copies" => ["nullable", "integer", "min:1"],
+            "bgg_id" => ["nullable", "integer"],
+            "bgg_url" => ["nullable", "string", "url", "max:500"],
             "min_age" => ["nullable", "integer", "min:0"],
         ]);
 
         Game::create([
             ...$validated,
+            "copies" => $validated["copies"] ?? 1,
             "user_id" => $request->user()->id,
         ]);
+
+        return Redirect::route("games.index");
+    }
+
+    public function incrementCopies(Request $request, Game $game): RedirectResponse
+    {
+        if ($game->is_shared || $game->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $game->increment("copies");
 
         return Redirect::route("games.index");
     }
@@ -95,6 +149,9 @@ class GameController extends Controller
             "name" => ["required", "string", "max:255"],
             "min_players" => ["required", "integer", "min:1"],
             "max_players" => ["required", "integer", "min:1", "gte:min_players"],
+            "description" => ["nullable", "string"],
+            "year" => ["nullable", "integer", "min:1900", "max:2100"],
+            "copies" => ["nullable", "integer", "min:1"],
         ]);
 
         $game->update($validated);

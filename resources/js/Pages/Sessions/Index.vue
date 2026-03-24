@@ -1,4 +1,11 @@
-<script lang="ts">
+<script setup lang="ts">
+import Pagination from '@/Components/Pagination.vue'
+import { useTranslate } from '@/composables/useTranslate'
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
+
+const { t } = useTranslate()
+
 interface Friend {
   id: number;
   first_name: string;
@@ -19,20 +26,23 @@ interface Session {
   games: Game[];
 }
 
-</script>
-
-<script setup lang="ts">
-import { useTranslate } from '@/composables/useTranslate'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
-
-const { t } = useTranslate()
+interface PaginatorMeta {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number | null;
+  to: number | null;
+}
 
 defineProps<{
-  sessions: Session[];
+  sessions: {
+    data: Session[];
+    meta: PaginatorMeta;
+  };
 }>()
 
-function deleteSession(session: Session) {
+function deleteSession(session: Session): void {
   const translations = (usePage().props as Record<string, unknown>)
     .translations as Record<string, string>
   const msg = (
@@ -70,13 +80,14 @@ function deleteSession(session: Session) {
           class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800"
         >
           <div
-            v-if="sessions.length === 0"
+            v-if="sessions.meta.total === 0"
             class="p-4 text-gray-500 sm:p-6 dark:text-gray-400"
           >
             {{ t('sessions.empty') }}
           </div>
 
           <template v-else>
+            <!-- Desktop table -->
             <table class="hidden w-full text-left text-sm sm:table">
               <thead
                 class="border-b bg-gray-50 text-xs text-gray-700 uppercase dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
@@ -93,7 +104,7 @@ function deleteSession(session: Session) {
               </thead>
               <tbody>
                 <tr
-                  v-for="session in sessions"
+                  v-for="session in sessions.data"
                   :key="session.id"
                   class="border-b dark:border-gray-700"
                 >
@@ -134,9 +145,10 @@ function deleteSession(session: Session) {
               </tbody>
             </table>
 
+            <!-- Mobile cards -->
             <div class="divide-y sm:hidden dark:divide-gray-700">
               <div
-                v-for="session in sessions"
+                v-for="session in sessions.data"
                 :key="session.id"
                 class="space-y-2 p-4"
               >
@@ -147,9 +159,9 @@ function deleteSession(session: Session) {
                   >
                     {{ session.name }}
                   </Link>
-                  <span class="text-sm text-gray-500 dark:text-gray-400">{{
-                    session.date
-                  }}</span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ session.date }}
+                  </span>
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                   {{ session.friends.length }} {{ t('sessions.friendsCount') }},
@@ -171,6 +183,8 @@ function deleteSession(session: Session) {
                 </div>
               </div>
             </div>
+
+            <Pagination :meta="sessions.meta" route-name="sessions.index" />
           </template>
         </div>
       </div>

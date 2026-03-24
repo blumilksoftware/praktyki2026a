@@ -1,24 +1,38 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import Pagination from '@/Components/Pagination.vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
 
 const { t } = useTranslate()
 
 interface Friend {
-    id: number
-    first_name: string
-    last_name: string
-    email: string | null
+  id: number
+  first_name: string
+  last_name: string
+  email: string | null
+}
+
+interface PaginatorMeta {
+  current_page: number
+  last_page: number
+  per_page: number
+  total: number
+  from: number | null
+  to: number | null
 }
 
 defineProps<{
-    friends: Friend[]
+  friends: {
+    data: Friend[]
+    meta: PaginatorMeta
+  }
 }>()
 
-function deleteFriend(friend: Friend) {
+function deleteFriend(friend: Friend): void {
   const translations = (usePage().props as Record<string, unknown>).translations as Record<string, string>
-  const msg = (translations?.['friends.deleteConfirm'] ?? 'Delete "{name}"?').replace('{name}', `${friend.first_name} ${friend.last_name}`)
+  const msg = (translations?.['friends.deleteConfirm'] ?? 'Delete "{name}"?')
+    .replace('{name}', `${friend.first_name} ${friend.last_name}`)
   if (confirm(msg)) {
     router.delete(route('friends.destroy', friend.id))
   }
@@ -46,11 +60,12 @@ function deleteFriend(friend: Friend) {
     <div class="py-6 sm:py-12">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-          <div v-if="friends.length === 0" class="p-4 sm:p-6 text-gray-500 dark:text-gray-400">
+          <div v-if="friends.meta.total === 0" class="p-4 text-gray-500 sm:p-6 dark:text-gray-400">
             {{ t('friends.empty') }}
           </div>
 
           <template v-else>
+            <!-- Desktop table -->
             <table class="hidden w-full text-left text-sm sm:table">
               <thead class="border-b bg-gray-50 text-xs uppercase text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
                 <tr>
@@ -61,7 +76,7 @@ function deleteFriend(friend: Friend) {
               </thead>
               <tbody>
                 <tr
-                  v-for="friend in friends"
+                  v-for="friend in friends.data"
                   :key="friend.id"
                   class="border-b dark:border-gray-700"
                 >
@@ -95,14 +110,19 @@ function deleteFriend(friend: Friend) {
               </tbody>
             </table>
 
+            <!-- Mobile cards -->
             <div class="divide-y dark:divide-gray-700 sm:hidden">
               <div
-                v-for="friend in friends"
+                v-for="friend in friends.data"
                 :key="friend.id"
-                class="p-4 space-y-2"
+                class="space-y-2 p-4"
               >
-                <p class="font-medium text-gray-900 dark:text-gray-100">{{ friend.first_name }} {{ friend.last_name }}</p>
-                <p v-if="friend.email" class="text-sm text-gray-600 dark:text-gray-400">{{ friend.email }}</p>
+                <p class="font-medium text-gray-900 dark:text-gray-100">
+                  {{ friend.first_name }} {{ friend.last_name }}
+                </p>
+                <p v-if="friend.email" class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ friend.email }}
+                </p>
                 <div class="flex gap-4 pt-1">
                   <Link
                     :href="route('preferences.show', friend.id)"
@@ -125,6 +145,11 @@ function deleteFriend(friend: Friend) {
                 </div>
               </div>
             </div>
+
+            <Pagination
+              :meta="friends.meta"
+              route-name="friends.index"
+            />
           </template>
         </div>
       </div>

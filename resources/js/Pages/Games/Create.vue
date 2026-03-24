@@ -4,27 +4,80 @@ import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, Link, useForm, router } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
 import { ref, computed } from 'vue'
 import axios from 'axios'
 
 const { t } = useTranslate()
 
-// ── Mode toggle ────────────────────────────────────────────────────────────
-// 'manual' = existing hand-entry form
-// 'bgg'    = new BGG URL import flow
 type Mode = 'manual' | 'bgg'
 const mode = ref<Mode>('manual')
+
+interface DuplicateMatch {
+  id: number
+  name: string
+  copies: number
+  is_shared: boolean
+}
+
+const duplicateMatch = ref<DuplicateMatch | null>(null)
+const showDuplicateDialog = ref(false)
+const duplicateChecking = ref(false)
+
+// pendingBggSubmit holds the BGG confirmForm submission so we can
+// either fire it (if user picks "save as new") or discard it
+// (if user picks "increment copies").
+const pendingBggSubmit = ref(false)
+
+async function checkDuplicate(name: string): Promise<DuplicateMatch | null> {
+  if (!name.trim()) return null
+
+  duplicateChecking.value = true
+  try {
+    const { data } = await axios.post(route('games.checkDuplicate'), { name })
+    return data.duplicate ?? null
+  } catch {
+    return null
+  } finally {
+    duplicateChecking.value = false
+  }
+}
+
+async function onManualNameBlur(): Promise<void> {
+  const match = await checkDuplicate(form.name)
+  if (match) {
+    duplicateMatch.value = match
+    showDuplicateDialog.value = true
+  }
+}
+
+function incrementCopies(): void {
+  if (!duplicateMatch.value) return
+  router.post(route('games.incrementCopies', duplicateMatch.value.id))
+  showDuplicateDialog.value = false
+  pendingBggSubmit.value = false
+}
+
+function saveAsNew(): void {
+  showDuplicateDialog.value = false
+  duplicateMatch.value = null
+  if (pendingBggSubmit.value) {
+    pendingBggSubmit.value = false
+    confirmForm.post(route('games.store'))
+  }
+}
 
 // ── Manual form ────────────────────────────────────────────────────────────
 const form = useForm({
   name: '',
   min_players: 2,
   max_players: 4,
+  description: '',
+  copies: 1,
 })
 
-function submit() {
+function submit(): void {
   form.post(route('games.store'))
 }
 
@@ -44,12 +97,11 @@ const bggPreview    = ref<null | {
   bgg_url: string
 }>(null)
 
-// BGG URLs always contain /boardgame/{digits}
 const looksLikeBggUrl = computed(() =>
   /boardgamegeek\.com\/boardgame\/\d+/i.test(bggUrl.value),
 )
 
-async function fetchFromBgg() {
+async function fetchFromBgg(): Promise<void> {
   if (!looksLikeBggUrl.value || bggLoading.value) return
 
   bggLoading.value    = true
@@ -75,7 +127,7 @@ async function fetchFromBgg() {
   }
 }
 
-function resetBgg() {
+function resetBgg(): void {
   bggUrl.value        = ''
   bggPreview.value    = null
   bggError.value      = null
@@ -91,9 +143,10 @@ const confirmForm = useForm({
   description: '',
   year: null as number | null,
   min_age: null as number | null,
+  copies: 1,
 })
 
-function confirmBggImport() {
+async function confirmBggImport(): Promise<void> {
   if (!bggPreview.value) return
 
   confirmForm.name        = bggPreview.value.name
@@ -104,6 +157,15 @@ function confirmBggImport() {
   confirmForm.description = bggPreview.value.description
   confirmForm.year        = bggPreview.value.year
   confirmForm.min_age     = bggPreview.value.min_age
+
+  const match = await checkDuplicate(bggPreview.value.name)
+
+  if (match) {
+    duplicateMatch.value  = match
+    pendingBggSubmit.value = true
+    showDuplicateDialog.value = true
+    return
+  }
 
   confirmForm.post(route('games.store'))
 }
@@ -125,6 +187,41 @@ const bggFieldState = computed(() => {
         {{ t('games.addTitle') }}
       </h2>
     </template>
+
+    <!-- ── Shared duplicate dialog ───────────────────────────────────────── -->
+    <Teleport to="body">
+      <div
+        v-if="showDuplicateDialog && duplicateMatch"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      >
+        <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {{ t('games.duplicateTitle') }}
+          </h3>
+          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            {{ t('games.duplicateMessage').replace('{name}', duplicateMatch.name) }}
+          </p>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {{ t('games.duplicateCopies').replace('{count}', String(duplicateMatch.copies)) }}
+          </p>
+          <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              @click="saveAsNew"
+            >
+              {{ t('games.duplicateSaveNew') }}
+            </button>
+            <PrimaryButton
+              type="button"
+              @click="incrementCopies"
+            >
+              {{ t('games.duplicateIncrement') }}
+            </PrimaryButton>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <div class="py-6 sm:py-12">
       <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
@@ -156,7 +253,7 @@ const bggFieldState = computed(() => {
           </div>
 
           <div class="p-4 sm:p-6">
-            <!-- ─────────────────── MANUAL FORM ───────────────────── -->
+            <!-- ── MANUAL FORM ────────────────────────────────── -->
             <form
               v-if="mode === 'manual'"
               class="space-y-6"
@@ -170,8 +267,12 @@ const bggFieldState = computed(() => {
                   type="text"
                   class="mt-1 block w-full"
                   autofocus
+                  @blur="onManualNameBlur"
                 />
                 <InputError :message="form.errors.name" class="mt-2" />
+                <p v-if="duplicateChecking" class="mt-1 text-xs text-gray-400">
+                  {{ t('games.duplicateChecking') }}
+                </p>
               </div>
 
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -199,6 +300,29 @@ const bggFieldState = computed(() => {
                 </div>
               </div>
 
+              <div>
+                <InputLabel for="copies" :value="t('games.copies')" />
+                <TextInput
+                  id="copies"
+                  v-model.number="form.copies"
+                  type="number"
+                  min="1"
+                  class="mt-1 block w-full"
+                />
+                <InputError :message="form.errors.copies" class="mt-2" />
+              </div>
+
+              <div>
+                <InputLabel for="description" :value="t('games.description')" />
+                <textarea
+                  id="description"
+                  v-model="form.description"
+                  rows="4"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 sm:text-sm"
+                />
+                <InputError :message="form.errors.description" class="mt-2" />
+              </div>
+
               <div class="flex items-center gap-4">
                 <PrimaryButton :disabled="form.processing">
                   {{ t('games.save') }}
@@ -215,7 +339,6 @@ const bggFieldState = computed(() => {
             <!-- ── BGG IMPORT FLOW ────────────────────────────── -->
             <div v-else class="space-y-6">
               <template v-if="!bggPreview">
-                <!-- BGG attribution logo — required by BGG API terms -->
                 <a
                   href="https://boardgamegeek.com"
                   target="_blank"
@@ -298,7 +421,7 @@ const bggFieldState = computed(() => {
                   <summary class="cursor-pointer select-none px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-400">
                     {{ t('games.bggHowToFind') }}
                   </summary>
-                  <ol class="space-y-1 px-6 pb-4 pt-2 text-sm text-gray-500 dark:text-gray-400 list-decimal">
+                  <ol class="list-decimal space-y-1 px-6 pb-4 pt-2 text-sm text-gray-500 dark:text-gray-400">
                     <li>{{ t('games.bggStep1') }}</li>
                     <li>{{ t('games.bggStep2') }}</li>
                     <li>{{ t('games.bggStep3') }}</li>
@@ -347,7 +470,6 @@ const bggFieldState = computed(() => {
                     </div>
                   </div>
 
-                  <!-- Meta chips -->
                   <div class="mt-3 flex flex-wrap gap-2">
                     <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                       👥 {{ bggPreview.min_players }}–{{ bggPreview.max_players }} {{ t('games.players') }}
@@ -369,11 +491,22 @@ const bggFieldState = computed(() => {
                 </div>
 
                 <div class="flex items-center gap-4">
+                  <!-- The button now shows a checking indicator while
+                       the duplicate check runs in the background. -->
                   <PrimaryButton
                     type="button"
+                    :disabled="duplicateChecking"
                     @click="confirmBggImport"
                   >
-                    {{ t('games.bggConfirm') }}
+                    <svg
+                      v-if="duplicateChecking"
+                      class="-ml-1 mr-2 size-4 animate-spin"
+                      fill="none" viewBox="0 0 24 24"
+                    >
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                    </svg>
+                    {{ duplicateChecking ? t('games.duplicateChecking') : t('games.bggConfirm') }}
                   </PrimaryButton>
                   <button
                     type="button"

@@ -16,13 +16,26 @@ class SessionController extends Controller
 {
     public function index(Request $request): Response
     {
+        $perPage = min(max($request->integer("per_page", 10), 10), 50);
+
         $sessions = Session::where("user_id", $request->user()->id)
             ->with(["friends", "games"])
             ->orderByDesc("date")
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         return Inertia::render("Sessions/Index", [
-            "sessions" => $sessions,
+            "sessions" => [
+                "data" => $sessions->items(),
+                "meta" => [
+                    "current_page" => $sessions->currentPage(),
+                    "last_page" => $sessions->lastPage(),
+                    "per_page" => $sessions->perPage(),
+                    "total" => $sessions->total(),
+                    "from" => $sessions->firstItem(),
+                    "to" => $sessions->lastItem(),
+                ],
+            ],
         ]);
     }
 

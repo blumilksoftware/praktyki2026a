@@ -36,6 +36,12 @@ Route::post("/games/import-from-bgg", [GameController::class, "importFromBgg"])
     ->name("games.importFromBgg")
     ->middleware("auth");
 
+Route::post("/games/check-duplicate", [GameController::class, "checkDuplicate"])
+    ->name("games.checkDuplicate");
+
+Route::post("/games/{game}/increment-copies", [GameController::class, "incrementCopies"])
+    ->name("games.incrementCopies");
+
 Route::resource("/friends", FriendController::class)->middleware(["auth", "verified"])->except(["show"]);
 
 Route::resource("/sessions", SessionController::class)->middleware(["auth", "verified"]);

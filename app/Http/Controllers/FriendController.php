@@ -15,12 +15,26 @@ class FriendController extends Controller
 {
     public function index(Request $request): Response
     {
+        $perPage = min(max($request->integer("per_page", 10), 10), 50);
+
         $friends = Friend::where("user_id", $request->user()->id)
             ->orderBy("last_name")
-            ->get();
+            ->orderBy("first_name")
+            ->paginate($perPage)
+            ->withQueryString();
 
         return Inertia::render("Friends/Index", [
-            "friends" => $friends,
+            "friends" => [
+                "data" => $friends->items(),
+                "meta" => [
+                    "current_page" => $friends->currentPage(),
+                    "last_page" => $friends->lastPage(),
+                    "per_page" => $friends->perPage(),
+                    "total" => $friends->total(),
+                    "from" => $friends->firstItem(),
+                    "to" => $friends->lastItem(),
+                ],
+            ],
         ]);
     }
 
