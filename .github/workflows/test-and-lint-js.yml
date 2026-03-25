@@ -9,7 +9,10 @@ on:
       - '**.ts'
       - '**.vue'
       - 'package.json'
-      - 'package.lock'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
 
 jobs:
   test-and-lint-js:
