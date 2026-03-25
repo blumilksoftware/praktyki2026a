@@ -12,7 +12,7 @@ class SeatingService
 {
     public function arrange(Collection $friends, Collection $games): array
     {
-        $friends->load("games");
+        $friends->loadMissing("games");
 
         $unseated = collect();
         $tables = [];

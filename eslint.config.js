@@ -1,5 +1,8 @@
-import blumilkDefault from '@blumilksoftware/eslint-config'
+import blumilkTypescript from '@blumilksoftware/eslint-config/typescript-config.js'
 
 export default [
-  ...blumilkDefault,
+  ...blumilkTypescript,
+  {
+    ignores: ['resources/js/ziggy.js', 'resources/js/Types/ziggy.d.ts'],
+  },
 ]

@@ -8,8 +8,8 @@ use App\Models\Friend;
 use App\Models\Game;
 use App\Services\SeatingService;
 use Illuminate\Database\Eloquent\Collection;
-use PHPUnit\Framework\TestCase;
 use stdClass;
+use Tests\TestCase;
 
 class SeatingServiceTest extends TestCase
 {

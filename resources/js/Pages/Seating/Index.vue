@@ -1,92 +1,87 @@
 <template>
-    <!-- SeatingPage.vue
+  <!-- SeatingPage.vue
          This is the top-level "page" component. In an Inertia.js app this
          is what your Laravel route renders directly via Inertia::render().
          It owns the composable, passes data down to children, and listens
          for events coming back up. No real logic lives here — just wiring. -->
 
-    <div class="page">
-        <!-- Decorative background geometry -->
-        <div class="bg-grid"></div>
-        <div class="bg-blob blob-1"></div>
-        <div class="bg-blob blob-2"></div>
+  <div class="page">
+    <!-- Decorative background geometry -->
+    <div class="bg-grid" />
+    <div class="bg-blob blob-1" />
+    <div class="bg-blob blob-2" />
 
-        <div class="page-inner">
+    <div class="page-inner">
+      <!-- Page header -->
+      <header class="page-header">
+        <div class="header-eyebrow">Game Night</div>
+        <h1 class="header-title">Seating Planner</h1>
+        <p class="header-sub">
+          Select who's coming and which games are on the table —
+          we'll arrange the best possible groups automatically.
+        </p>
+      </header>
 
-            <!-- Page header -->
-            <header class="page-header">
-                <div class="header-eyebrow">Game Night</div>
-                <h1 class="header-title">Seating Planner</h1>
-                <p class="header-sub">
-                    Select who's coming and which games are on the table —
-                    we'll arrange the best possible groups automatically.
-                </p>
-            </header>
+      <!-- Loading skeleton while friends/games are being fetched -->
+      <div v-if="loadingData" class="loading-state">
+        <div class="spinner" />
+        <span>Loading your data…</span>
+      </div>
 
-            <!-- Loading skeleton while friends/games are being fetched -->
-            <div v-if="loadingData" class="loading-state">
-                <div class="spinner"></div>
-                <span>Loading your data…</span>
+      <!-- Error state -->
+      <div v-else-if="error" class="error-banner">
+        {{ error }}
+      </div>
+
+      <!-- Main content: either the selection UI or the results -->
+      <template v-else>
+        <!-- SELECTION VIEW: shown before the user hits "Arrange" -->
+        <div v-if="!result" class="selection-layout">
+          <div class="selectors-row">
+            <FriendSelector
+              :friends="friends"
+              :selected-ids="selectedFriends"
+              @toggle="toggleFriend"
+              @select-all="selectAllFriends"
+              @clear-all="clearFriends"
+            />
+            <GameSelector
+              :games="games"
+              :selected-ids="selectedGames"
+              @toggle="toggleGame"
+              @select-all="selectAllGames"
+              @clear-all="clearGames"
+            />
+          </div>
+
+          <!-- Action footer -->
+          <div class="action-footer">
+            <div class="selection-summary">
+              <span>{{ selectedFriends.length }} friends</span>
+              <span class="dot">·</span>
+              <span>{{ selectedGames.length }} games selected</span>
             </div>
-
-            <!-- Error state -->
-            <div v-else-if="error" class="error-banner">
-                {{ error }}
-            </div>
-
-            <!-- Main content: either the selection UI or the results -->
-            <template v-else>
-
-                <!-- SELECTION VIEW: shown before the user hits "Arrange" -->
-                <div v-if="!result" class="selection-layout">
-
-                    <div class="selectors-row">
-                        <FriendSelector
-                            :friends="friends"
-                            :selected-ids="selectedFriends"
-                            @toggle="toggleFriend"
-                            @select-all="selectAllFriends"
-                            @clear-all="clearFriends"
-                        />
-                        <GameSelector
-                            :games="games"
-                            :selected-ids="selectedGames"
-                            @toggle="toggleGame"
-                            @select-all="selectAllGames"
-                            @clear-all="clearGames"
-                        />
-                    </div>
-
-                    <!-- Action footer -->
-                    <div class="action-footer">
-                        <div class="selection-summary">
-                            <span>{{ selectedFriends.length }} friends</span>
-                            <span class="dot">·</span>
-                            <span>{{ selectedGames.length }} games selected</span>
-                        </div>
-                        <button
-                            class="arrange-btn"
-                            :disabled="!canArrange || loading"
-                            @click="arrange"
-                        >
-                            <span v-if="loading" class="btn-spinner"></span>
-                            <span v-else>✦</span>
-                            {{ loading ? 'Arranging…' : 'Arrange Seating' }}
-                        </button>
-                    </div>
-                </div>
-
-                <!-- RESULTS VIEW: shown after the API returns a result -->
-                <SeatingResults
-                    v-else
-                    :result="result"
-                    @reset="reset"
-                />
-
-            </template>
-
+            <button
+              class="arrange-btn"
+              :disabled="!canArrange || loading"
+              @click="arrange"
+            >
+              <span v-if="loading" class="btn-spinner" />
+              <span v-else>✦</span>
+              {{ loading ? 'Arranging…' : 'Arrange Seating' }}
+            </button>
+          </div>
         </div>
+
+        <!-- RESULTS VIEW: shown after the API returns a result -->
+        <SeatingResults
+          v-else
+          :result="result"
+          @reset="reset"
+        />
+      </template>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -99,14 +94,14 @@ import SeatingResults  from '../components/SeatingResults.vue'
 // Pull everything we need from the composable.
 // All state and logic lives there; this component just wires it to the template.
 const {
-    friends, games,
-    selectedFriends, selectedGames,
-    result, loading, loadingData, error,
-    canArrange,
-    loadData, arrange, reset,
-    toggleFriend, toggleGame,
-    selectAllFriends, clearFriends,
-    selectAllGames, clearGames,
+  friends, games,
+  selectedFriends, selectedGames,
+  result, loading, loadingData, error,
+  canArrange,
+  loadData, arrange, reset,
+  toggleFriend, toggleGame,
+  selectAllFriends, clearFriends,
+  selectAllGames, clearGames,
 } = useSeating()
 
 // onMounted fires once, right after Vue renders this component for the first time.
