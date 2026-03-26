@@ -17,11 +17,33 @@ class FriendController extends Controller
     {
         $perPage = min(max($request->integer("per_page", 10), 10), 50);
 
-        $friends = Friend::where("user_id", $request->user()->id)
-            ->orderBy("last_name")
-            ->orderBy("first_name")
-            ->paginate($perPage)
-            ->withQueryString();
+        $allowedSorts = ["last_name", "first_name", "email"];
+        $sortColumn = in_array($request->input("sort"), $allowedSorts, true)
+            ? $request->input("sort")
+            : "last_name";
+        $sortDirection = $request->input("direction") === "desc" ? "desc" : "asc";
+
+        $search = trim((string)$request->input("search", ""));
+
+        $query = Friend::where("user_id", $request->user()->id);
+
+        if ($search !== "") {
+            $query->where(function ($q) use ($search): void {
+                $q->where("first_name", "ilike", "%{$search}%")
+                    ->orWhere("last_name", "ilike", "%{$search}%")
+                    ->orWhere("email", "ilike", "%{$search}%");
+            });
+        }
+
+        $query->orderBy($sortColumn, $sortDirection);
+
+        if ($sortColumn === "last_name") {
+            $query->orderBy("first_name", $sortDirection);
+        } elseif ($sortColumn === "first_name") {
+            $query->orderBy("last_name", $sortDirection);
+        }
+
+        $friends = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render("Friends/Index", [
             "friends" => [
@@ -33,6 +55,9 @@ class FriendController extends Controller
                     "total" => $friends->total(),
                     "from" => $friends->firstItem(),
                     "to" => $friends->lastItem(),
+                    "sort" => $sortColumn,
+                    "direction" => $sortDirection,
+                    "search" => $search,
                 ],
             ],
         ]);

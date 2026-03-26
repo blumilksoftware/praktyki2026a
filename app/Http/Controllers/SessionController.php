@@ -18,9 +18,39 @@ class SessionController extends Controller
     {
         $perPage = min(max($request->integer("per_page", 10), 10), 50);
 
-        $sessions = Session::where("user_id", $request->user()->id)
-            ->with(["friends", "games"])
-            ->orderByDesc("date")
+        $allowedSorts = ["name", "date"];
+        $sortColumn = in_array($request->input("sort"), $allowedSorts, true)
+            ? $request->input("sort")
+            : "date";
+        $sortDirection = $request->input("direction") === "asc" ? "asc" : "desc";
+
+        $search = trim((string)$request->input("search", ""));
+        $dateFrom = $request->input("date_from", "");
+        $dateTo = $request->input("date_to", "");
+        $dateFrom = (is_string($dateFrom) && $dateFrom !== "" && strtotime($dateFrom) !== false)
+            ? $dateFrom
+            : null;
+        $dateTo = (is_string($dateTo) && $dateTo !== "" && strtotime($dateTo) !== false)
+            ? $dateTo
+            : null;
+
+        $query = Session::where("user_id", $request->user()->id)
+            ->with(["friends", "games"]);
+
+        if ($search !== "") {
+            $query->where("name", "ilike", "%{$search}%");
+        }
+
+        if ($dateFrom !== null) {
+            $query->whereDate("date", ">=", $dateFrom);
+        }
+
+        if ($dateTo !== null) {
+            $query->whereDate("date", "<=", $dateTo);
+        }
+
+        $sessions = $query
+            ->orderBy($sortColumn, $sortDirection)
             ->paginate($perPage)
             ->withQueryString();
 
@@ -34,6 +64,11 @@ class SessionController extends Controller
                     "total" => $sessions->total(),
                     "from" => $sessions->firstItem(),
                     "to" => $sessions->lastItem(),
+                    "sort" => $sortColumn,
+                    "direction" => $sortDirection,
+                    "search" => $search,
+                    "date_from" => $dateFrom,
+                    "date_to" => $dateTo,
                 ],
             ],
         ]);

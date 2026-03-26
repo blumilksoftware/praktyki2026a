@@ -21,16 +21,39 @@ class GameController extends Controller
     {
         $perPage = min(max($request->integer("per_page", 10), 10), 50);
 
-        $games = Game::where("user_id", $request->user()->id)
-            ->orWhere("is_shared", true)
-            ->orderBy("name")
+        $allowedSorts = ["name", "copies", "min_players", "max_players", "year"];
+        $sortColumn = in_array($request->input("sort"), $allowedSorts, true)
+            ? $request->input("sort")
+            : "name";
+        $sortDirection = $request->input("direction") === "desc" ? "desc" : "asc";
+
+        $search = trim((string)$request->input("search", ""));
+        $players = $request->integer("players", 0);
+        $players = $players > 0 ? $players : null;
+
+        $query = Game::where(function ($q) use ($request): void {
+            $q->where("user_id", $request->user()->id)
+                ->orWhere("is_shared", true);
+        });
+
+        if ($search !== "") {
+            $query->where(function ($q) use ($search): void {
+                $q->where("name", "ilike", "%{$search}%")
+                    ->orWhere("description", "ilike", "%{$search}%");
+            });
+        }
+
+        if ($players !== null) {
+            $query->where("min_players", "<=", $players)
+                ->where("max_players", ">=", $players);
+        }
+
+        $games = $query
+            ->orderBy($sortColumn, $sortDirection)
             ->paginate($perPage)
             ->withQueryString();
 
         return Inertia::render("Games/Index", [
-            // We manually reshape the paginator into a { data, meta } structure
-            // so the frontend always receives a consistent shape regardless of
-            // how Laravel internally serializes the paginator.
             "games" => [
                 "data" => $games->items(),
                 "meta" => [
@@ -40,6 +63,10 @@ class GameController extends Controller
                     "total" => $games->total(),
                     "from" => $games->firstItem(),
                     "to" => $games->lastItem(),
+                    "sort" => $sortColumn,
+                    "direction" => $sortDirection,
+                    "search" => $search,
+                    "players" => $players,
                 ],
             ],
         ]);

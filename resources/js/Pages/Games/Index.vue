@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import Pagination from '@/Components/Pagination.vue'
+import SortableHeader from '@/Components/SortableHeader.vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
 import { ref } from 'vue'
+import type { PaginatorMeta } from '@/Types/pagination'
 
 const { t } = useTranslate()
 
@@ -19,22 +21,71 @@ interface Game {
   copies: number
 }
 
-interface Paginator {
-  data: Game[]
-  meta: {
-    current_page: number
-    last_page: number
-    per_page: number
-    total: number
-    from: number | null
-    to: number | null
+const props = defineProps<{
+  games: {
+    data: Game[]
+    meta: PaginatorMeta
   }
-}
-
-defineProps<{
-  games: Paginator
 }>()
 
+// ── Search state ───────────────────────────────────────────────────────────
+const searchQuery = ref(props.games.meta.search ?? '')
+const playersFilter = ref<number | ''>(props.games.meta.players ?? '')
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+function navigate(): void {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    router.get(
+      route('games.index'),
+      {
+        search: searchQuery.value,
+        players: playersFilter.value !== '' ? playersFilter.value : undefined,
+        sort: props.games.meta.sort,
+        direction: props.games.meta.direction,
+        page: 1,
+        per_page: props.games.meta.per_page,
+      },
+      { preserveState: true, preserveScroll: false },
+    )
+  }, 300)
+}
+
+function clearFilters(): void {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  searchQuery.value = ''
+  playersFilter.value = ''
+  router.get(
+    route('games.index'),
+    { sort: props.games.meta.sort, direction: props.games.meta.direction, per_page: props.games.meta.per_page },
+    { preserveState: true, preserveScroll: false },
+  )
+}
+
+const hasActiveFilters = () =>
+  searchQuery.value !== '' || playersFilter.value !== ''
+
+// ── Sorting ────────────────────────────────────────────────────────────────
+function sort(column: string): void {
+  const newDirection =
+    props.games.meta.sort === column && props.games.meta.direction === 'asc'
+      ? 'desc'
+      : 'asc'
+  router.get(
+    route('games.index'),
+    {
+      sort: column,
+      direction: newDirection,
+      search: searchQuery.value,
+      players: playersFilter.value !== '' ? playersFilter.value : undefined,
+      page: 1,
+      per_page: props.games.meta.per_page,
+    },
+    { preserveState: true, preserveScroll: true },
+  )
+}
+
+// ── Expandable descriptions ────────────────────────────────────────────────
 const expandedDescriptions = ref<Set<number>>(new Set())
 
 function toggleDescription(id: number): void {
@@ -47,9 +98,12 @@ function toggleDescription(id: number): void {
   expandedDescriptions.value = next
 }
 
+// ── Delete ─────────────────────────────────────────────────────────────────
 function deleteGame(game: Game): void {
-  const translations = (usePage().props as Record<string, unknown>).translations as Record<string, string>
-  const msg = (translations?.['games.deleteConfirm'] ?? 'Delete "{name}"?').replace('{name}', game.name)
+  const translations = (usePage().props as Record<string, unknown>)
+    .translations as Record<string, string>
+  const msg = (translations?.['games.deleteConfirm'] ?? 'Delete "{name}"?')
+    .replace('{name}', game.name)
   if (confirm(msg)) {
     router.delete(route('games.destroy', game.id))
   }
@@ -77,8 +131,44 @@ function deleteGame(game: Game): void {
     <div class="py-6 sm:py-12">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
+          <!-- Search and filter bar -->
+          <div class="flex flex-wrap items-end gap-3 border-b border-gray-200 px-4 py-3 dark:border-gray-700 sm:px-6">
+            <div class="flex-1 min-w-45">
+              <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
+                {{ t('games.searchLabel') }}
+              </label>
+              <input
+                v-model="searchQuery"
+                type="search"
+                :placeholder="t('games.searchPlaceholder')"
+                class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder:text-gray-400"
+                @input="navigate"
+              >
+            </div>
+            <div class="w-36">
+              <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
+                {{ t('games.playersFilterLabel') }}
+              </label>
+              <input
+                v-model.number="playersFilter"
+                type="number"
+                min="1"
+                :placeholder="t('games.playersFilterPlaceholder')"
+                class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder:text-gray-400"
+                @input="navigate"
+              >
+            </div>
+            <button
+              v-if="hasActiveFilters()"
+              class="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              @click="clearFilters"
+            >
+              {{ t('games.clearFilters') }}
+            </button>
+          </div>
+
           <div v-if="games.meta.total === 0" class="p-4 text-gray-500 sm:p-6 dark:text-gray-400">
-            {{ t('games.empty') }}
+            {{ hasActiveFilters() ? t('games.noResults') : t('games.empty') }}
           </div>
 
           <template v-else>
@@ -86,9 +176,34 @@ function deleteGame(game: Game): void {
             <table class="hidden w-full text-left text-sm sm:table">
               <thead class="border-b bg-gray-50 text-xs uppercase text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
                 <tr>
-                  <th class="px-6 py-3">{{ t('games.name') }}</th>
-                  <th class="px-6 py-3">{{ t('games.players') }}</th>
-                  <th class="px-6 py-3">{{ t('games.copies') }}</th>
+                  <SortableHeader
+                    column="name"
+                    :label="t('games.name')"
+                    :current-sort="games.meta.sort!"
+                    :current-direction="games.meta.direction!"
+                    @sort="sort"
+                  />
+                  <SortableHeader
+                    column="min_players"
+                    :label="t('games.players')"
+                    :current-sort="games.meta.sort!"
+                    :current-direction="games.meta.direction!"
+                    @sort="sort"
+                  />
+                  <SortableHeader
+                    column="copies"
+                    :label="t('games.copies')"
+                    :current-sort="games.meta.sort!"
+                    :current-direction="games.meta.direction!"
+                    @sort="sort"
+                  />
+                  <SortableHeader
+                    column="year"
+                    :label="t('games.year')"
+                    :current-sort="games.meta.sort!"
+                    :current-direction="games.meta.direction!"
+                    @sort="sort"
+                  />
                   <th class="px-6 py-3">{{ t('games.type') }}</th>
                   <th class="px-6 py-3 text-right">{{ t('games.actions') }}</th>
                 </tr>
@@ -102,7 +217,6 @@ function deleteGame(game: Game): void {
                   <td class="px-6 py-4">
                     <div class="font-medium text-gray-900 dark:text-gray-100">
                       {{ game.name }}
-                      <span v-if="game.year" class="ml-1 text-xs text-gray-400">({{ game.year }})</span>
                     </div>
                     <template v-if="game.description">
                       <p
@@ -126,6 +240,9 @@ function deleteGame(game: Game): void {
                     <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                       {{ game.copies }}×
                     </span>
+                  </td>
+                  <td class="px-6 py-4 text-gray-600 dark:text-gray-400">
+                    {{ game.year ?? '—' }}
                   </td>
                   <td class="px-6 py-4">
                     <span
@@ -221,8 +338,6 @@ function deleteGame(game: Game): void {
               </div>
             </div>
 
-            <!-- Pagination bar — the same component will be used on
-                 Friends/Index and Sessions/Index unchanged. -->
             <Pagination
               :meta="games.meta"
               route-name="games.index"
