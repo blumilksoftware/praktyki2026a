@@ -81,7 +81,7 @@ function submit() {
               <InputError :message="form.errors.email" class="mt-2" />
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center justify-end gap-4">
               <PrimaryButton :disabled="form.processing">{{ t('friends.save') }}</PrimaryButton>
               <Link
                 :href="route('friends.index')"

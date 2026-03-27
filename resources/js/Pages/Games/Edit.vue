@@ -83,7 +83,7 @@ function submit() {
               </div>
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center justify-end gap-4">
               <PrimaryButton :disabled="form.processing">{{ t('games.save') }}</PrimaryButton>
               <Link
                 :href="route('games.index')"

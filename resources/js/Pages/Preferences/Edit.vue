@@ -25,6 +25,7 @@ interface Friend {
 const props = defineProps<{
     friend: Friend
     games: Game[]
+    redirectTo?: string
 }>()
 
 const existingRatings = computed(() => {
@@ -47,6 +48,7 @@ const form = useForm({
 function submit() {
   const filtered = {
     ratings: form.ratings.filter(r => r.rating > 0),
+    redirect_to: props.redirectTo,
   }
   form.transform(() => filtered).put(route('preferences.update', props.friend.id))
 }
@@ -69,15 +71,15 @@ function setRating(gameId: number, rating: number) {
   <AuthenticatedLayout>
     <template #header>
       <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-          {{ t('preferences.title', { name: `${friend.first_name} ${friend.last_name}` }) }}
-        </h2>
         <Link
-          :href="route('friends.index')"
-          class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          :href="redirectTo || route('friends.index')"
+          class="text-sm text-gray-600 hover:text-gray-900 hover:underline dark:text-gray-400 dark:hover:text-gray-100"
         >
           {{ t('preferences.back') }}
         </Link>
+        <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+          {{ t('preferences.title', { name: `${friend.first_name} ${friend.last_name}` }) }}
+        </h2>
       </div>
     </template>
 
@@ -118,7 +120,7 @@ function setRating(gameId: number, rating: number) {
               </div>
             </div>
 
-            <div class="pt-4">
+            <div class="flex justify-end pt-4">
               <PrimaryButton :disabled="form.processing">{{ t('preferences.save') }}</PrimaryButton>
             </div>
           </form>

@@ -37,7 +37,7 @@ const props = defineProps<{
 
 const form = useForm({
   name: props.session.name,
-  date: props.session.date,
+  date: props.session.date?.substring(0, 10) ?? '',
   notes: props.session.notes ?? '',
   friend_ids: props.session.friends.map(f => f.id),
   game_ids: props.session.games.map(g => g.id),
@@ -164,7 +164,7 @@ function submit() {
               <InputError :message="form.errors.game_ids" class="mt-2" />
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center justify-end gap-4">
               <PrimaryButton :disabled="form.processing">{{ t('sessions.save') }}</PrimaryButton>
               <Link
                 :href="route('sessions.index')"

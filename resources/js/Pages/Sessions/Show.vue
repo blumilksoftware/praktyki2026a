@@ -2,9 +2,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
+import { useFormatDate } from '@/composables/useFormatDate'
 import { ref } from 'vue'
 
 const { t } = useTranslate()
+const { formatDate } = useFormatDate()
 
 interface Friend {
     id: number
@@ -77,13 +79,13 @@ function hideArrangement() {
         <div class="flex items-center gap-4">
           <Link
             :href="route('sessions.edit', session.id)"
-            class="text-sm text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
+            class="text-sm text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
           >
             {{ t('sessions.edit') }}
           </Link>
           <Link
             :href="route('sessions.index')"
-            class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            class="text-sm text-gray-600 hover:text-gray-900 hover:underline dark:text-gray-400 dark:hover:text-gray-100"
           >
             {{ t('sessions.back') }}
           </Link>
@@ -97,7 +99,7 @@ function hideArrangement() {
           <div class="space-y-4">
             <div>
               <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ t('sessions.date') }}</p>
-              <p class="mt-1 text-gray-900 dark:text-gray-100">{{ session.date }}</p>
+              <p class="mt-1 text-gray-900 dark:text-gray-100">{{ formatDate(session.date) }}</p>
             </div>
 
             <div v-if="session.notes">
@@ -120,8 +122,8 @@ function hideArrangement() {
             >
               {{ friend.first_name }} {{ friend.last_name }}
               <Link
-                :href="route('preferences.show', friend.id)"
-                class="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                :href="route('preferences.show', friend.id) + '?redirect_to=' + encodeURIComponent(route('sessions.show', session.id))"
+                class="text-xs text-indigo-500 hover:text-indigo-700 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 {{ t('friends.preferences') }}
               </Link>
@@ -229,7 +231,7 @@ function hideArrangement() {
               >
                 {{ friend.first_name }} {{ friend.last_name }}
                 <Link
-                  :href="route('preferences.show', friend.id)"
+                  :href="route('preferences.show', friend.id) + '?redirect_to=' + encodeURIComponent(route('sessions.show', session.id))"
                   class="text-xs text-amber-600 underline hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200"
                 >
                   {{ t('friends.preferences') }}

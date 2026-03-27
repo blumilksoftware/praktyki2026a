@@ -154,7 +154,7 @@ function submit() {
               <InputError :message="form.errors.game_ids" class="mt-2" />
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center justify-end gap-4">
               <PrimaryButton :disabled="form.processing">{{ t('sessions.save') }}</PrimaryButton>
               <Link
                 :href="route('sessions.index')"

@@ -29,8 +29,7 @@ Route::get("/dashboard", function () {
 })->middleware(["auth", "verified"])->name("dashboard");
 
 Route::resource("/games", GameController::class)
-    ->middleware(["auth", "verified"])
-    ->except(["show"]);
+    ->middleware(["auth", "verified"]);
 
 Route::resource("/friends", FriendController::class)->middleware(["auth", "verified"])->except(["show"]);
 

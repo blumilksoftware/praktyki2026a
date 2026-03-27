@@ -63,7 +63,7 @@ function deleteFriend(friend: Friend) {
                 <tr
                   v-for="friend in friends"
                   :key="friend.id"
-                  class="border-b dark:border-gray-700"
+                  class="border-b transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
                 >
                   <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
                     {{ friend.first_name }} {{ friend.last_name }}
@@ -74,18 +74,18 @@ function deleteFriend(friend: Friend) {
                   <td class="px-6 py-4 text-right">
                     <Link
                       :href="route('preferences.show', friend.id)"
-                      class="mr-3 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
+                      class="mr-3 text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
                     >
                       {{ t('friends.preferences') }}
                     </Link>
                     <Link
                       :href="route('friends.edit', friend.id)"
-                      class="mr-3 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
+                      class="mr-3 text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
                     >
                       {{ t('friends.edit') }}
                     </Link>
                     <button
-                      class="text-red-600 hover:text-red-900 dark:text-red-400"
+                      class="text-red-600 hover:text-red-500 hover:underline dark:text-red-400 dark:hover:text-red-300"
                       @click="deleteFriend(friend)"
                     >
                       {{ t('friends.delete') }}
@@ -106,18 +106,18 @@ function deleteFriend(friend: Friend) {
                 <div class="flex gap-4 pt-1">
                   <Link
                     :href="route('preferences.show', friend.id)"
-                    class="text-sm font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
+                    class="text-sm font-medium text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
                   >
                     {{ t('friends.preferences') }}
                   </Link>
                   <Link
                     :href="route('friends.edit', friend.id)"
-                    class="text-sm font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
+                    class="text-sm font-medium text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
                   >
                     {{ t('friends.edit') }}
                   </Link>
                   <button
-                    class="text-sm font-medium text-red-600 hover:text-red-900 dark:text-red-400"
+                    class="text-sm font-medium text-red-600 hover:text-red-500 hover:underline dark:text-red-400 dark:hover:text-red-300"
                     @click="deleteFriend(friend)"
                   >
                     {{ t('friends.delete') }}

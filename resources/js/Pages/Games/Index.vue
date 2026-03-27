@@ -66,10 +66,12 @@ function deleteGame(game: Game) {
                 <tr
                   v-for="game in games"
                   :key="game.id"
-                  class="border-b dark:border-gray-700"
+                  class="border-b border-gray-100 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
                 >
-                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
-                    {{ game.name }}
+                  <td class="px-6 py-4 font-medium">
+                    <Link :href="route('games.show', game.id)" class="text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300">
+                      {{ game.name }}
+                    </Link>
                   </td>
                   <td class="px-6 py-4 text-gray-600 dark:text-gray-400">
                     {{ game.min_players }}–{{ game.max_players }}
@@ -92,30 +94,37 @@ function deleteGame(game: Game) {
                     <template v-if="!game.is_shared">
                       <Link
                         :href="route('games.edit', game.id)"
-                        class="mr-3 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
+                        :title="t('games.edit')"
+                        class="mr-3 inline-block text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
                       >
-                        {{ t('games.edit') }}
+                        <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                        </svg>
                       </Link>
                       <button
-                        class="text-red-600 hover:text-red-900 dark:text-red-400"
+                        :title="t('games.delete')"
+                        class="inline-block text-red-600 hover:text-red-500 hover:underline dark:text-red-400 dark:hover:text-red-300"
                         @click="deleteGame(game)"
                       >
-                        {{ t('games.delete') }}
+                        <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                        </svg>
                       </button>
                     </template>
+                    <span v-else class="text-gray-400 dark:text-gray-500">—</span>
                   </td>
                 </tr>
               </tbody>
             </table>
 
-            <div class="divide-y dark:divide-gray-700 sm:hidden">
+            <div class="divide-y divide-gray-100 dark:divide-gray-700 sm:hidden">
               <div
                 v-for="game in games"
                 :key="game.id"
                 class="p-4 space-y-2"
               >
                 <div class="flex items-center justify-between">
-                  <span class="font-medium text-gray-900 dark:text-gray-100">{{ game.name }}</span>
+                  <Link :href="route('games.show', game.id)" class="font-medium text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300">{{ game.name }}</Link>
                   <span
                     v-if="game.is_shared"
                     class="rounded bg-green-100 px-2 py-1 text-xs text-green-800 dark:bg-green-900 dark:text-green-300"
@@ -130,19 +139,28 @@ function deleteGame(game: Game) {
                   </span>
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">{{ game.min_players }}–{{ game.max_players }} {{ t('games.playersCount') }}</p>
-                <div v-if="!game.is_shared" class="flex gap-4 pt-1">
-                  <Link
-                    :href="route('games.edit', game.id)"
-                    class="text-sm font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
-                  >
-                    {{ t('games.edit') }}
-                  </Link>
-                  <button
-                    class="text-sm font-medium text-red-600 hover:text-red-900 dark:text-red-400"
-                    @click="deleteGame(game)"
-                  >
-                    {{ t('games.delete') }}
-                  </button>
+                <div class="flex gap-4 pt-1">
+                  <template v-if="!game.is_shared">
+                    <Link
+                      :href="route('games.edit', game.id)"
+                      :title="t('games.edit')"
+                      class="text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
+                    >
+                      <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                      </svg>
+                    </Link>
+                    <button
+                      :title="t('games.delete')"
+                      class="text-red-600 hover:text-red-500 hover:underline dark:text-red-400 dark:hover:text-red-300"
+                      @click="deleteGame(game)"
+                    >
+                      <svg class="size-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                      </svg>
+                    </button>
+                  </template>
+                  <span v-else class="text-gray-400 dark:text-gray-500">—</span>
                 </div>
               </div>
             </div>

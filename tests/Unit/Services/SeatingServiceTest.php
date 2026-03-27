@@ -226,24 +226,49 @@ class SeatingServiceTest extends TestCase
     }
 
     /**
-     * A friend with no ratings at all has no data for force-assign to work with.
-     * They should land in 'unseated' rather than causing an error.
+     * A friend with no ratings at all is treated as neutral (rating 5)
+     * and should be eligible for any game, not left unseated.
      */
-    public function testFriendWithNoRatingsEndsUpUnseated(): void
+    public function testFriendWithNoRatingsIsSeatedWithNeutralPreference(): void
     {
         $game = $this->makeGame(id: 1, min: 2, max: 4);
 
-        // Alice has a rating, Bob has none at all.
         $alice = $this->makeFriend(id: 1, games: [$this->gameWithRating($game, 4)]);
-        $bob = $this->makeFriend(id: 2, games: []); // no ratings
+        $bob = $this->makeFriend(id: 2, games: []);
 
         $result = $this->service->arrange(
             new Collection([$alice, $bob]),
             new Collection([$game]),
         );
 
+        $this->assertCount(1, $result["tables"]);
+        $this->assertCount(0, $result["unseated"]);
+
+        $seatedIds = $result["tables"][0]["friends"]->pluck("id")->toArray();
+        $this->assertContains(1, $seatedIds, "Alice should be seated");
+        $this->assertContains(2, $seatedIds, "Bob (unrated) should be seated with neutral preference");
+        $this->assertEquals(4.5, $result["tables"][0]["avg_rating"]);
+    }
+
+    /**
+     * A friend who rated some games but not the session's game should
+     * not be eligible — only completely unrated friends get neutral treatment.
+     */
+    public function testFriendWhoRatedOtherGamesIsNotEligibleForUnratedGame(): void
+    {
+        $chess = $this->makeGame(id: 1, min: 2, max: 4);
+        $poker = $this->makeGame(id: 2, min: 2, max: 4);
+
+        $alice = $this->makeFriend(id: 1, games: [$this->gameWithRating($chess, 5)]);
+        $bob = $this->makeFriend(id: 2, games: [$this->gameWithRating($poker, 5)]);
+
+        $result = $this->service->arrange(
+            new Collection([$alice, $bob]),
+            new Collection([$chess]),
+        );
+
         $unseatedIds = $result["unseated"]->pluck("id")->toArray();
-        $this->assertContains(2, $unseatedIds, "Bob should be unseated — he has no game preferences");
+        $this->assertContains(2, $unseatedIds, "Bob rated other games but not chess — should be unseated");
     }
 
     /**
@@ -263,6 +288,65 @@ class SeatingServiceTest extends TestCase
 
         $this->assertCount(1, $result["tables"], "Even rating-1 friends should be seated");
         $this->assertEquals(1.0, $result["tables"][0]["avg_rating"]);
+    }
+
+    // =========================================================================
+    // TEST GROUP 5: Algorithm improvements
+    // =========================================================================
+
+    /**
+     * When multiple table configurations score equally, repeated calls
+     * should not always produce the same result (random tiebreaker).
+     * We run 20 iterations — if a tie exists, we expect to see at least
+     * two different outcomes.
+     */
+    public function testTiedScoresCanProduceDifferentResults(): void
+    {
+        $chess = $this->makeGame(id: 1, min: 2, max: 2);
+        $poker = $this->makeGame(id: 2, min: 2, max: 2);
+
+        $alice = $this->makeFriend(id: 1, games: [$this->gameWithRating($chess, 5)]);
+        $bob = $this->makeFriend(id: 2, games: [$this->gameWithRating($chess, 5)]);
+        $carol = $this->makeFriend(id: 3, games: [$this->gameWithRating($poker, 5)]);
+        $dave = $this->makeFriend(id: 4, games: [$this->gameWithRating($poker, 5)]);
+
+        $firstGameIds = [];
+
+        for ($i = 0; $i < 20; $i++) {
+            $result = $this->service->arrange(
+                new Collection([$alice, $bob, $carol, $dave]),
+                new Collection([$chess, $poker]),
+            );
+
+            $firstGameIds[] = $result["tables"][0]["game"]->id;
+        }
+
+        $unique = array_unique($firstGameIds);
+        $this->assertGreaterThanOrEqual(2, count($unique), "With tied scores, different orderings should appear over 20 runs");
+    }
+
+    /**
+     * The algorithm evaluates different table sizes (min to max players)
+     * and chooses the best composite score. This tests that all sizes
+     * are considered rather than always using max capacity.
+     */
+    public function testVariableTableSizesAreEvaluated(): void
+    {
+        $game = $this->makeGame(id: 1, min: 1, max: 4);
+
+        $superfan = $this->makeFriend(id: 1, games: [$this->gameWithRating($game, 10)]);
+        $casual1 = $this->makeFriend(id: 2, games: [$this->gameWithRating($game, 2)]);
+        $casual2 = $this->makeFriend(id: 3, games: [$this->gameWithRating($game, 2)]);
+        $casual3 = $this->makeFriend(id: 4, games: [$this->gameWithRating($game, 2)]);
+
+        $result = $this->service->arrange(
+            new Collection([$superfan, $casual1, $casual2, $casual3]),
+            new Collection([$game]),
+        );
+
+        $table = $result["tables"][0];
+        $this->assertLessThanOrEqual($game->max_players, $table["friends"]->count());
+        $this->assertGreaterThanOrEqual($game->min_players, $table["friends"]->count());
     }
 
     // -------------------------------------------------------------------------

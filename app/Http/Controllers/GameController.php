@@ -17,11 +17,22 @@ class GameController extends Controller
     {
         $games = Game::where("user_id", $request->user()->id)
             ->orWhere("is_shared", true)
-            ->orderBy("name")
+            ->orderByDesc("updated_at")
             ->get();
 
         return Inertia::render("Games/Index", [
             "games" => $games,
+        ]);
+    }
+
+    public function show(Request $request, Game $game): Response
+    {
+        if (!$game->is_shared && $game->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        return Inertia::render("Games/Show", [
+            "game" => $game,
         ]);
     }
 

@@ -30,6 +30,7 @@ class PreferenceController extends Controller
         return Inertia::render("Preferences/Edit", [
             "friend" => $friend,
             "games" => $games,
+            "redirectTo" => $request->query("redirect_to"),
         ]);
     }
 
@@ -49,6 +50,17 @@ class PreferenceController extends Controller
 
         $friend->games()->sync($data);
 
-        return Redirect::route("preferences.show", $friend);
+        $redirectTo = $request->input("redirect_to");
+
+        if ($redirectTo) {
+            $parsed = parse_url($redirectTo);
+            $path = $parsed["path"] ?? "";
+
+            if (str_starts_with($path, "/")) {
+                return Redirect::to($path);
+            }
+        }
+
+        return Redirect::route("friends.index");
     }
 }

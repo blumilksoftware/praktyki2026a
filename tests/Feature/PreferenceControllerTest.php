@@ -37,8 +37,23 @@ test("user can update friend preferences", function (): void {
         ],
     ]);
 
-    $response->assertRedirect("/friends/{$friend->id}/preferences");
+    $response->assertRedirect("/friends");
     $this->assertDatabaseHas("friend_game", ["friend_id" => $friend->id, "game_id" => $game->id, "rating" => 8]);
+});
+
+test("user is redirected to redirect_to after updating preferences", function (): void {
+    $user = User::factory()->create();
+    $friend = Friend::factory()->create(["user_id" => $user->id]);
+    $game = Game::factory()->create(["user_id" => $user->id]);
+
+    $response = $this->actingAs($user)->put("/friends/{$friend->id}/preferences", [
+        "ratings" => [
+            ["game_id" => $game->id, "rating" => 8],
+        ],
+        "redirect_to" => "/sessions/5",
+    ]);
+
+    $response->assertRedirect("/sessions/5");
 });
 
 test("user cannot update another user's friend preferences", function (): void {
