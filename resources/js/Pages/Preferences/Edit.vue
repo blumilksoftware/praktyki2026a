@@ -109,7 +109,7 @@ function setRating(gameId: number, rating: number) {
                   v-for="n in 10"
                   :key="n"
                   type="button"
-                  class="size-6 rounded text-xs font-medium transition"
+                  class="size-6 cursor-pointer rounded text-xs font-medium transition"
                   :class="getRating(game.id) >= n
                     ? 'bg-indigo-600 text-white'
                     : 'bg-gray-100 text-gray-400 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-500 dark:hover:bg-gray-600'"

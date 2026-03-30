@@ -79,7 +79,7 @@ function deleteFriend(friend: Friend) {
                 <tr
                   v-for="friend in friends"
                   :key="friend.id"
-                  class="border-b transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
+                  class="border-b border-gray-100 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
                 >
                   <td
                     class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100"
@@ -113,7 +113,7 @@ function deleteFriend(friend: Friend) {
               </tbody>
             </table>
 
-            <div class="divide-y sm:hidden dark:divide-gray-700">
+            <div class="divide-y divide-gray-100 sm:hidden dark:divide-gray-700">
               <div
                 v-for="friend in friends"
                 :key="friend.id"
