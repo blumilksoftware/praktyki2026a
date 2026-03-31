@@ -99,6 +99,7 @@
     "games.createdAt": "Added",
     "games.save": "Save",
     "games.cancel": "Cancel",
+    "games.deleteTitle": "Delete game",
 
     "friends.title": "Friends",
     "friends.add": "Add friend",
@@ -117,6 +118,7 @@
     "friends.emailOptional": "Email (optional)",
     "friends.save": "Save",
     "friends.cancel": "Cancel",
+    "friends.deleteTitle": "Delete friend",
 
     "sessions.title": "Sessions",
     "sessions.add": "Add session",
@@ -155,6 +157,7 @@
     "sessions.noArrangementGames": "Add games to this session to arrange seating.",
     "sessions.rearrange": "Re-arrange",
     "sessions.hideArrangement": "Hide arrangement",
+    "sessions.deleteTitle": "Delete session",
 
     "preferences.title": "Preferences — {name}",
     "preferences.noGames": "No games available. Add games to your collection first.",
@@ -162,7 +165,12 @@
     "preferences.playersCount": "players",
     "preferences.save": "Save preferences",
     "preferences.cancel": "Cancel",
-    "preferences.cancelConfirm": "You have unsaved changes in this friend preferences. Are you sure you want to leave without saving?",
-
-    "common.cancelConfirm" : "You have unsaved changes. Are you sure you want to leave?"
+    
+    "common.cancelConfirm": "You have unsaved changes. Are you sure you want to leave?",
+    "common.delete": "Delete",
+    "common.cancel": "Cancel",
+    "common.cancelTitle": "Unsaved changes",
+    "common.cancelMessage": "You have unsaved changes. Are you sure you want to leave?",
+    "common.cancelConfirmLabel": "Leave",
+    "common.cancelCancelLabel": "Stay"
 }

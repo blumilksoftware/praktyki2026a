@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import IconButton from '@/Components/IconButton.vue'
 import { useTranslate } from '@/composables/useTranslate'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import { IconEdit, IconTrash } from '@tabler/icons-vue'
 
 const { t } = useTranslate()
+const { confirm } = useConfirmDialog()
 
 interface Game {
   id: number
@@ -20,13 +22,16 @@ defineProps<{
   games: Game[]
 }>()
 
-function deleteGame(game: Game) {
-  const translations = (usePage().props as Record<string, unknown>)
-    .translations as Record<string, string>
-  const msg = (
-    translations?.['games.deleteConfirm'] ?? 'Delete "{name}"?'
-  ).replace('{name}', game.name)
-  if (confirm(msg)) {
+async function deleteGame(game: Game): Promise<void> {
+  const confirmed = await confirm({
+    title: t('games.deleteTitle'),
+    message: t('games.deleteConfirm').replace('{name}', game.name),
+    confirmLabel: t('common.delete'),
+    cancelLabel: t('common.cancel'),
+    variant: 'danger',
+  })
+
+  if (confirmed) {
     router.delete(route('games.destroy', game.id))
   }
 }
@@ -38,9 +43,7 @@ function deleteGame(game: Game) {
   <AuthenticatedLayout>
     <template #header>
       <div class="flex items-center justify-between">
-        <h2
-          class="text-xl leading-tight font-semibold text-gray-800 dark:text-gray-200"
-        >
+        <h2 class="text-xl leading-tight font-semibold text-gray-800 dark:text-gray-200">
           {{ t('games.title') }}
         </h2>
         <Link
@@ -54,9 +57,7 @@ function deleteGame(game: Game) {
 
     <div class="py-6 sm:py-12">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div
-          class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800"
-        >
+        <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
           <div
             v-if="games.length === 0"
             class="p-4 text-gray-500 sm:p-6 dark:text-gray-400"
@@ -66,9 +67,7 @@ function deleteGame(game: Game) {
 
           <template v-else>
             <table class="hidden w-full text-left text-sm sm:table">
-              <thead
-                class="border-b bg-gray-50 text-xs text-gray-700 uppercase dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
-              >
+              <thead class="border-b bg-gray-50 text-xs text-gray-700 uppercase dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
                 <tr>
                   <th class="px-6 py-3">{{ t('games.name') }}</th>
                   <th class="px-6 py-3">{{ t('games.players') }}</th>
@@ -128,9 +127,7 @@ function deleteGame(game: Game) {
               </tbody>
             </table>
 
-            <div
-              class="divide-y divide-gray-100 sm:hidden dark:divide-gray-700"
-            >
+            <div class="divide-y divide-gray-100 sm:hidden dark:divide-gray-700">
               <div v-for="game in games" :key="game.id" class="space-y-2 p-4">
                 <div class="flex items-center justify-between">
                   <Link

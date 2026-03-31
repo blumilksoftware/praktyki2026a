@@ -8,6 +8,7 @@ import NavLink from '@/Components/NavLink.vue'
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue'
 import { Link } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
+import ConfirmDialog from '@/Components/ConfirmDialog.vue'
 
 const { t } = useTranslate()
 const showingNavigationDropdown = ref(false)
@@ -228,4 +229,5 @@ const showingNavigationDropdown = ref(false)
       </main>
     </div>
   </div>
+  <ConfirmDialog />
 </template>

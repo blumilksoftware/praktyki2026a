@@ -99,6 +99,7 @@
     "games.createdAt": "Dodano",
     "games.save": "Zapisz",
     "games.cancel": "Anuluj",
+    "games.deleteTitle" : "Usuń grę",
 
     "friends.title": "Znajomi",
     "friends.add": "Dodaj znajomego",
@@ -117,6 +118,7 @@
     "friends.emailOptional": "E-mail (opcjonalny)",
     "friends.save": "Zapisz",
     "friends.cancel": "Anuluj",
+    "friends.deleteTitle" : "Usuń znajomego",
 
     "sessions.title": "Sesje",
     "sessions.add": "Dodaj sesję",
@@ -155,6 +157,7 @@
     "sessions.noArrangementGames": "Dodaj gry do sesji, aby rozdzielić miejsca.",
     "sessions.rearrange": "Rozdziel ponownie",
     "sessions.hideArrangement": "Ukryj rozkład",
+    "sessions.deleteTitle" : "Usuń sesję",
 
     "preferences.title": "Preferencje — {name}",
     "preferences.noGames": "Brak dostępnych gier. Najpierw dodaj gry do swojej kolekcji.",
@@ -162,7 +165,12 @@
     "preferences.playersCount": "graczy",
     "preferences.save": "Zapisz preferencje",
     "preferences.cancel" : "Anuluj",
-    "preferences.cancelConfirm" : "Masz niezapisane zmiany w preferencjach tego znajomego. Czy na pewno chcesz wyjść bez zapisywania?",
 
-    "common.cancelConfirm" : "Masz niezapisane zmiany. Czy jesteś pewien że chcesz opuścić tę stronę?"
+    "common.cancelConfirm" : "Masz niezapisane zmiany. Czy jesteś pewien że chcesz opuścić tę stronę?",
+    "common.delete" : "Usuń",
+    "common.cancel" : "Anuluj",
+    "common.cancelTitle" : "Niezapisane zmiany",
+    "common.cancelMessage" : "Masz niezapisane zmiany. Czy na pewno chcesz wyjść?",
+    "common.cancelConfirmLabel" : "Wyjdź",
+    "common.cancelCancelLabel" : "Zostań"
 }
