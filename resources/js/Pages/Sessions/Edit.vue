@@ -4,35 +4,36 @@ import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
+import { useCancelWithWarning } from '@/composables/useCancelWithWarning'
 
 const { t } = useTranslate()
 
 interface Friend {
-    id: number
-    first_name: string
-    last_name: string
+  id: number
+  first_name: string
+  last_name: string
 }
 
 interface Game {
-    id: number
-    name: string
+  id: number
+  name: string
 }
 
 interface Session {
-    id: number
-    name: string
-    date: string
-    notes: string | null
-    friends: Friend[]
-    games: Game[]
+  id: number
+  name: string
+  date: string
+  notes: string | null
+  friends: Friend[]
+  games: Game[]
 }
 
 const props = defineProps<{
-    session: Session
-    friends: Friend[]
-    games: Game[]
+  session: Session
+  friends: Friend[]
+  games: Game[]
 }>()
 
 const form = useForm({
@@ -43,7 +44,9 @@ const form = useForm({
   game_ids: props.session.games.map(g => g.id),
 })
 
-function toggleFriend(id: number) {
+const { cancel } = useCancelWithWarning(form, route('sessions.index'), t)
+
+function toggleFriend(id: number): void {
   const index = form.friend_ids.indexOf(id)
   if (index === -1) {
     form.friend_ids.push(id)
@@ -52,7 +55,7 @@ function toggleFriend(id: number) {
   }
 }
 
-function toggleGame(id: number) {
+function toggleGame(id: number): void {
   const index = form.game_ids.indexOf(id)
   if (index === -1) {
     form.game_ids.push(id)
@@ -61,7 +64,7 @@ function toggleGame(id: number) {
   }
 }
 
-function submit() {
+function submit(): void {
   form.put(route('sessions.update', props.session.id))
 }
 </script>
@@ -123,7 +126,7 @@ function submit() {
                 <label
                   v-for="friend in props.friends"
                   :key="friend.id"
-                  class="flex items-center gap-2 cursor-pointer"
+                  class="flex cursor-pointer items-center gap-2"
                 >
                   <input
                     type="checkbox"
@@ -148,7 +151,7 @@ function submit() {
                 <label
                   v-for="game in props.games"
                   :key="game.id"
-                  class="flex items-center gap-2 cursor-pointer"
+                  class="flex cursor-pointer items-center gap-2"
                 >
                   <input
                     type="checkbox"
@@ -165,13 +168,16 @@ function submit() {
             </div>
 
             <div class="flex items-center justify-end gap-4">
-              <PrimaryButton :disabled="form.processing">{{ t('sessions.save') }}</PrimaryButton>
-              <Link
-                :href="route('sessions.index')"
-                class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+              <button
+                type="button"
+                class="cursor-pointer text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                @click="cancel"
               >
                 {{ t('sessions.cancel') }}
-              </Link>
+              </button>
+              <PrimaryButton :disabled="form.processing">
+                {{ t('sessions.save') }}
+              </PrimaryButton>
             </div>
           </form>
         </div>

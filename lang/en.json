@@ -157,9 +157,12 @@
     "sessions.hideArrangement": "Hide arrangement",
 
     "preferences.title": "Preferences — {name}",
-    "preferences.back": "← Back",
     "preferences.noGames": "No games available. Add games to your collection first.",
     "preferences.hint": "Click a rating to rate games from 1 to 10. Click again to remove the rating.",
     "preferences.playersCount": "players",
-    "preferences.save": "Save preferences"
+    "preferences.save": "Save preferences",
+    "preferences.cancel": "Cancel",
+    "preferences.cancelConfirm": "You have unsaved changes in this friend preferences. Are you sure you want to leave without saving?",
+
+    "common.cancelConfirm" : "You have unsaved changes. Are you sure you want to leave?"
 }

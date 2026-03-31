@@ -4,8 +4,9 @@ import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
+import { useCancelWithWarning } from '@/composables/useCancelWithWarning'
 
 const { t } = useTranslate()
 
@@ -14,6 +15,8 @@ const form = useForm({
   min_players: 2,
   max_players: 4,
 })
+
+const { cancel } = useCancelWithWarning(form, route('games.index'), t)
 
 function submit() {
   form.post(route('games.store'))
@@ -73,13 +76,14 @@ function submit() {
             </div>
 
             <div class="flex items-center justify-end gap-4">
-              <PrimaryButton :disabled="form.processing">{{ t('games.save') }}</PrimaryButton>
-              <Link
-                :href="route('games.index')"
-                class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+              <button
+                type="button"
+                class="cursor-pointer text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                @click="cancel"
               >
                 {{ t('games.cancel') }}
-              </Link>
+              </button>
+              <PrimaryButton :disabled="form.processing">{{ t('games.save') }}</PrimaryButton>
             </div>
           </form>
         </div>

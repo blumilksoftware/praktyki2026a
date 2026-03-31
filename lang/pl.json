@@ -157,9 +157,12 @@
     "sessions.hideArrangement": "Ukryj rozkład",
 
     "preferences.title": "Preferencje — {name}",
-    "preferences.back": "← Wstecz",
     "preferences.noGames": "Brak dostępnych gier. Najpierw dodaj gry do swojej kolekcji.",
     "preferences.hint": "Kliknij ocenę, aby ocenić gry od 1 do 10. Kliknij ponownie, aby usunąć ocenę.",
     "preferences.playersCount": "graczy",
-    "preferences.save": "Zapisz preferencje"
+    "preferences.save": "Zapisz preferencje",
+    "preferences.cancel" : "Anuluj",
+    "preferences.cancelConfirm" : "Masz niezapisane zmiany w preferencjach tego znajomego. Czy na pewno chcesz wyjść bez zapisywania?",
+
+    "common.cancelConfirm" : "Masz niezapisane zmiany. Czy jesteś pewien że chcesz opuścić tę stronę?"
 }

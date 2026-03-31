@@ -4,8 +4,9 @@ import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
+import { useCancelWithWarning } from '@/composables/useCancelWithWarning'
 
 const { t } = useTranslate()
 
@@ -32,6 +33,8 @@ const form = useForm({
   friend_ids: [] as number[],
   game_ids: [] as number[],
 })
+
+const { cancel } = useCancelWithWarning(form, route('sessions.index'), t)
 
 function toggleFriend(id: number) {
   const index = form.friend_ids.indexOf(id)
@@ -155,13 +158,14 @@ function submit() {
             </div>
 
             <div class="flex items-center justify-end gap-4">
-              <PrimaryButton :disabled="form.processing">{{ t('sessions.save') }}</PrimaryButton>
-              <Link
-                :href="route('sessions.index')"
-                class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+              <button
+                type="button"
+                class="cursor-pointer text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                @click="cancel"
               >
                 {{ t('sessions.cancel') }}
-              </Link>
+              </button>
+              <PrimaryButton :disabled="form.processing">{{ t('sessions.save') }}</PrimaryButton>
             </div>
           </form>
         </div>

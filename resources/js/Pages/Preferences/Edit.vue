@@ -1,31 +1,32 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { useTranslate } from '@/composables/useTranslate'
+import { useCancelWithWarning } from '@/composables/useCancelWithWarning'
 
 const { t } = useTranslate()
 
 interface Game {
-    id: number
-    name: string
-    min_players: number
-    max_players: number
-    pivot?: { rating: number }
+  id: number
+  name: string
+  min_players: number
+  max_players: number
+  pivot?: { rating: number }
 }
 
 interface Friend {
-    id: number
-    first_name: string
-    last_name: string
-    games: Game[]
+  id: number
+  first_name: string
+  last_name: string
+  games: Game[]
 }
 
 const props = defineProps<{
-    friend: Friend
-    games: Game[]
-    redirectTo?: string
+  friend: Friend
+  games: Game[]
+  redirectTo?: string
 }>()
 
 const existingRatings = computed(() => {
@@ -45,7 +46,7 @@ const form = useForm({
   })),
 })
 
-function submit() {
+function submit(): void {
   const filtered = {
     ratings: form.ratings.filter(r => r.rating > 0),
     redirect_to: props.redirectTo,
@@ -53,11 +54,13 @@ function submit() {
   form.transform(() => filtered).put(route('preferences.update', props.friend.id))
 }
 
+const { cancel } = useCancelWithWarning(form, route('friends.index'), t)
+
 function getRating(gameId: number): number {
   return form.ratings.find(r => r.game_id === gameId)?.rating || 0
 }
 
-function setRating(gameId: number, rating: number) {
+function setRating(gameId: number, rating: number): void {
   const entry = form.ratings.find(r => r.game_id === gameId)
   if (entry) {
     entry.rating = entry.rating === rating ? 0 : rating
@@ -70,17 +73,9 @@ function setRating(gameId: number, rating: number) {
 
   <AuthenticatedLayout>
     <template #header>
-      <div class="flex items-center justify-between">
-        <Link
-          :href="redirectTo || route('friends.index')"
-          class="text-sm text-gray-600 hover:text-gray-900 hover:underline dark:text-gray-400 dark:hover:text-gray-100"
-        >
-          {{ t('preferences.back') }}
-        </Link>
-        <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-          {{ t('preferences.title', { name: `${friend.first_name} ${friend.last_name}` }) }}
-        </h2>
-      </div>
+      <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+        {{ t('preferences.title', { name: `${friend.first_name} ${friend.last_name}` }) }}
+      </h2>
     </template>
 
     <div class="py-6 sm:py-12">
@@ -102,7 +97,9 @@ function setRating(gameId: number, rating: number) {
             >
               <div class="min-w-0">
                 <p class="font-medium text-gray-900 dark:text-gray-100">{{ game.name }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ game.min_players }}–{{ game.max_players }} {{ t('preferences.playersCount') }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ game.min_players }}–{{ game.max_players }} {{ t('preferences.playersCount') }}
+                </p>
               </div>
               <div class="flex flex-wrap items-center gap-1">
                 <button
@@ -120,8 +117,17 @@ function setRating(gameId: number, rating: number) {
               </div>
             </div>
 
-            <div class="flex justify-end pt-4">
-              <PrimaryButton :disabled="form.processing">{{ t('preferences.save') }}</PrimaryButton>
+            <div class="flex items-center justify-end gap-4 pt-4">
+              <button
+                type="button"
+                class="cursor-pointer text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                @click="cancel"
+              >
+                {{ t('preferences.cancel') }}
+              </button>
+              <PrimaryButton :disabled="form.processing">
+                {{ t('preferences.save') }}
+              </PrimaryButton>
             </div>
           </form>
         </div>
