@@ -1,18 +1,10 @@
 <template>
-  <!-- SeatingPage.vue
-         This is the top-level "page" component. In an Inertia.js app this
-         is what your Laravel route renders directly via Inertia::render().
-         It owns the composable, passes data down to children, and listens
-         for events coming back up. No real logic lives here — just wiring. -->
-
   <div class="page">
-    <!-- Decorative background geometry -->
     <div class="bg-grid" />
     <div class="bg-blob blob-1" />
     <div class="bg-blob blob-2" />
 
     <div class="page-inner">
-      <!-- Page header -->
       <header class="page-header">
         <div class="header-eyebrow">Game Night</div>
         <h1 class="header-title">Seating Planner</h1>
@@ -22,20 +14,16 @@
         </p>
       </header>
 
-      <!-- Loading skeleton while friends/games are being fetched -->
       <div v-if="loadingData" class="loading-state">
         <div class="spinner" />
         <span>Loading your data…</span>
       </div>
 
-      <!-- Error state -->
       <div v-else-if="error" class="error-banner">
         {{ error }}
       </div>
 
-      <!-- Main content: either the selection UI or the results -->
       <template v-else>
-        <!-- SELECTION VIEW: shown before the user hits "Arrange" -->
         <div v-if="!result" class="selection-layout">
           <div class="selectors-row">
             <FriendSelector
@@ -54,7 +42,6 @@
             />
           </div>
 
-          <!-- Action footer -->
           <div class="action-footer">
             <div class="selection-summary">
               <span>{{ selectedFriends.length }} friends</span>
@@ -73,7 +60,6 @@
           </div>
         </div>
 
-        <!-- RESULTS VIEW: shown after the API returns a result -->
         <SeatingResults
           v-else
           :result="result"
@@ -91,8 +77,6 @@ import FriendSelector  from '../components/FriendSelector.vue'
 import GameSelector    from '../components/GameSelector.vue'
 import SeatingResults  from '../components/SeatingResults.vue'
 
-// Pull everything we need from the composable.
-// All state and logic lives there; this component just wires it to the template.
 const {
   friends, games,
   selectedFriends, selectedGames,
@@ -104,16 +88,10 @@ const {
   selectAllGames, clearGames,
 } = useSeating()
 
-// onMounted fires once, right after Vue renders this component for the first time.
-// It's the correct place to kick off your initial data fetch — never in setup()
-// directly, because you want the DOM to be ready first.
 onMounted(loadData)
 </script>
 
 <style>
-/* Global CSS variables — define once, use everywhere.
-   Put these in your main app.css or a dedicated variables.css.
-   They're here in the page component for self-containedness. */
 
 :root {
     --bg:             #f6f5f2;
@@ -149,7 +127,6 @@ onMounted(loadData)
 </style>
 
 <style scoped>
-/* ---- Page shell ---- */
 .page {
     min-height: 100vh;
     background: var(--bg);
@@ -158,7 +135,6 @@ onMounted(loadData)
     font-family: 'DM Sans', system-ui, sans-serif;
 }
 
-/* Subtle dot-grid background */
 .bg-grid {
     position: fixed;
     inset: 0;
@@ -168,7 +144,6 @@ onMounted(loadData)
     pointer-events: none;
 }
 
-/* Blurred colour blobs for depth */
 .bg-blob {
     position: fixed;
     border-radius: 50%;
@@ -197,7 +172,6 @@ onMounted(loadData)
     gap: 40px;
 }
 
-/* ---- Header ---- */
 .page-header {
     text-align: center;
 }
@@ -229,7 +203,6 @@ onMounted(loadData)
     line-height: 1.6;
 }
 
-/* ---- Loading & error ---- */
 .loading-state {
     display: flex;
     flex-direction: column;
@@ -257,7 +230,6 @@ onMounted(loadData)
     font-size: 0.9rem;
 }
 
-/* ---- Selection layout ---- */
 .selectors-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -269,7 +241,6 @@ onMounted(loadData)
     .selectors-row { grid-template-columns: 1fr; }
 }
 
-/* ---- Action footer ---- */
 .action-footer {
     display: flex;
     align-items: center;

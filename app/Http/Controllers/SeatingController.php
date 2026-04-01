@@ -27,7 +27,7 @@ class SeatingController extends Controller
 
         $friends = Friend::with("games")
             ->whereIn("id", $validated["friend_ids"])
-            ->where("user_id", auth()->id()) // security: only own friends
+            ->where("user_id", auth()->id())
             ->get();
 
         $games = Game::whereIn("id", $validated["game_ids"])
