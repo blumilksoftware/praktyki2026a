@@ -28,7 +28,7 @@ const submit = () => {
     <Head :title="t('auth.register')" />
 
     <Link
-      :href="route('login')"
+      href="/"
       class="mb-4 inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
     >
       {{ t('auth.back') }}

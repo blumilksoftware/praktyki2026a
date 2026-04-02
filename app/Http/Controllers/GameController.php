@@ -46,7 +46,7 @@ class GameController extends Controller
         $validated = $request->validate([
             "name" => ["required", "string", "max:255"],
             "min_players" => ["required", "integer", "min:1"],
-            "max_players" => ["required", "integer", "min:1", "gte:min_players"],
+            "max_players" => ["required", "integer", "min:1", "max:100", "gte:min_players"],
         ]);
 
         Game::create([
@@ -77,7 +77,7 @@ class GameController extends Controller
         $validated = $request->validate([
             "name" => ["required", "string", "max:255"],
             "min_players" => ["required", "integer", "min:1"],
-            "max_players" => ["required", "integer", "min:1", "gte:min_players"],
+            "max_players" => ["required", "integer", "min:1", "max:100", "gte:min_players"],
         ]);
 
         $game->update($validated);

@@ -11,19 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-/**
- * @property int $id
- * @property string $name
- * @property int|null $user_id
- * @property bool $is_shared
- * @property int $min_players
- * @property int $max_players
- * @property Carbon $created_at
- * @property Carbon $updated_at
- * @property User|null $user
- * @property Collection<int, Friend> $friends
- * @property Collection<int, Session> $sessions
- */
 class Game extends Model
 {
     use HasFactory;

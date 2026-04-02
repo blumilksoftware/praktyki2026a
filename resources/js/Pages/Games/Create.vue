@@ -57,6 +57,7 @@ function submit() {
                   v-model.number="form.min_players"
                   type="number"
                   min="1"
+                  max="100"
                   class="mt-1 block w-full"
                 />
                 <InputError :message="form.errors.min_players" class="mt-2" />
@@ -69,6 +70,7 @@ function submit() {
                   v-model.number="form.max_players"
                   type="number"
                   min="1"
+                  max="100"
                   class="mt-1 block w-full"
                 />
                 <InputError :message="form.errors.max_players" class="mt-2" />
