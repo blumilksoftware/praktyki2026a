@@ -10,6 +10,33 @@ use Illuminate\Support\Collection;
 
 class SeatingService
 {
+    public function arrangeFormatted(Collection $friends, Collection $games): array
+    {
+        $raw = $this->arrange($friends, $games);
+
+        return [
+            "tables" => collect($raw["tables"])->map(fn($table) => [
+                "game" => [
+                    "id"          => $table["game"]->id,
+                    "name"        => $table["game"]->name,
+                    "min_players" => $table["game"]->min_players,
+                    "max_players" => $table["game"]->max_players,
+                ],
+                "friends"    => $table["friends"]->map(fn($friend) => [
+                    "id"         => $friend->id,
+                    "first_name" => $friend->first_name,
+                    "last_name"  => $friend->last_name,
+                ])->values(),
+                "avg_rating" => $table["avg_rating"],
+            ]),
+            "unseated" => $raw["unseated"]->map(fn($friend) => [
+                "id"         => $friend->id,
+                "first_name" => $friend->first_name,
+                "last_name"  => $friend->last_name,
+            ])->values(),
+        ];
+    }
+
     public function arrange(Collection $friends, Collection $games): array
     {
         $friends->loadMissing("games");

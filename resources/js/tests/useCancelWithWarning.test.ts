@@ -2,31 +2,25 @@ import { describe, test, expect, vi, beforeEach } from 'vitest'
 import { useCancelWithWarning } from '@/composables/useCancelWithWarning'
 import { useConfirmDialog } from '@/composables/useConfirmDialog'
 
-// We mock the router so navigation calls don't actually try to do
-// anything — we just want to verify they were called with the right URL.
 vi.mock('@inertiajs/vue3', () => ({
   router: {
     visit: vi.fn(),
   },
 }))
 
-// Import the mocked router so we can assert on it
 import { router } from '@inertiajs/vue3'
 
 describe('useCancelWithWarning', () => {
   let dialog: ReturnType<typeof useConfirmDialog>
 
   beforeEach(() => {
-    // Reset the router mock between tests
     vi.clearAllMocks()
-    // Reset dialog state
     dialog = useConfirmDialog()
     if (dialog.isOpen.value) {
       dialog.onCancel()
     }
   })
 
-  // A minimal translate function that returns the key — good enough for tests
   const t = (key: string) => key
 
   // ── Happy path: form is clean ─────────────────────────────────────────────
@@ -65,10 +59,8 @@ describe('useCancelWithWarning', () => {
     const form = { isDirty: true }
     const { cancel } = useCancelWithWarning(form, '/games', t)
 
-    // Don't await — we need to interact with the dialog before it resolves
     cancel()
 
-    // Give the promise a tick to open the dialog
     await new Promise(resolve => setTimeout(resolve, 0))
 
     expect(dialog.isOpen.value).toBe(true)
@@ -81,7 +73,6 @@ describe('useCancelWithWarning', () => {
     const cancelPromise = cancel()
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    // User clicks "Leave"
     dialog.onConfirm()
     await cancelPromise
 
@@ -97,7 +88,6 @@ describe('useCancelWithWarning', () => {
     const cancelPromise = cancel()
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    // User clicks "Stay"
     dialog.onCancel()
     await cancelPromise
 

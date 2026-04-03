@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Game;
 use App\Models\Session;
 use App\Services\SeatingService;
+use App\Services\SessionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -17,6 +18,7 @@ class SessionController extends Controller
 {
     public function __construct(
         private SeatingService $seatingService,
+        private SessionService $sessionService,
     ) {}
 
     public function index(Request $request): Response
@@ -33,44 +35,32 @@ class SessionController extends Controller
 
     public function create(Request $request): Response
     {
-        $userId = $request->user()->id;
-
         return Inertia::render("Sessions/Create", [
             "friends" => $request->user()->friends()->orderBy("last_name")->get(),
-            "games" => Game::where("user_id", $userId)->orWhere("is_shared", true)->orderBy("name")->get(),
+            "games"   => Game::visibleTo($request->user()->id)->orderBy("name")->get(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            "name" => ["required", "string", "max:255"],
-            "date" => ["required", "date"],
-            "notes" => ["nullable", "string", "max:1000"],
+            "name"       => ["required", "string", "max:255"],
+            "date"       => ["required", "date"],
+            "notes"      => ["nullable", "string", "max:1000"],
             "friend_ids" => ["array"],
             "friend_ids.*" => ["integer", "exists:friends,id"],
-            "game_ids" => ["array"],
+            "game_ids"   => ["array"],
             "game_ids.*" => ["integer", "exists:games,id"],
         ]);
 
-        $session = Session::create([
-            "user_id" => $request->user()->id,
-            "name" => $validated["name"],
-            "date" => $validated["date"],
-            "notes" => $validated["notes"] ?? null,
-        ]);
-
-        $session->friends()->sync($validated["friend_ids"] ?? []);
-        $session->games()->sync($validated["game_ids"] ?? []);
+        $session = $this->sessionService->create($request->user(), $validated);
 
         return Redirect::route("sessions.show", $session);
     }
 
-    public function show(Request $request, Session $session): Response
+    public function show(Session $session): Response
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("view", $session);
 
         $session->load(["friends", "games"]);
 
@@ -81,92 +71,56 @@ class SessionController extends Controller
 
     public function edit(Request $request, Session $session): Response
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("update", $session);
 
-        $userId = $request->user()->id;
         $session->load(["friends", "games"]);
 
         return Inertia::render("Sessions/Edit", [
             "session" => $session,
             "friends" => $request->user()->friends()->orderBy("last_name")->get(),
-            "games" => Game::where("user_id", $userId)->orWhere("is_shared", true)->orderBy("name")->get(),
+            "games"   => Game::visibleTo($request->user()->id)->orderBy("name")->get(),
         ]);
     }
 
     public function update(Request $request, Session $session): RedirectResponse
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("update", $session);
 
         $validated = $request->validate([
-            "name" => ["required", "string", "max:255"],
-            "date" => ["required", "date"],
-            "notes" => ["nullable", "string", "max:1000"],
+            "name"       => ["required", "string", "max:255"],
+            "date"       => ["required", "date"],
+            "notes"      => ["nullable", "string", "max:1000"],
             "friend_ids" => ["array"],
             "friend_ids.*" => ["integer", "exists:friends,id"],
-            "game_ids" => ["array"],
+            "game_ids"   => ["array"],
             "game_ids.*" => ["integer", "exists:games,id"],
         ]);
 
-        $session->update([
-            "name" => $validated["name"],
-            "date" => $validated["date"],
-            "notes" => $validated["notes"] ?? null,
-        ]);
-
-        $session->friends()->sync($validated["friend_ids"] ?? []);
-        $session->games()->sync($validated["game_ids"] ?? []);
+        $this->sessionService->update($session, $validated);
 
         return Redirect::route("sessions.show", $session);
     }
 
-    public function destroy(Request $request, Session $session): RedirectResponse
+    public function destroy(Session $session): RedirectResponse
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("delete", $session);
 
         $session->delete();
 
         return Redirect::route("sessions.index");
     }
 
-    public function arrange(Request $request, Session $session): Response
+    public function arrange(Session $session): Response
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("arrange", $session);
 
         $session->load(["friends.games", "games"]);
 
-        $result = $this->seatingService->arrange($session->friends, $session->games);
+        $arrangement = $this->seatingService->arrangeFormatted($session->friends, $session->games);
 
         return Inertia::render("Sessions/Show", [
-            "session" => $session,
-            "arrangement" => [
-                "tables" => collect($result["tables"])->map(fn($table) => [
-                    "game" => [
-                        "id" => $table["game"]->id,
-                        "name" => $table["game"]->name,
-                        "min_players" => $table["game"]->min_players,
-                        "max_players" => $table["game"]->max_players,
-                    ],
-                    "friends" => $table["friends"]->map(fn($friend) => [
-                        "id" => $friend->id,
-                        "first_name" => $friend->first_name,
-                        "last_name" => $friend->last_name,
-                    ])->values(),
-                    "avg_rating" => $table["avg_rating"],
-                ]),
-                "unseated" => $result["unseated"]->map(fn($friend) => [
-                    "id" => $friend->id,
-                    "first_name" => $friend->first_name,
-                    "last_name" => $friend->last_name,
-                ])->values(),
-            ],
+            "session"     => $session,
+            "arrangement" => $arrangement,
         ]);
     }
 }

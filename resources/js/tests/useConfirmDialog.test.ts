@@ -1,28 +1,19 @@
 import { describe, test, expect, beforeEach } from 'vitest'
 import { useConfirmDialog } from '@/composables/useConfirmDialog'
 
-// We test the composable directly without mounting any component.
-// Since useConfirmDialog uses module-level state, we need to reset
-// it between tests by cancelling any open dialog.
-
 describe('useConfirmDialog', () => {
   let dialog: ReturnType<typeof useConfirmDialog>
 
   beforeEach(() => {
     dialog = useConfirmDialog()
-    // Reset state between tests by cancelling any lingering open dialog
     if (dialog.isOpen.value) {
       dialog.onCancel()
     }
   })
 
-  // ── Initial state ────────────────────────────────────────────────────────
-
   test('dialog is closed by default', () => {
     expect(dialog.isOpen.value).toBe(false)
   })
-
-  // ── Opening the dialog ───────────────────────────────────────────────────
 
   test('confirm() opens the dialog', async () => {
     dialog.confirm({
@@ -62,8 +53,6 @@ describe('useConfirmDialog', () => {
     expect(dialog.options.value.variant).toBe('neutral')
   })
 
-  // ── Resolving with confirm ────────────────────────────────────────────────
-
   test('onConfirm() closes the dialog', async () => {
     dialog.confirm({
       title: 'Test',
@@ -89,8 +78,6 @@ describe('useConfirmDialog', () => {
 
     expect(await promise).toBe(true)
   })
-
-  // ── Resolving with cancel ─────────────────────────────────────────────────
 
   test('onCancel() closes the dialog', async () => {
     dialog.confirm({
@@ -118,8 +105,6 @@ describe('useConfirmDialog', () => {
     expect(await promise).toBe(false)
   })
 
-  // ── Multiple dialogs ──────────────────────────────────────────────────────
-
   test('opening a second dialog after the first was resolved works correctly', async () => {
     const first = dialog.confirm({
       title: 'First',
@@ -130,7 +115,6 @@ describe('useConfirmDialog', () => {
     dialog.onConfirm()
     await first
 
-    // Now open a second dialog
     const second = dialog.confirm({
       title: 'Second',
       message: 'Second dialog',

@@ -3,29 +3,21 @@ import { mount } from '@vue/test-utils'
 import ConfirmDialog from '@/Components/ConfirmDialog.vue'
 import { useConfirmDialog } from '@/composables/useConfirmDialog'
 
-// These tests mount the actual ConfirmDialog component and verify
-// that it renders correctly and that clicking the buttons does what
-// the user would expect.
-
 describe('ConfirmDialog', () => {
   let dialog: ReturnType<typeof useConfirmDialog>
 
   beforeEach(() => {
     dialog = useConfirmDialog()
-    // Reset between tests
     if (dialog.isOpen.value) {
       dialog.onCancel()
     }
   })
-
-  // ── Visibility ────────────────────────────────────────────────────────────
 
   test('is not visible when dialog is closed', () => {
     const wrapper = mount(ConfirmDialog, {
       global: { stubs: { Teleport: true } },
     })
 
-    // When isOpen is false the dialog panel should not be in the DOM
     expect(wrapper.find('[data-testid="dialog-panel"]').exists()).toBe(false)
   })
 
@@ -48,8 +40,6 @@ describe('ConfirmDialog', () => {
     expect(wrapper.text()).toContain('Delete item')
     expect(wrapper.text()).toContain('Are you sure you want to delete this?')
   })
-
-  // ── Content rendering ─────────────────────────────────────────────────────
 
   test('renders the correct title and message', async () => {
     const wrapper = mount(ConfirmDialog, {
@@ -87,8 +77,6 @@ describe('ConfirmDialog', () => {
     expect(wrapper.text()).toContain('Stay')
   })
 
-  // ── Variant styling ───────────────────────────────────────────────────────
-
   test('confirm button has red styling for danger variant', async () => {
     const wrapper = mount(ConfirmDialog, {
       global: { stubs: { Teleport: true } },
@@ -104,7 +92,6 @@ describe('ConfirmDialog', () => {
 
     await wrapper.vm.$nextTick()
 
-    // The danger confirm button should have a red background class
     const buttons = wrapper.findAll('button')
     const confirmButton = buttons.find(b => b.text() === 'Delete')
     expect(confirmButton?.classes()).toContain('bg-red-600')
@@ -129,8 +116,6 @@ describe('ConfirmDialog', () => {
     const confirmButton = buttons.find(b => b.text() === 'Leave')
     expect(confirmButton?.classes()).toContain('bg-indigo-600')
   })
-
-  // ── Button interactions ───────────────────────────────────────────────────
 
   test('clicking the confirm button closes the dialog', async () => {
     const wrapper = mount(ConfirmDialog, {
@@ -191,7 +176,6 @@ describe('ConfirmDialog', () => {
 
     await wrapper.vm.$nextTick()
 
-    // The backdrop is the first div inside the fixed overlay
     const backdrop = wrapper.find('.absolute.inset-0')
     await backdrop.trigger('click')
 

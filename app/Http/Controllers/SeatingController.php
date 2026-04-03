@@ -19,10 +19,10 @@ class SeatingController extends Controller
     public function arrange(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            "friend_ids" => ["required", "array", "min:1"],
+            "friend_ids"   => ["required", "array", "min:1"],
             "friend_ids.*" => ["integer", "exists:friends,id"],
-            "game_ids" => ["required", "array", "min:1"],
-            "game_ids.*" => ["integer", "exists:games,id"],
+            "game_ids"     => ["required", "array", "min:1"],
+            "game_ids.*"   => ["integer", "exists:games,id"],
         ]);
 
         $friends = Friend::with("games")
@@ -30,30 +30,12 @@ class SeatingController extends Controller
             ->where("user_id", auth()->id())
             ->get();
 
-        $games = Game::whereIn("id", $validated["game_ids"])
-            ->where("user_id", auth()->id())
+        $games = Game::visibleTo(auth()->id())
+            ->whereIn("id", $validated["game_ids"])
             ->get();
 
-        $result = $this->seatingService->arrange($friends, $games);
-
-        return response()->json([
-            "tables" => collect($result["tables"])->map(fn($t) => [
-                "game" => [
-                    "id" => $t["game"]->id,
-                    "name" => $t["game"]->name,
-                    "min_players" => $t["game"]->min_players,
-                    "max_players" => $t["game"]->max_players,
-                ],
-                "friends" => $t["friends"]->map(fn($f) => [
-                    "id" => $f->id,
-                    "name" => $f->first_name . " " . $f->last_name,
-                ])->values(),
-                "avg_rating" => $t["avg_rating"],
-            ]),
-            "unseated" => $result["unseated"]->map(fn($f) => [
-                "id" => $f->id,
-                "name" => $f->first_name . " " . $f->last_name,
-            ])->values(),
-        ]);
+        return response()->json(
+            $this->seatingService->arrangeFormatted($friends, $games)
+        );
     }
 }
