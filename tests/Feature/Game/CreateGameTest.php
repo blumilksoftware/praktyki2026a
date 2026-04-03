@@ -17,14 +17,14 @@ test("user can store a game", function (): void {
 
     $this->actingAs($user)
         ->post("/games", [
-            "name"        => "Catan",
+            "name" => "Catan",
             "min_players" => 2,
             "max_players" => 4,
         ])
         ->assertRedirect("/games");
 
     $this->assertDatabaseHas("games", [
-        "name"    => "Catan",
+        "name" => "Catan",
         "user_id" => $user->id,
     ]);
 });
@@ -34,14 +34,14 @@ test("store game accepts max_players of exactly 100", function (): void {
 
     $this->actingAs($user)
         ->post("/games", [
-            "name"        => "Catan",
+            "name" => "Catan",
             "min_players" => 2,
             "max_players" => 100,
         ])
         ->assertRedirect("/games");
 
     $this->assertDatabaseHas("games", [
-        "name"        => "Catan",
+        "name" => "Catan",
         "max_players" => 100,
     ]);
 });
@@ -50,7 +50,7 @@ test("store game accepts max_players of exactly 100", function (): void {
 
 test("store game requires auth", function (): void {
     $this->post("/games", [
-        "name"        => "Catan",
+        "name" => "Catan",
         "min_players" => 2,
         "max_players" => 4,
     ])->assertRedirect("/login");
@@ -77,7 +77,7 @@ test("store game requires max_players gte min_players", function (): void {
 
     $this->actingAs($user)
         ->post("/games", [
-            "name"        => "Catan",
+            "name" => "Catan",
             "min_players" => 5,
             "max_players" => 2,
         ])
@@ -89,7 +89,7 @@ test("store game rejects min_players less than 1", function (): void {
 
     $this->actingAs($user)
         ->post("/games", [
-            "name"        => "Catan",
+            "name" => "Catan",
             "min_players" => 0,
             "max_players" => 4,
         ])
@@ -101,7 +101,7 @@ test("store game rejects max_players above 100", function (): void {
 
     $this->actingAs($user)
         ->post("/games", [
-            "name"        => "Catan",
+            "name" => "Catan",
             "min_players" => 2,
             "max_players" => 101,
         ])

@@ -8,7 +8,7 @@ use App\Models\User;
 // ── Happy paths ───────────────────────────────────────────────────────────
 
 test("user can delete their own friend", function (): void {
-    $user   = User::factory()->create();
+    $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
 
     $this->actingAs($user)
@@ -28,7 +28,7 @@ test("delete friend requires auth", function (): void {
 });
 
 test("user cannot delete another user's friend", function (): void {
-    $user        = User::factory()->create();
+    $user = User::factory()->create();
     $otherFriend = Friend::factory()->create();
 
     $this->actingAs($user)

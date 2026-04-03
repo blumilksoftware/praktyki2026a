@@ -9,7 +9,7 @@ use App\Models\User;
 // ── Happy paths ───────────────────────────────────────────────────────────
 
 test("preferences page is displayed", function (): void {
-    $user   = User::factory()->create();
+    $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
 
     $this->actingAs($user)
@@ -18,9 +18,9 @@ test("preferences page is displayed", function (): void {
 });
 
 test("user can update friend preferences", function (): void {
-    $user   = User::factory()->create();
+    $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
-    $game   = Game::factory()->create(["user_id" => $user->id]);
+    $game = Game::factory()->create(["user_id" => $user->id]);
 
     $this->actingAs($user)
         ->put("/friends/{$friend->id}/preferences", [
@@ -32,15 +32,15 @@ test("user can update friend preferences", function (): void {
 
     $this->assertDatabaseHas("friend_game", [
         "friend_id" => $friend->id,
-        "game_id"   => $game->id,
-        "rating"    => 8,
+        "game_id" => $game->id,
+        "rating" => 8,
     ]);
 });
 
 test("user can update preferences with minimum valid rating", function (): void {
-    $user   = User::factory()->create();
+    $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
-    $game   = Game::factory()->create(["user_id" => $user->id]);
+    $game = Game::factory()->create(["user_id" => $user->id]);
 
     $this->actingAs($user)
         ->put("/friends/{$friend->id}/preferences", [
@@ -50,14 +50,14 @@ test("user can update preferences with minimum valid rating", function (): void 
 
     $this->assertDatabaseHas("friend_game", [
         "friend_id" => $friend->id,
-        "rating"    => 1,
+        "rating" => 1,
     ]);
 });
 
 test("user can update preferences with maximum valid rating", function (): void {
-    $user   = User::factory()->create();
+    $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
-    $game   = Game::factory()->create(["user_id" => $user->id]);
+    $game = Game::factory()->create(["user_id" => $user->id]);
 
     $this->actingAs($user)
         ->put("/friends/{$friend->id}/preferences", [
@@ -67,18 +67,18 @@ test("user can update preferences with maximum valid rating", function (): void 
 
     $this->assertDatabaseHas("friend_game", [
         "friend_id" => $friend->id,
-        "rating"    => 10,
+        "rating" => 10,
     ]);
 });
 
 test("user is redirected to redirect_to after updating preferences", function (): void {
-    $user   = User::factory()->create();
+    $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
-    $game   = Game::factory()->create(["user_id" => $user->id]);
+    $game = Game::factory()->create(["user_id" => $user->id]);
 
     $this->actingAs($user)
         ->put("/friends/{$friend->id}/preferences", [
-            "ratings"     => [["game_id" => $game->id, "rating" => 8]],
+            "ratings" => [["game_id" => $game->id, "rating" => 8]],
             "redirect_to" => "/sessions/5",
         ])
         ->assertRedirect("/sessions/5");
@@ -102,7 +102,7 @@ test("update preferences requires auth", function (): void {
 });
 
 test("user cannot view another user's friend preferences", function (): void {
-    $user        = User::factory()->create();
+    $user = User::factory()->create();
     $otherFriend = Friend::factory()->create();
 
     $this->actingAs($user)
@@ -111,9 +111,9 @@ test("user cannot view another user's friend preferences", function (): void {
 });
 
 test("user cannot update another user's friend preferences", function (): void {
-    $user        = User::factory()->create();
+    $user = User::factory()->create();
     $otherFriend = Friend::factory()->create();
-    $game        = Game::factory()->create(["user_id" => $user->id]);
+    $game = Game::factory()->create(["user_id" => $user->id]);
 
     $this->actingAs($user)
         ->put("/friends/{$otherFriend->id}/preferences", [
@@ -123,9 +123,9 @@ test("user cannot update another user's friend preferences", function (): void {
 });
 
 test("preference rating must be at least 1", function (): void {
-    $user   = User::factory()->create();
+    $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
-    $game   = Game::factory()->create(["user_id" => $user->id]);
+    $game = Game::factory()->create(["user_id" => $user->id]);
 
     $this->actingAs($user)
         ->put("/friends/{$friend->id}/preferences", [
@@ -135,9 +135,9 @@ test("preference rating must be at least 1", function (): void {
 });
 
 test("preference rating must be at most 10", function (): void {
-    $user   = User::factory()->create();
+    $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
-    $game   = Game::factory()->create(["user_id" => $user->id]);
+    $game = Game::factory()->create(["user_id" => $user->id]);
 
     $this->actingAs($user)
         ->put("/friends/{$friend->id}/preferences", [
@@ -147,9 +147,9 @@ test("preference rating must be at most 10", function (): void {
 });
 
 test("preference rating must not be negative", function (): void {
-    $user   = User::factory()->create();
+    $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
-    $game   = Game::factory()->create(["user_id" => $user->id]);
+    $game = Game::factory()->create(["user_id" => $user->id]);
 
     $this->actingAs($user)
         ->put("/friends/{$friend->id}/preferences", [
@@ -159,7 +159,7 @@ test("preference rating must not be negative", function (): void {
 });
 
 test("preference game must exist", function (): void {
-    $user   = User::factory()->create();
+    $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
 
     $this->actingAs($user)

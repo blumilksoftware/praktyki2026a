@@ -41,7 +41,7 @@ class GameController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            "name"        => ["required", "string", "max:255"],
+            "name" => ["required", "string", "max:255"],
             "min_players" => ["required", "integer", "min:1"],
             "max_players" => ["required", "integer", "min:1", "max:100", "gte:min_players"],
         ]);
@@ -68,7 +68,7 @@ class GameController extends Controller
         $this->authorize("update", $game);
 
         $validated = $request->validate([
-            "name"        => ["required", "string", "max:255"],
+            "name" => ["required", "string", "max:255"],
             "min_players" => ["required", "integer", "min:1"],
             "max_players" => ["required", "integer", "min:1", "max:100", "gte:min_players"],
         ]);

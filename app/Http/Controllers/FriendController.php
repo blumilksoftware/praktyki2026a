@@ -33,8 +33,8 @@ class FriendController extends Controller
     {
         $validated = $request->validate([
             "first_name" => ["required", "string", "max:255"],
-            "last_name"  => ["required", "string", "max:255"],
-            "email"      => ["nullable", "email", "max:255"],
+            "last_name" => ["required", "string", "max:255"],
+            "email" => ["nullable", "email", "max:255"],
         ]);
 
         Friend::create([
@@ -60,8 +60,8 @@ class FriendController extends Controller
 
         $validated = $request->validate([
             "first_name" => ["required", "string", "max:255"],
-            "last_name"  => ["required", "string", "max:255"],
-            "email"      => ["nullable", "email", "max:255"],
+            "last_name" => ["required", "string", "max:255"],
+            "email" => ["nullable", "email", "max:255"],
         ]);
 
         $friend->update($validated);

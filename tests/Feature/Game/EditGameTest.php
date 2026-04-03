@@ -22,14 +22,14 @@ test("user can update their own game", function (): void {
 
     $this->actingAs($user)
         ->put("/games/{$game->id}", [
-            "name"        => "Updated Name",
+            "name" => "Updated Name",
             "min_players" => 2,
             "max_players" => 6,
         ])
         ->assertRedirect("/games");
 
     $this->assertDatabaseHas("games", [
-        "id"   => $game->id,
+        "id" => $game->id,
         "name" => "Updated Name",
     ]);
 });
@@ -40,14 +40,14 @@ test("update game accepts max_players of exactly 100", function (): void {
 
     $this->actingAs($user)
         ->put("/games/{$game->id}", [
-            "name"        => "Catan",
+            "name" => "Catan",
             "min_players" => 2,
             "max_players" => 100,
         ])
         ->assertRedirect("/games");
 
     $this->assertDatabaseHas("games", [
-        "id"          => $game->id,
+        "id" => $game->id,
         "max_players" => 100,
     ]);
 });
@@ -65,14 +65,14 @@ test("update game requires auth", function (): void {
     $game = Game::factory()->create();
 
     $this->put("/games/{$game->id}", [
-        "name"        => "Updated",
+        "name" => "Updated",
         "min_players" => 2,
         "max_players" => 4,
     ])->assertRedirect("/login");
 });
 
 test("user cannot edit another user's game", function (): void {
-    $user      = User::factory()->create();
+    $user = User::factory()->create();
     $otherGame = Game::factory()->userAdded()->create();
 
     $this->actingAs($user)
@@ -81,7 +81,7 @@ test("user cannot edit another user's game", function (): void {
 });
 
 test("user cannot edit shared game", function (): void {
-    $user       = User::factory()->create();
+    $user = User::factory()->create();
     $sharedGame = Game::factory()->shared()->create();
 
     $this->actingAs($user)
@@ -90,12 +90,12 @@ test("user cannot edit shared game", function (): void {
 });
 
 test("user cannot update another user's game", function (): void {
-    $user      = User::factory()->create();
+    $user = User::factory()->create();
     $otherGame = Game::factory()->userAdded()->create();
 
     $this->actingAs($user)
         ->put("/games/{$otherGame->id}", [
-            "name"        => "Updated",
+            "name" => "Updated",
             "min_players" => 2,
             "max_players" => 4,
         ])
@@ -103,12 +103,12 @@ test("user cannot update another user's game", function (): void {
 });
 
 test("user cannot update shared game", function (): void {
-    $user       = User::factory()->create();
+    $user = User::factory()->create();
     $sharedGame = Game::factory()->shared()->create();
 
     $this->actingAs($user)
         ->put("/games/{$sharedGame->id}", [
-            "name"        => "Updated",
+            "name" => "Updated",
             "min_players" => 2,
             "max_players" => 4,
         ])
@@ -133,7 +133,7 @@ test("update game requires max_players gte min_players", function (): void {
 
     $this->actingAs($user)
         ->put("/games/{$game->id}", [
-            "name"        => "Catan",
+            "name" => "Catan",
             "min_players" => 5,
             "max_players" => 2,
         ])
@@ -146,7 +146,7 @@ test("update game rejects max_players above 100", function (): void {
 
     $this->actingAs($user)
         ->put("/games/{$game->id}", [
-            "name"        => "Catan",
+            "name" => "Catan",
             "min_players" => 2,
             "max_players" => 101,
         ])

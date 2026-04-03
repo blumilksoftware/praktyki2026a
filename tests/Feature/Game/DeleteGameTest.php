@@ -28,7 +28,7 @@ test("delete game requires auth", function (): void {
 });
 
 test("user cannot delete another user's game", function (): void {
-    $user      = User::factory()->create();
+    $user = User::factory()->create();
     $otherGame = Game::factory()->userAdded()->create();
 
     $this->actingAs($user)
@@ -39,7 +39,7 @@ test("user cannot delete another user's game", function (): void {
 });
 
 test("user cannot delete shared game", function (): void {
-    $user       = User::factory()->create();
+    $user = User::factory()->create();
     $sharedGame = Game::factory()->shared()->create();
 
     $this->actingAs($user)

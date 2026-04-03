@@ -28,8 +28,8 @@ class PreferenceController extends Controller
         $games = Game::visibleTo($request->user()->id)->orderBy("name")->get();
 
         return Inertia::render("Preferences/Edit", [
-            "friend"     => $friend,
-            "games"      => $games,
+            "friend" => $friend,
+            "games" => $games,
             "redirectTo" => $request->query("redirect_to"),
         ]);
     }
@@ -39,9 +39,9 @@ class PreferenceController extends Controller
         $this->authorize("managePreferences", $friend);
 
         $request->validate([
-            "ratings"             => ["array"],
-            "ratings.*.game_id"   => ["required", "integer", "exists:games,id"],
-            "ratings.*.rating"    => ["required", "integer", "min:1", "max:10"],
+            "ratings" => ["array"],
+            "ratings.*.game_id" => ["required", "integer", "exists:games,id"],
+            "ratings.*.rating" => ["required", "integer", "min:1", "max:10"],
         ]);
 
         $this->preferenceService->sync($friend, $request->ratings ?? []);

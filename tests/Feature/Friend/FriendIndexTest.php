@@ -21,7 +21,7 @@ test("index shows only user's own friends", function (): void {
     $this->actingAs($user)
         ->get("/friends")
         ->assertOk()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(fn($page) => $page
             ->component("Friends/Index")
             ->has("friends", 2));
 });

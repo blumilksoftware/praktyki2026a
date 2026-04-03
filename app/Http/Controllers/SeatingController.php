@@ -19,10 +19,10 @@ class SeatingController extends Controller
     public function arrange(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            "friend_ids"   => ["required", "array", "min:1"],
+            "friend_ids" => ["required", "array", "min:1"],
             "friend_ids.*" => ["integer", "exists:friends,id"],
-            "game_ids"     => ["required", "array", "min:1"],
-            "game_ids.*"   => ["integer", "exists:games,id"],
+            "game_ids" => ["required", "array", "min:1"],
+            "game_ids.*" => ["integer", "exists:games,id"],
         ]);
 
         $friends = Friend::with("games")
@@ -35,7 +35,7 @@ class SeatingController extends Controller
             ->get();
 
         return response()->json(
-            $this->seatingService->arrangeFormatted($friends, $games)
+            $this->seatingService->arrangeFormatted($friends, $games),
         );
     }
 }

@@ -22,7 +22,7 @@ test("index shows user's own games and shared games but not other users' games",
     $this->actingAs($user)
         ->get("/games")
         ->assertOk()
-        ->assertInertia(fn ($page) => $page
+        ->assertInertia(fn($page) => $page
             ->component("Games/Index")
             ->has("games", 2));
 });

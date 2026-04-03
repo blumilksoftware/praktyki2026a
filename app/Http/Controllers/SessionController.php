@@ -37,19 +37,19 @@ class SessionController extends Controller
     {
         return Inertia::render("Sessions/Create", [
             "friends" => $request->user()->friends()->orderBy("last_name")->get(),
-            "games"   => Game::visibleTo($request->user()->id)->orderBy("name")->get(),
+            "games" => Game::visibleTo($request->user()->id)->orderBy("name")->get(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            "name"       => ["required", "string", "max:255"],
-            "date"       => ["required", "date"],
-            "notes"      => ["nullable", "string", "max:1000"],
+            "name" => ["required", "string", "max:255"],
+            "date" => ["required", "date"],
+            "notes" => ["nullable", "string", "max:1000"],
             "friend_ids" => ["array"],
             "friend_ids.*" => ["integer", "exists:friends,id"],
-            "game_ids"   => ["array"],
+            "game_ids" => ["array"],
             "game_ids.*" => ["integer", "exists:games,id"],
         ]);
 
@@ -78,7 +78,7 @@ class SessionController extends Controller
         return Inertia::render("Sessions/Edit", [
             "session" => $session,
             "friends" => $request->user()->friends()->orderBy("last_name")->get(),
-            "games"   => Game::visibleTo($request->user()->id)->orderBy("name")->get(),
+            "games" => Game::visibleTo($request->user()->id)->orderBy("name")->get(),
         ]);
     }
 
@@ -87,12 +87,12 @@ class SessionController extends Controller
         $this->authorize("update", $session);
 
         $validated = $request->validate([
-            "name"       => ["required", "string", "max:255"],
-            "date"       => ["required", "date"],
-            "notes"      => ["nullable", "string", "max:1000"],
+            "name" => ["required", "string", "max:255"],
+            "date" => ["required", "date"],
+            "notes" => ["nullable", "string", "max:1000"],
             "friend_ids" => ["array"],
             "friend_ids.*" => ["integer", "exists:friends,id"],
-            "game_ids"   => ["array"],
+            "game_ids" => ["array"],
             "game_ids.*" => ["integer", "exists:games,id"],
         ]);
 
@@ -119,7 +119,7 @@ class SessionController extends Controller
         $arrangement = $this->seatingService->arrangeFormatted($session->friends, $session->games);
 
         return Inertia::render("Sessions/Show", [
-            "session"     => $session,
+            "session" => $session,
             "arrangement" => $arrangement,
         ]);
     }

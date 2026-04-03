@@ -17,22 +17,22 @@ class SeatingService
         return [
             "tables" => collect($raw["tables"])->map(fn($table) => [
                 "game" => [
-                    "id"          => $table["game"]->id,
-                    "name"        => $table["game"]->name,
+                    "id" => $table["game"]->id,
+                    "name" => $table["game"]->name,
                     "min_players" => $table["game"]->min_players,
                     "max_players" => $table["game"]->max_players,
                 ],
-                "friends"    => $table["friends"]->map(fn($friend) => [
-                    "id"         => $friend->id,
+                "friends" => $table["friends"]->map(fn($friend) => [
+                    "id" => $friend->id,
                     "first_name" => $friend->first_name,
-                    "last_name"  => $friend->last_name,
+                    "last_name" => $friend->last_name,
                 ])->values(),
                 "avg_rating" => $table["avg_rating"],
             ]),
             "unseated" => $raw["unseated"]->map(fn($friend) => [
-                "id"         => $friend->id,
+                "id" => $friend->id,
                 "first_name" => $friend->first_name,
-                "last_name"  => $friend->last_name,
+                "last_name" => $friend->last_name,
             ])->values(),
         ];
     }
