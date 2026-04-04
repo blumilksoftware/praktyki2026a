@@ -8,6 +8,7 @@ use App\Models\Game;
 use App\Models\Session;
 use App\Services\SeatingService;
 use App\Services\SessionService;
+use App\Http\Requests\SessionRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -41,19 +42,9 @@ class SessionController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(SessionRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            "name" => ["required", "string", "max:255"],
-            "date" => ["required", "date"],
-            "notes" => ["nullable", "string", "max:1000"],
-            "friend_ids" => ["array"],
-            "friend_ids.*" => ["integer", "exists:friends,id"],
-            "game_ids" => ["array"],
-            "game_ids.*" => ["integer", "exists:games,id"],
-        ]);
-
-        $session = $this->sessionService->create($request->user(), $validated);
+        $session = $this->sessionService->create($request->user(), $request->validated());
 
         return Redirect::route("sessions.show", $session);
     }
@@ -82,21 +73,11 @@ class SessionController extends Controller
         ]);
     }
 
-    public function update(Request $request, Session $session): RedirectResponse
+    public function update(SessionRequest $request, Session $session): RedirectResponse
     {
         $this->authorize("update", $session);
 
-        $validated = $request->validate([
-            "name" => ["required", "string", "max:255"],
-            "date" => ["required", "date"],
-            "notes" => ["nullable", "string", "max:1000"],
-            "friend_ids" => ["array"],
-            "friend_ids.*" => ["integer", "exists:friends,id"],
-            "game_ids" => ["array"],
-            "game_ids.*" => ["integer", "exists:games,id"],
-        ]);
-
-        $this->sessionService->update($session, $validated);
+        $this->sessionService->update($session, $request->validated());
 
         return Redirect::route("sessions.show", $session);
     }

@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Models\Game;
 use App\Models\User;
 
-// ── Happy paths ───────────────────────────────────────────────────────────
-
 test("user can edit their own game", function (): void {
     $user = User::factory()->create();
     $game = Game::factory()->create(["user_id" => $user->id]);
@@ -51,8 +49,6 @@ test("update game accepts max_players of exactly 100", function (): void {
         "max_players" => 100,
     ]);
 });
-
-// ── Sad paths ─────────────────────────────────────────────────────────────
 
 test("edit game requires auth", function (): void {
     $game = Game::factory()->create();

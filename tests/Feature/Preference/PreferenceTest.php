@@ -6,8 +6,6 @@ use App\Models\Friend;
 use App\Models\Game;
 use App\Models\User;
 
-// ── Happy paths ───────────────────────────────────────────────────────────
-
 test("preferences page is displayed", function (): void {
     $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
@@ -83,8 +81,6 @@ test("user is redirected to redirect_to after updating preferences", function ()
         ])
         ->assertRedirect("/sessions/5");
 });
-
-// ── Sad paths ─────────────────────────────────────────────────────────────
 
 test("preferences page requires auth", function (): void {
     $friend = Friend::factory()->create();

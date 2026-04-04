@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Models\User;
 
-// ── Happy paths ───────────────────────────────────────────────────────────
-
 test("friends create page is displayed", function (): void {
     $user = User::factory()->create();
 
@@ -47,8 +45,6 @@ test("store friend email is optional", function (): void {
         "user_id" => $user->id,
     ]);
 });
-
-// ── Sad paths ─────────────────────────────────────────────────────────────
 
 test("store friend requires auth", function (): void {
     $this->post("/friends", [

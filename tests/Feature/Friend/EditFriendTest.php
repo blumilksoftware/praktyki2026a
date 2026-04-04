@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Models\Friend;
 use App\Models\User;
 
-// ── Happy paths ───────────────────────────────────────────────────────────
-
 test("user can edit their own friend", function (): void {
     $user = User::factory()->create();
     $friend = Friend::factory()->create(["user_id" => $user->id]);
@@ -55,8 +53,6 @@ test("user can update friend and clear email", function (): void {
         "email" => null,
     ]);
 });
-
-// ── Sad paths ─────────────────────────────────────────────────────────────
 
 test("edit friend requires auth", function (): void {
     $friend = Friend::factory()->create();

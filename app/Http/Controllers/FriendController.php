@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Friend;
+use App\Http\Requests\FriendRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -29,16 +30,10 @@ class FriendController extends Controller
         return Inertia::render("Friends/Create");
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(FriendRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            "first_name" => ["required", "string", "max:255"],
-            "last_name" => ["required", "string", "max:255"],
-            "email" => ["nullable", "email", "max:255"],
-        ]);
-
         Friend::create([
-            ...$validated,
+            ...$request->validated(),
             "user_id" => $request->user()->id,
         ]);
 
@@ -54,17 +49,11 @@ class FriendController extends Controller
         ]);
     }
 
-    public function update(Request $request, Friend $friend): RedirectResponse
+    public function update(FriendRequest $request, Friend $friend): RedirectResponse
     {
         $this->authorize("update", $friend);
 
-        $validated = $request->validate([
-            "first_name" => ["required", "string", "max:255"],
-            "last_name" => ["required", "string", "max:255"],
-            "email" => ["nullable", "email", "max:255"],
-        ]);
-
-        $friend->update($validated);
+        $friend->update($request->validated());
 
         return Redirect::route("friends.index");
     }

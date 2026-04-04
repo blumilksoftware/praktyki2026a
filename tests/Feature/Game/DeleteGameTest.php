@@ -5,8 +5,6 @@ declare(strict_types=1);
 use App\Models\Game;
 use App\Models\User;
 
-// ── Happy paths ───────────────────────────────────────────────────────────
-
 test("user can delete their own game", function (): void {
     $user = User::factory()->create();
     $game = Game::factory()->create(["user_id" => $user->id]);
@@ -17,8 +15,6 @@ test("user can delete their own game", function (): void {
 
     $this->assertDatabaseMissing("games", ["id" => $game->id]);
 });
-
-// ── Sad paths ─────────────────────────────────────────────────────────────
 
 test("delete game requires auth", function (): void {
     $game = Game::factory()->create();

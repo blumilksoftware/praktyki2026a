@@ -23,8 +23,6 @@ describe('useCancelWithWarning', () => {
 
   const t = (key: string) => key
 
-  // ── Happy path: form is clean ─────────────────────────────────────────────
-
   test('navigates immediately when form is not dirty', async () => {
     const form = { isDirty: false }
     const { cancel } = useCancelWithWarning(form, '/games', t)
@@ -53,8 +51,6 @@ describe('useCancelWithWarning', () => {
     expect(dialog.isOpen.value).toBe(false)
   })
 
-  // ── Happy path: form is dirty, user confirms leaving ─────────────────────
-
   test('opens the dialog when form is dirty', async () => {
     const form = { isDirty: true }
     const { cancel } = useCancelWithWarning(form, '/games', t)
@@ -78,8 +74,6 @@ describe('useCancelWithWarning', () => {
 
     expect(router.visit).toHaveBeenCalledWith('/games')
   })
-
-  // ── Sad path: form is dirty, user chooses to stay ─────────────────────────
 
   test('does not navigate when user cancels the dialog', async () => {
     const form = { isDirty: true }

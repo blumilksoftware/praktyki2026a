@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PreferenceRequest;
 use App\Models\Friend;
 use App\Models\Game;
 use App\Services\PreferenceService;
@@ -34,17 +35,11 @@ class PreferenceController extends Controller
         ]);
     }
 
-    public function update(Request $request, Friend $friend): RedirectResponse
+    public function update(PreferenceRequest $request, Friend $friend): RedirectResponse
     {
         $this->authorize("managePreferences", $friend);
 
-        $request->validate([
-            "ratings" => ["array"],
-            "ratings.*.game_id" => ["required", "integer", "exists:games,id"],
-            "ratings.*.rating" => ["required", "integer", "min:1", "max:10"],
-        ]);
-
-        $this->preferenceService->sync($friend, $request->ratings ?? []);
+        $this->preferenceService->sync($friend, $request->validated()['ratings'] ?? []);
 
         $redirectTo = $request->input("redirect_to");
 
