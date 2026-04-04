@@ -22,10 +22,10 @@ class SeatingController extends Controller
 
         $friends = Friend::with("games")
             ->whereIn("id", $validated["friend_ids"])
-            ->where("user_id", auth()->id())
+            ->where("user_id", $request->user()->id)
             ->get();
 
-        $games = Game::visibleTo(auth()->id())
+        $games = Game::visibleTo($request->user()->id)
             ->whereIn("id", $validated["game_ids"])
             ->get();
 

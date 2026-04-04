@@ -20,7 +20,7 @@ class SeatingServiceTest extends TestCase
         parent::setUp();
         $this->service = new SeatingService();
     }
-    
+
     public function testTwoFriendsSharingOneGameFormASingleTable(): void
     {
         $game = $this->makeGame(id: 1, min: 2, max: 4);

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Friend;
+use App\Actions\CreateFriendAction;
+use App\Actions\UpdateFriendAction;
 use App\Http\Requests\FriendRequest;
+use App\Models\Friend;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -30,12 +32,9 @@ class FriendController extends Controller
         return Inertia::render("Friends/Create");
     }
 
-    public function store(FriendRequest $request): RedirectResponse
+    public function store(FriendRequest $request, CreateFriendAction $action): RedirectResponse
     {
-        Friend::create([
-            ...$request->validated(),
-            "user_id" => $request->user()->id,
-        ]);
+        $action->execute($request->user(), $request->validated());
 
         return Redirect::route("friends.index");
     }
@@ -49,11 +48,11 @@ class FriendController extends Controller
         ]);
     }
 
-    public function update(FriendRequest $request, Friend $friend): RedirectResponse
+    public function update(FriendRequest $request, Friend $friend, UpdateFriendAction $action): RedirectResponse
     {
         $this->authorize("update", $friend);
 
-        $friend->update($request->validated());
+        $action->execute($friend, $request->validated());
 
         return Redirect::route("friends.index");
     }

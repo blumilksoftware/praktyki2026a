@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\CreateSessionAction;
+use App\Actions\UpdateSessionAction;
+use App\Http\Requests\SessionRequest;
 use App\Models\Game;
 use App\Models\Session;
 use App\Services\SeatingService;
-use App\Services\SessionService;
-use App\Http\Requests\SessionRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -19,7 +20,6 @@ class SessionController extends Controller
 {
     public function __construct(
         private SeatingService $seatingService,
-        private SessionService $sessionService,
     ) {}
 
     public function index(Request $request): Response
@@ -42,9 +42,9 @@ class SessionController extends Controller
         ]);
     }
 
-    public function store(SessionRequest $request): RedirectResponse
+    public function store(SessionRequest $request, CreateSessionAction $action): RedirectResponse
     {
-        $session = $this->sessionService->create($request->user(), $request->validated());
+        $session = $action->execute($request->user(), $request->validated());
 
         return Redirect::route("sessions.show", $session);
     }
@@ -73,11 +73,11 @@ class SessionController extends Controller
         ]);
     }
 
-    public function update(SessionRequest $request, Session $session): RedirectResponse
+    public function update(SessionRequest $request, Session $session, UpdateSessionAction $action): RedirectResponse
     {
         $this->authorize("update", $session);
 
-        $this->sessionService->update($session, $request->validated());
+        $session = $action->execute($session, $request->validated());
 
         return Redirect::route("sessions.show", $session);
     }

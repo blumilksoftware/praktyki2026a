@@ -16,9 +16,10 @@ class PreferenceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ratings'            => ['array'],
-            'ratings.*.game_id'  => ['required', 'integer', 'exists:games,id'],
-            'ratings.*.rating'   => ['required', 'integer', 'min:1', 'max:10'],
+            "ratings" => ["array"],
+            "ratings.*.game_id" => ["required", "integer", "exists:games,id"],
+            "ratings.*.rating" => ["required", "integer", "min:1", "max:10"],
+            "redirect_to" => ["nullable", "string"],
         ];
     }
 }

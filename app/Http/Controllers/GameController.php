@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Game;
+use App\Actions\CreateGameAction;
+use App\Actions\UpdateGameAction;
 use App\Http\Requests\GameRequest;
+use App\Models\Game;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -25,7 +27,7 @@ class GameController extends Controller
         ]);
     }
 
-    public function show(Request $request, Game $game): Response
+    public function show(Game $game): Response
     {
         $this->authorize("view", $game);
 
@@ -39,17 +41,14 @@ class GameController extends Controller
         return Inertia::render("Games/Create");
     }
 
-    public function store(GameRequest $request): RedirectResponse
+    public function store(GameRequest $request, CreateGameAction $action): RedirectResponse
     {
-        Game::create([
-            ...$request->validated(),
-            "user_id" => $request->user()->id,
-        ]);
+        $action->execute($request->user(), $request->validated());
 
         return Redirect::route("games.index");
     }
 
-    public function edit(Request $request, Game $game): Response
+    public function edit(Game $game): Response
     {
         $this->authorize("update", $game);
 
@@ -58,11 +57,11 @@ class GameController extends Controller
         ]);
     }
 
-    public function update(GameRequest $request, Game $game): RedirectResponse
+    public function update(GameRequest $request, Game $game, UpdateGameAction $action): RedirectResponse
     {
         $this->authorize("update", $game);
 
-        $game->update($request->validated());
+        $action->execute($game, $request->validated());
 
         return Redirect::route("games.index");
     }

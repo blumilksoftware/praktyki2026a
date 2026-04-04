@@ -16,10 +16,10 @@ class SeatingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'friend_ids'   => ['required', 'array', 'min:1'],
-            'friend_ids.*' => ['integer', 'exists:friends,id'],
-            'game_ids'     => ['required', 'array', 'min:1'],
-            'game_ids.*'   => ['integer', 'exists:games,id'],
+            "friend_ids" => ["required", "array", "min:1"],
+            "friend_ids.*" => ["integer", "exists:friends,id"],
+            "game_ids" => ["required", "array", "min:1"],
+            "game_ids.*" => ["integer", "exists:games,id"],
         ];
     }
 }

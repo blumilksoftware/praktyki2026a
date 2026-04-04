@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Actions;
 
 use App\Models\Friend;
 
-class PreferenceService
+class SyncPreferencesAction
 {
-    public function sync(Friend $friend, array $ratings): void
+    public function execute(Friend $friend, array $ratings): void
     {
         $data = collect($ratings)
             ->mapWithKeys(fn($item) => [$item["game_id"] => ["rating" => $item["rating"]]])
