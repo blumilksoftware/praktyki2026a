@@ -60,7 +60,7 @@ class BoardGameGeekService
                     "type" => "boardgame",
                 ]);
 
-            $response->throw(); // throws RequestException on 4xx/5xx
+            $response->throw();
         } catch (ConnectionException $e) {
             Log::error("BGG API connection failed", ["bgg_id" => $bggId, "error" => $e->getMessage()]);
 
@@ -101,7 +101,6 @@ class BoardGameGeekService
             }
         }
 
-        // Clean the description: BGG encodes HTML entities in it.
         $description = html_entity_decode(
             (string)$item->description,
             ENT_QUOTES | ENT_HTML5,
@@ -129,7 +128,6 @@ class BoardGameGeekService
             "min_players" => $data["min_players"],
             "max_players" => $data["max_players"],
             "is_shared" => false,
-            // Possible future fields to add:
             "bgg_id" => $data["bgg_id"],
             "bgg_url" => $data["bgg_url"],
             "year" => $data["year"],

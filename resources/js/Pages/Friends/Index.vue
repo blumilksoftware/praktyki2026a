@@ -118,7 +118,6 @@ async function deleteFriend(friend: Friend): Promise<void> {
         <div
           class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800"
         >
-          <!-- Search bar -->
           <div
             class="flex items-center gap-3 border-b border-gray-200 px-4 py-3 sm:px-6 dark:border-gray-700"
           >

@@ -75,7 +75,6 @@ function pageWindow(): Array<number | '...'> {
 
 <template>
   <div class="flex flex-col items-center justify-between gap-4 border-t border-gray-200 px-4 py-3 dark:border-gray-700 sm:flex-row sm:px-6">
-    <!-- Left side: showing X–Y of Z results -->
     <div class="flex items-center gap-4">
       <p class="text-sm text-gray-500 dark:text-gray-400">
         <template v-if="meta.from && meta.to">
@@ -92,7 +91,6 @@ function pageWindow(): Array<number | '...'> {
         </template>
       </p>
 
-      <!-- Per-page selector -->
       <select
         :value="meta.per_page"
         class="rounded-md border-gray-300 py-1 pl-2 pr-7 text-sm text-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
@@ -108,7 +106,6 @@ function pageWindow(): Array<number | '...'> {
       </select>
     </div>
 
-    <!-- Right side: page number buttons -->
     <div class="flex items-center gap-1">
       <button
         class="cursor-pointer rounded px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 disabled:cursor-default disabled:opacity-40 dark:text-gray-400 dark:hover:bg-gray-700"
