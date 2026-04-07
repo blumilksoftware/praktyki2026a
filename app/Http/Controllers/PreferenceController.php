@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Friend;
 use App\Models\Game;
+use App\Services\PreferenceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -14,30 +15,28 @@ use Inertia\Response;
 
 class PreferenceController extends Controller
 {
+    public function __construct(
+        private PreferenceService $preferenceService,
+    ) {}
+
     public function show(Request $request, Friend $friend): Response
     {
-        if ($friend->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("managePreferences", $friend);
 
         $friend->load("games");
 
-        $games = Game::where("user_id", $request->user()->id)
-            ->orWhere("is_shared", true)
-            ->orderBy("name")
-            ->get();
+        $games = Game::visibleTo($request->user()->id)->orderBy("name")->get();
 
         return Inertia::render("Preferences/Edit", [
             "friend" => $friend,
             "games" => $games,
+            "redirectTo" => $request->query("redirect_to"),
         ]);
     }
 
     public function update(Request $request, Friend $friend): RedirectResponse
     {
-        if ($friend->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("managePreferences", $friend);
 
         $request->validate([
             "ratings" => ["array"],
@@ -45,10 +44,19 @@ class PreferenceController extends Controller
             "ratings.*.rating" => ["required", "integer", "min:1", "max:10"],
         ]);
 
-        $data = collect($request->ratings)->mapWithKeys(fn($item) => [$item["game_id"] => ["rating" => $item["rating"]]])->toArray();
+        $this->preferenceService->sync($friend, $request->ratings ?? []);
 
-        $friend->games()->sync($data);
+        $redirectTo = $request->input("redirect_to");
 
-        return Redirect::route("preferences.show", $friend);
+        if ($redirectTo) {
+            $parsed = parse_url($redirectTo);
+            $path = $parsed["path"] ?? "";
+
+            if (str_starts_with($path, "/")) {
+                return Redirect::to($path);
+            }
+        }
+
+        return Redirect::route("friends.index");
     }
 }

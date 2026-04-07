@@ -84,11 +84,9 @@ class FriendController extends Controller
         return Redirect::route("friends.index");
     }
 
-    public function edit(Request $request, Friend $friend): Response
+    public function edit(Friend $friend): Response
     {
-        if ($friend->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("update", $friend);
 
         return Inertia::render("Friends/Edit", [
             "friend" => $friend,
@@ -97,9 +95,7 @@ class FriendController extends Controller
 
     public function update(Request $request, Friend $friend): RedirectResponse
     {
-        if ($friend->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("update", $friend);
 
         $validated = $request->validate([
             "first_name" => ["required", "string", "max:255"],
@@ -112,11 +108,9 @@ class FriendController extends Controller
         return Redirect::route("friends.index");
     }
 
-    public function destroy(Request $request, Friend $friend): RedirectResponse
+    public function destroy(Friend $friend): RedirectResponse
     {
-        if ($friend->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("delete", $friend);
 
         $friend->delete();
 

@@ -152,10 +152,16 @@ return [
     "uuid" => "Pole :attribute musi być prawidłowym UUID.",
 
     "attributes" => [
-        "name" => "imię",
-        "email" => "email",
+        "name" => "nazwa",
+        "email" => "e-mail",
         "password" => "hasło",
         "password_confirmation" => "potwierdzenie hasła",
         "current_password" => "obecne hasło",
+        "date" => "data",
+        "notes" => "notatki",
+        "min_players" => "minimalna liczba graczy",
+        "max_players" => "maksymalna liczba graczy",
+        "first_name" => "imię",
+        "last_name" => "nazwisko",
     ],
 ];

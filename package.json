@@ -7,14 +7,18 @@
     "build": "vite build",
     "lint": "eslint .",
     "lintf": "eslint . --fix",
-    "tsc": "vue-tsc"
+    "tsc": "vue-tsc",
+    "test:frontend": "vitest run"
   },
   "dependencies": {
     "@inertiajs/vue3": "^2.3.6",
+    "@tabler/icons-vue": "^3.41.1",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/vite": "^4.1.18",
     "laravel-vite-plugin": "^1.0.0",
     "lodash": "^4.17.21",
+    "tailwindcss": "^4.1.18",
     "vue": "^3.5.26"
   },
   "devDependencies": {
@@ -26,13 +30,15 @@
     "@tailwindcss/vite": "^4.2.1",
     "@types/node": "^25.3.5",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
-    "@vitejs/plugin-vue": "^5.0.0",
+    "@vitejs/plugin-vue": "^5.2.4",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^14.7.0",
+    "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.12",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^9.23.0",
+    "jsdom": "^29.0.1",
     "postcss": "^8.4.31",
     "prettier": "^3.3.0",
     "prettier-plugin-organize-imports": "^4.0.0",

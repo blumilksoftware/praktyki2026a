@@ -49,7 +49,7 @@ function changePerPage(event: Event): void {
   )
 }
 
-function pageWindow(): (number | '...')[] {
+function pageWindow(): Array<number | '...'> {
   const total = props.meta.last_page
   const current = props.meta.current_page
 
@@ -57,7 +57,7 @@ function pageWindow(): (number | '...')[] {
     return Array.from({ length: total }, (_, i) => i + 1)
   }
 
-  const pages: (number | '...')[] = [1]
+  const pages: Array<number | '...'> = [1]
 
   if (current > 3) pages.push('...')
 
@@ -111,7 +111,7 @@ function pageWindow(): (number | '...')[] {
     <!-- Right side: page number buttons -->
     <div class="flex items-center gap-1">
       <button
-        class="rounded px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 disabled:opacity-40 dark:text-gray-400 dark:hover:bg-gray-700"
+        class="cursor-pointer rounded px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 disabled:cursor-default disabled:opacity-40 dark:text-gray-400 dark:hover:bg-gray-700"
         :disabled="meta.current_page === 1"
         @click="goToPage(meta.current_page - 1)"
       >
@@ -127,7 +127,7 @@ function pageWindow(): (number | '...')[] {
         </span>
         <button
           v-else
-          class="min-w-8 rounded px-2 py-1 text-sm transition-colors"
+          class="min-w-8 cursor-pointer rounded px-2 py-1 text-sm transition-colors"
           :class="page === meta.current_page
             ? 'bg-indigo-600 text-white font-medium'
             : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'"
@@ -138,7 +138,7 @@ function pageWindow(): (number | '...')[] {
       </template>
 
       <button
-        class="rounded px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 disabled:opacity-40 dark:text-gray-400 dark:hover:bg-gray-700"
+        class="cursor-pointer rounded px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 disabled:cursor-default disabled:opacity-40 dark:text-gray-400 dark:hover:bg-gray-700"
         :disabled="meta.current_page === meta.last_page"
         @click="goToPage(meta.current_page + 1)"
       >

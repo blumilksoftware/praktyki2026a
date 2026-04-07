@@ -4,20 +4,21 @@ import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
+import { useCancelWithWarning } from '@/composables/useCancelWithWarning'
 
 const { t } = useTranslate()
 
 interface Friend {
-    id: number
-    first_name: string
-    last_name: string
-    email: string | null
+  id: number
+  first_name: string
+  last_name: string
+  email: string | null
 }
 
 const props = defineProps<{
-    friend: Friend
+  friend: Friend
 }>()
 
 const form = useForm({
@@ -26,7 +27,9 @@ const form = useForm({
   email: props.friend.email || '',
 })
 
-function submit() {
+const { cancel } = useCancelWithWarning(form, route('friends.index'), t)
+
+function submit(): void {
   form.put(route('friends.update', props.friend.id))
 }
 </script>
@@ -57,7 +60,6 @@ function submit() {
                 />
                 <InputError :message="form.errors.first_name" class="mt-2" />
               </div>
-
               <div>
                 <InputLabel for="last_name" :value="t('friends.lastName')" />
                 <TextInput
@@ -81,14 +83,17 @@ function submit() {
               <InputError :message="form.errors.email" class="mt-2" />
             </div>
 
-            <div class="flex items-center gap-4">
-              <PrimaryButton :disabled="form.processing">{{ t('friends.save') }}</PrimaryButton>
-              <Link
-                :href="route('friends.index')"
-                class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            <div class="justify-end gap-4 flex items-center ">
+              <button
+                type="button"
+                class="cursor-pointer text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                @click="cancel"
               >
                 {{ t('friends.cancel') }}
-              </Link>
+              </button>
+              <PrimaryButton :disabled="form.processing">
+                {{ t('friends.save') }}
+              </PrimaryButton>
             </div>
           </form>
         </div>

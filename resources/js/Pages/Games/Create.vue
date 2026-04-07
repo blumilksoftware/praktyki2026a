@@ -4,14 +4,17 @@ import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
-import { Head, Link, useForm, router } from '@inertiajs/vue3'
-import { useTranslate } from '@/composables/useTranslate'
+import { Head, useForm, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 import axios from 'axios'
+import { useTranslate } from '@/composables/useTranslate'
+import { useCancelWithWarning } from '@/composables/useCancelWithWarning'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 
 const { t } = useTranslate()
+const { confirm } = useConfirmDialog()
 
-type Mode = 'manual' | 'bgg'
+type Mode = 'manual' | 'bgg';
 const mode = ref<Mode>('manual')
 
 interface DuplicateMatch {
@@ -25,9 +28,6 @@ const duplicateMatch = ref<DuplicateMatch | null>(null)
 const showDuplicateDialog = ref(false)
 const duplicateChecking = ref(false)
 
-// pendingBggSubmit holds the BGG confirmForm submission so we can
-// either fire it (if user picks "save as new") or discard it
-// (if user picks "increment copies").
 const pendingBggSubmit = ref(false)
 
 async function checkDuplicate(name: string): Promise<DuplicateMatch | null> {
@@ -68,7 +68,6 @@ function saveAsNew(): void {
   }
 }
 
-// ── Manual form ────────────────────────────────────────────────────────────
 const form = useForm({
   name: '',
   min_players: 2,
@@ -77,16 +76,36 @@ const form = useForm({
   copies: 1,
 })
 
-function submit(): void {
+const { cancel } = useCancelWithWarning(form, route('games.index'), t)
+
+function submit() {
   form.post(route('games.store'))
 }
 
-// ── BGG import ─────────────────────────────────────────────────────────────
-const bggUrl        = ref('')
-const bggLoading    = ref(false)
-const bggError      = ref<string | null>(null)
+async function cancelBgg(): Promise<void> {
+  if (!bggUrl.value && !bggPreview.value) {
+    router.visit(route('games.index'))
+    return
+  }
+
+  const confirmed = await confirm({
+    title: t('common.cancelTitle'),
+    message: t('common.cancelMessage'),
+    confirmLabel: t('common.cancelConfirmLabel'),
+    cancelLabel: t('common.cancelCancelLabel'),
+    variant: 'neutral',
+  })
+
+  if (confirmed) {
+    router.visit(route('games.index'))
+  }
+}
+
+const bggUrl = ref('')
+const bggLoading = ref(false)
+const bggError = ref<string | null>(null)
 const bggFieldError = ref<string | null>(null)
-const bggPreview    = ref<null | {
+const bggPreview = ref<null | {
   name: string
   min_players: number
   max_players: number
@@ -104,10 +123,10 @@ const looksLikeBggUrl = computed(() =>
 async function fetchFromBgg(): Promise<void> {
   if (!looksLikeBggUrl.value || bggLoading.value) return
 
-  bggLoading.value    = true
-  bggError.value      = null
+  bggLoading.value = true
+  bggError.value = null
   bggFieldError.value = null
-  bggPreview.value    = null
+  bggPreview.value = null
 
   try {
     const { data } = await axios.post(route('games.importFromBgg'), {
@@ -128,9 +147,9 @@ async function fetchFromBgg(): Promise<void> {
 }
 
 function resetBgg(): void {
-  bggUrl.value        = ''
-  bggPreview.value    = null
-  bggError.value      = null
+  bggUrl.value = ''
+  bggPreview.value = null
+  bggError.value = null
   bggFieldError.value = null
 }
 
@@ -149,19 +168,19 @@ const confirmForm = useForm({
 async function confirmBggImport(): Promise<void> {
   if (!bggPreview.value) return
 
-  confirmForm.name        = bggPreview.value.name
+  confirmForm.name = bggPreview.value.name
   confirmForm.min_players = bggPreview.value.min_players
   confirmForm.max_players = bggPreview.value.max_players
-  confirmForm.bgg_id      = bggPreview.value.bgg_id
-  confirmForm.bgg_url     = bggPreview.value.bgg_url
+  confirmForm.bgg_id = bggPreview.value.bgg_id
+  confirmForm.bgg_url = bggPreview.value.bgg_url
   confirmForm.description = bggPreview.value.description
-  confirmForm.year        = bggPreview.value.year
-  confirmForm.min_age     = bggPreview.value.min_age
+  confirmForm.year = bggPreview.value.year
+  confirmForm.min_age = bggPreview.value.min_age
 
   const match = await checkDuplicate(bggPreview.value.name)
 
   if (match) {
-    duplicateMatch.value  = match
+    duplicateMatch.value = match
     pendingBggSubmit.value = true
     showDuplicateDialog.value = true
     return
@@ -170,10 +189,13 @@ async function confirmBggImport(): Promise<void> {
   confirmForm.post(route('games.store'))
 }
 
+const bggDescriptionExpanded = ref(false)
+
 const bggFieldState = computed(() => {
-  if (bggFieldError.value)                    return 'border-red-400 focus:ring-red-400'
-  if (looksLikeBggUrl.value)                  return 'border-green-400 focus:ring-green-400'
-  if (bggUrl.value && !looksLikeBggUrl.value) return 'border-yellow-400 focus:ring-yellow-400'
+  if (bggFieldError.value) return 'border-red-400 focus:ring-red-400'
+  if (looksLikeBggUrl.value) return 'border-green-400 focus:ring-green-400'
+  if (bggUrl.value && !looksLikeBggUrl.value)
+    return 'border-yellow-400 focus:ring-yellow-400'
   return 'border-gray-300 dark:border-gray-600'
 })
 </script>
@@ -183,26 +205,36 @@ const bggFieldState = computed(() => {
 
   <AuthenticatedLayout>
     <template #header>
-      <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+      <h2
+        class="text-xl leading-tight font-semibold text-gray-800 dark:text-gray-200"
+      >
         {{ t('games.addTitle') }}
       </h2>
     </template>
 
-    <!-- ── Shared duplicate dialog ───────────────────────────────────────── -->
     <Teleport to="body">
       <div
         v-if="showDuplicateDialog && duplicateMatch"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       >
-        <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+        <div
+          class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
+        >
           <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
             {{ t('games.duplicateTitle') }}
           </h3>
           <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {{ t('games.duplicateMessage').replace('{name}', duplicateMatch.name) }}
+            {{
+              t('games.duplicateMessage').replace('{name}', duplicateMatch.name)
+            }}
           </p>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {{ t('games.duplicateCopies').replace('{count}', String(duplicateMatch.copies)) }}
+            {{
+              t('games.duplicateCopies').replace(
+                '{count}',
+                String(duplicateMatch.copies),
+              )
+            }}
           </p>
           <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button
@@ -212,10 +244,7 @@ const bggFieldState = computed(() => {
             >
               {{ t('games.duplicateSaveNew') }}
             </button>
-            <PrimaryButton
-              type="button"
-              @click="incrementCopies"
-            >
+            <PrimaryButton type="button" @click="incrementCopies">
               {{ t('games.duplicateIncrement') }}
             </PrimaryButton>
           </div>
@@ -226,14 +255,15 @@ const bggFieldState = computed(() => {
     <div class="py-6 sm:py-12">
       <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
         <div class="bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-          <!-- ── Mode toggle tabs ──────────────────────────────── -->
           <div class="flex border-b border-gray-200 dark:border-gray-700">
             <button
               type="button"
-              class="flex-1 px-4 py-3 text-sm font-medium transition-colors focus:outline-none"
-              :class="mode === 'manual'
-                ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+              class="flex-1 border-r border-gray-200 px-4 py-3 text-sm font-medium transition-colors focus:outline-none dark:border-gray-700"
+              :class="
+                mode === 'manual'
+                  ? 'cursor-default border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                  : 'cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+              "
               @click="mode = 'manual'"
             >
               <span class="mr-2 inline-block">✍️</span>
@@ -242,10 +272,12 @@ const bggFieldState = computed(() => {
             <button
               type="button"
               class="flex-1 px-4 py-3 text-sm font-medium transition-colors focus:outline-none"
-              :class="mode === 'bgg'
-                ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
-              @click="mode = 'bgg'; resetBgg()"
+              :class="
+                mode === 'bgg'
+                  ? 'cursor-default border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                  : 'cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+              "
+              @click="mode = 'bgg'"
             >
               <span class="mr-2 inline-block">🤓</span>
               {{ t('games.importFromBgg') }}
@@ -253,7 +285,6 @@ const bggFieldState = computed(() => {
           </div>
 
           <div class="p-4 sm:p-6">
-            <!-- ── MANUAL FORM ────────────────────────────────── -->
             <form
               v-if="mode === 'manual'"
               class="space-y-6"
@@ -277,7 +308,10 @@ const bggFieldState = computed(() => {
 
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <InputLabel for="min_players" :value="t('games.minPlayers')" />
+                  <InputLabel
+                    for="min_players"
+                    :value="t('games.minPlayers')"
+                  />
                   <TextInput
                     id="min_players"
                     v-model.number="form.min_players"
@@ -288,7 +322,10 @@ const bggFieldState = computed(() => {
                   <InputError :message="form.errors.min_players" class="mt-2" />
                 </div>
                 <div>
-                  <InputLabel for="max_players" :value="t('games.maxPlayers')" />
+                  <InputLabel
+                    for="max_players"
+                    :value="t('games.maxPlayers')"
+                  />
                   <TextInput
                     id="max_players"
                     v-model.number="form.max_players"
@@ -318,25 +355,25 @@ const bggFieldState = computed(() => {
                   id="description"
                   v-model="form.description"
                   rows="4"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 sm:text-sm"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                 />
                 <InputError :message="form.errors.description" class="mt-2" />
               </div>
 
-              <div class="flex items-center gap-4">
+              <div class="flex items-center justify-end gap-4">
+                <button
+                  type="button"
+                  class="cursor-pointer text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                  @click="cancel"
+                >
+                  {{ t('games.cancel') }}
+                </button>
                 <PrimaryButton :disabled="form.processing">
                   {{ t('games.save') }}
                 </PrimaryButton>
-                <Link
-                  :href="route('games.index')"
-                  class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-                >
-                  {{ t('games.cancel') }}
-                </Link>
               </div>
             </form>
 
-            <!-- ── BGG IMPORT FLOW ────────────────────────────── -->
             <div v-else class="space-y-6">
               <template v-if="!bggPreview">
                 <a
@@ -392,7 +429,14 @@ const bggFieldState = computed(() => {
                   {{ bggError }}
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center justify-end gap-4">
+                  <button
+                    type="button"
+                    class="cursor-pointer text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                    @click="cancelBgg"
+                  >
+                    {{ t('games.cancel') }}
+                  </button>
                   <PrimaryButton
                     type="button"
                     :disabled="!looksLikeBggUrl || bggLoading"
@@ -400,34 +444,49 @@ const bggFieldState = computed(() => {
                   >
                     <svg
                       v-if="bggLoading"
-                      class="-ml-1 mr-2 size-4 animate-spin"
-                      fill="none" viewBox="0 0 24 24"
+                      class="mr-2 -ml-1 size-4 animate-spin"
+                      fill="none"
+                      viewBox="0 0 24 24"
                     >
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      />
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      />
                     </svg>
-                    {{ bggLoading ? t('games.bggFetching') : t('games.bggFetch') }}
+                    {{
+                      bggLoading ? t('games.bggFetching') : t('games.bggFetch')
+                    }}
                   </PrimaryButton>
-
-                  <Link
-                    :href="route('games.index')"
-                    class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-                  >
-                    {{ t('games.cancel') }}
-                  </Link>
                 </div>
 
-                <details class="group rounded-lg border border-gray-200 dark:border-gray-700">
-                  <summary class="cursor-pointer select-none px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                <details
+                  class="group rounded-lg border border-gray-200 dark:border-gray-700"
+                >
+                  <summary
+                    class="cursor-pointer px-4 py-3 text-sm font-medium text-gray-600 select-none dark:text-gray-400"
+                  >
                     {{ t('games.bggHowToFind') }}
                   </summary>
-                  <ol class="list-decimal space-y-1 px-6 pb-4 pt-2 text-sm text-gray-500 dark:text-gray-400">
+                  <ol
+                    class="list-decimal space-y-1 px-6 pt-2 pb-4 text-sm text-gray-500 dark:text-gray-400"
+                  >
                     <li>{{ t('games.bggStep1') }}</li>
                     <li>{{ t('games.bggStep2') }}</li>
                     <li>{{ t('games.bggStep3') }}</li>
                     <li>
                       {{ t('games.bggStep4') }}<br>
-                      <code class="mt-1 inline-block rounded bg-gray-100 px-2 py-0.5 text-xs dark:bg-gray-700">
+                      <code
+                        class="mt-1 inline-block rounded bg-gray-100 px-2 py-0.5 text-xs dark:bg-gray-700"
+                      >
                         https://boardgamegeek.com/boardgame/174430/gloomhaven
                       </code>
                     </li>
@@ -436,14 +495,20 @@ const bggFieldState = computed(() => {
               </template>
 
               <template v-else>
-                <div class="flex items-center gap-2 rounded-md bg-green-50 px-4 py-3 text-sm font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                <div
+                  class="flex items-center gap-2 rounded-md bg-green-50 px-4 py-3 text-sm font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                >
                   <span>✓</span>
                   {{ t('games.bggFound') }}
                 </div>
 
-                <div class="rounded-lg border border-gray-200 p-5 dark:border-gray-700">
+                <div
+                  class="rounded-lg border border-gray-200 p-5 dark:border-gray-700"
+                >
                   <div class="flex items-start justify-between gap-4">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <h3
+                      class="text-lg font-semibold text-gray-900 dark:text-gray-100"
+                    >
                       {{ bggPreview.name }}
                     </h3>
                     <div class="flex shrink-0 flex-col items-end gap-2">
@@ -471,28 +536,53 @@ const bggFieldState = computed(() => {
                   </div>
 
                   <div class="mt-3 flex flex-wrap gap-2">
-                    <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                      👥 {{ bggPreview.min_players }}–{{ bggPreview.max_players }} {{ t('games.players') }}
+                    <span
+                      class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                    >
+                      👥 {{ bggPreview.min_players }}–{{
+                        bggPreview.max_players
+                      }}
+                      {{ t('games.players') }}
                     </span>
-                    <span v-if="bggPreview.year" class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                    <span
+                      v-if="bggPreview.year"
+                      class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                    >
                       📅 {{ bggPreview.year }}
                     </span>
-                    <span v-if="bggPreview.min_age" class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                    <span
+                      v-if="bggPreview.min_age"
+                      class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                    >
                       🔞 {{ t('games.age') }} {{ bggPreview.min_age }}+
                     </span>
                   </div>
 
-                  <p
-                    v-if="bggPreview.description"
-                    class="mt-3 line-clamp-3 text-sm text-gray-500 dark:text-gray-400"
-                  >
-                    {{ bggPreview.description }}
-                  </p>
+                  <template v-if="bggPreview.description">
+                    <p
+                      class="mt-3 whitespace-pre-line text-sm text-gray-500 dark:text-gray-400"
+                      :class="bggDescriptionExpanded ? '' : 'line-clamp-3'"
+                    >
+                      {{ bggPreview.description }}
+                    </p>
+                    <button
+                      type="button"
+                      class="mt-1 cursor-pointer text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400"
+                      @click="bggDescriptionExpanded = !bggDescriptionExpanded"
+                    >
+                      {{ bggDescriptionExpanded ? t('games.showLess') : t('games.showMore') }}
+                    </button>
+                  </template>
                 </div>
 
-                <div class="flex items-center gap-4">
-                  <!-- The button now shows a checking indicator while
-                       the duplicate check runs in the background. -->
+                <div class="flex items-center justify-end gap-4">
+                  <button
+                    type="button"
+                    class="cursor-pointer text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                    @click="resetBgg"
+                  >
+                    {{ t('games.bggTryAnother') }}
+                  </button>
                   <PrimaryButton
                     type="button"
                     :disabled="duplicateChecking"
@@ -500,21 +590,30 @@ const bggFieldState = computed(() => {
                   >
                     <svg
                       v-if="duplicateChecking"
-                      class="-ml-1 mr-2 size-4 animate-spin"
-                      fill="none" viewBox="0 0 24 24"
+                      class="mr-2 -ml-1 size-4 animate-spin"
+                      fill="none"
+                      viewBox="0 0 24 24"
                     >
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      />
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      />
                     </svg>
-                    {{ duplicateChecking ? t('games.duplicateChecking') : t('games.bggConfirm') }}
+                    {{
+                      duplicateChecking
+                        ? t('games.duplicateChecking')
+                        : t('games.bggConfirm')
+                    }}
                   </PrimaryButton>
-                  <button
-                    type="button"
-                    class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-                    @click="resetBgg"
-                  >
-                    {{ t('games.bggTryAnother') }}
-                  </button>
                 </div>
               </template>
             </div>

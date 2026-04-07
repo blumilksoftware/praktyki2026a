@@ -10,9 +10,36 @@ use Illuminate\Support\Collection;
 
 class SeatingService
 {
+    public function arrangeFormatted(Collection $friends, Collection $games): array
+    {
+        $raw = $this->arrange($friends, $games);
+
+        return [
+            "tables" => collect($raw["tables"])->map(fn($table) => [
+                "game" => [
+                    "id" => $table["game"]->id,
+                    "name" => $table["game"]->name,
+                    "min_players" => $table["game"]->min_players,
+                    "max_players" => $table["game"]->max_players,
+                ],
+                "friends" => $table["friends"]->map(fn($friend) => [
+                    "id" => $friend->id,
+                    "first_name" => $friend->first_name,
+                    "last_name" => $friend->last_name,
+                ])->values(),
+                "avg_rating" => $table["avg_rating"],
+            ]),
+            "unseated" => $raw["unseated"]->map(fn($friend) => [
+                "id" => $friend->id,
+                "first_name" => $friend->first_name,
+                "last_name" => $friend->last_name,
+            ])->values(),
+        ];
+    }
+
     public function arrange(Collection $friends, Collection $games): array
     {
-        $friends->load("games");
+        $friends->loadMissing("games");
 
         $unseated = collect();
         $tables = [];
@@ -39,43 +66,47 @@ class SeatingService
 
     private function findBestTable(Collection $remaining, Collection $games): ?array
     {
-        $bestScore = -1;
-        $bestTable = null;
+        $candidates = [];
 
         foreach ($games as $game) {
-            $eligible = $remaining->filter(fn(Friend $friend) => $friend->games->contains("id", $game->id));
-
+            $eligible = $this->eligibleFriends($remaining, $game);
             $count = $eligible->count();
 
             if ($count < $game->min_players) {
                 continue;
             }
 
-            if ($count > $game->max_players) {
-                $eligible = $this->topRatedFriends($eligible, $game, $game->max_players);
-                $count = $eligible->count();
-            }
+            $maxSize = min($count, $game->max_players);
 
-            $avgRating = $this->averageRating($eligible, $game);
-            $coverageWeight = 0.5; 
-            $satisfactionWeight = 0.5;
-            $score = $this->compositeScore($count, $avgRating, $remaining->count(), $coverageWeight, $satisfactionWeight);
+            for ($size = $game->min_players; $size <= $maxSize; $size++) {
+                $selected = $count > $size
+                    ? $this->topRatedFriends($eligible, $game, $size)
+                    : $eligible;
 
-            if ($score > $bestScore) {
-                $bestScore = $score;
-                $bestTable = [
+                $avgRating = $this->averageRating($selected, $game);
+                $coverageWeight = 0.7;
+                $satisfactionWeight = 0.3;
+                $score = $this->compositeScore($selected->count(), $avgRating, $remaining->count(), $coverageWeight, $satisfactionWeight);
+
+                $candidates[] = [
                     "game" => $game,
-                    "friends" => $eligible,
+                    "friends" => $selected,
                     "avg_rating" => round($avgRating, 2),
+                    "score" => $score,
                 ];
             }
         }
 
-        if ($bestTable === null) {
-            $bestTable = $this->forceAssign($remaining, $games);
+        if ($candidates === []) {
+            return $this->forceAssign($remaining, $games);
         }
 
-        return $bestTable;
+        $bestScore = max(array_column($candidates, "score"));
+        $tied = array_values(array_filter($candidates, fn($c) => abs($c["score"] - $bestScore) < 0.0001));
+        $winner = $tied[array_rand($tied)];
+        unset($winner["score"]);
+
+        return $winner;
     }
 
     private function compositeScore(int $count, float $avgRating, int $totalRemaining, float $coverageWeight, float $satisfactionWeight): float
@@ -84,6 +115,17 @@ class SeatingService
         $satisfactionScore = $avgRating / 10.0;
 
         return ($coverageWeight * $coverageScore) + ($satisfactionWeight * $satisfactionScore);
+    }
+
+    private function eligibleFriends(Collection $remaining, Game $game): Collection
+    {
+        return $remaining->filter(function (Friend $friend) use ($game) {
+            if ($friend->games->isEmpty()) {
+                return true;
+            }
+
+            return $friend->games->contains("id", $game->id);
+        });
     }
 
     private function topRatedFriends(Collection $eligible, Game $game, int $limit): Collection
@@ -100,9 +142,7 @@ class SeatingService
         $bestFriends = collect();
 
         foreach ($games as $game) {
-            $eligible = $remaining->filter(
-                fn(Friend $f) => $f->games->contains("id", $game->id),
-            );
+            $eligible = $this->eligibleFriends($remaining, $game);
 
             if ($eligible->count() > $bestFriends->count()) {
                 $bestGame = $game;
@@ -112,6 +152,10 @@ class SeatingService
 
         if ($bestGame === null || $bestFriends->isEmpty()) {
             return null;
+        }
+
+        if ($bestFriends->count() > $bestGame->max_players) {
+            $bestFriends = $this->topRatedFriends($bestFriends, $bestGame, $bestGame->max_players);
         }
 
         return [
@@ -136,6 +180,14 @@ class SeatingService
     {
         $pivot = $friend->games->find($game->id)?->pivot;
 
-        return $pivot?->rating ?? 0;
+        if ($pivot !== null) {
+            return $pivot->rating ?? 0;
+        }
+
+        if ($friend->games->isEmpty()) {
+            return 5;
+        }
+
+        return 0;
     }
 }

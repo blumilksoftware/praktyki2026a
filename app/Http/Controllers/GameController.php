@@ -72,6 +72,15 @@ class GameController extends Controller
         ]);
     }
 
+    public function show(Request $request, Game $game): Response
+    {
+        $this->authorize("view", $game);
+
+        return Inertia::render("Games/Show", [
+            "game" => $game,
+        ]);
+    }
+
     public function create(): Response
     {
         return Inertia::render("Games/Create");
@@ -109,7 +118,7 @@ class GameController extends Controller
         $validated = $request->validate([
             "name" => ["required", "string", "max:255"],
             "min_players" => ["required", "integer", "min:1"],
-            "max_players" => ["required", "integer", "min:1", "gte:min_players"],
+            "max_players" => ["required", "integer", "min:1", "max:100", "gte:min_players"],
             "description" => ["nullable", "string"],
             "year" => ["nullable", "integer", "min:1900", "max:2100"],
             "copies" => ["nullable", "integer", "min:1"],
@@ -157,9 +166,7 @@ class GameController extends Controller
 
     public function edit(Request $request, Game $game): Response
     {
-        if ($game->is_shared || $game->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("update", $game);
 
         return Inertia::render("Games/Edit", [
             "game" => $game,
@@ -168,14 +175,12 @@ class GameController extends Controller
 
     public function update(Request $request, Game $game): RedirectResponse
     {
-        if ($game->is_shared || $game->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("update", $game);
 
         $validated = $request->validate([
             "name" => ["required", "string", "max:255"],
             "min_players" => ["required", "integer", "min:1"],
-            "max_players" => ["required", "integer", "min:1", "gte:min_players"],
+            "max_players" => ["required", "integer", "min:1", "max:100", "gte:min_players"],
             "description" => ["nullable", "string"],
             "year" => ["nullable", "integer", "min:1900", "max:2100"],
             "copies" => ["nullable", "integer", "min:1"],
@@ -188,9 +193,7 @@ class GameController extends Controller
 
     public function destroy(Request $request, Game $game): RedirectResponse
     {
-        if ($game->is_shared || $game->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("delete", $game);
 
         $game->delete();
 

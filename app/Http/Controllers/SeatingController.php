@@ -27,33 +27,15 @@ class SeatingController extends Controller
 
         $friends = Friend::with("games")
             ->whereIn("id", $validated["friend_ids"])
-            ->where("user_id", auth()->id()) // security: only own friends
-            ->get();
-
-        $games = Game::whereIn("id", $validated["game_ids"])
             ->where("user_id", auth()->id())
             ->get();
 
-        $result = $this->seatingService->arrange($friends, $games);
+        $games = Game::visibleTo(auth()->id())
+            ->whereIn("id", $validated["game_ids"])
+            ->get();
 
-        return response()->json([
-            "tables" => collect($result["tables"])->map(fn($t) => [
-                "game" => [
-                    "id" => $t["game"]->id,
-                    "name" => $t["game"]->name,
-                    "min_players" => $t["game"]->min_players,
-                    "max_players" => $t["game"]->max_players,
-                ],
-                "friends" => $t["friends"]->map(fn($f) => [
-                    "id" => $f->id,
-                    "name" => $f->first_name . " " . $f->last_name,
-                ])->values(),
-                "avg_rating" => $t["avg_rating"],
-            ]),
-            "unseated" => $result["unseated"]->map(fn($f) => [
-                "id" => $f->id,
-                "name" => $f->first_name . " " . $f->last_name,
-            ])->values(),
-        ]);
+        return response()->json(
+            $this->seatingService->arrangeFormatted($friends, $games),
+        );
     }
 }

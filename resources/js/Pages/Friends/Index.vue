@@ -4,26 +4,29 @@ import SortableHeader from '@/Components/SortableHeader.vue'
 import { useTranslate } from '@/composables/useTranslate'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import type { PaginatorMeta } from '@/Types/pagination'
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import IconButton from '@/Components/IconButton.vue'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
+import { IconEdit, IconTrash, IconAdjustmentsAlt } from '@tabler/icons-vue'
 
 const { t } = useTranslate()
+const { confirm } = useConfirmDialog()
 
 interface Friend {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string | null;
+  id: number
+  first_name: string
+  last_name: string
+  email: string | null
 }
 
 const props = defineProps<{
   friends: {
-    data: Friend[];
-    meta: PaginatorMeta;
-  };
+    data: Friend[]
+    meta: PaginatorMeta
+  }
 }>()
 
-// ── Search ─────────────────────────────────────────────────────────────────
 const searchQuery = ref(props.friends.meta.search ?? '')
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -58,7 +61,6 @@ function clearSearch(): void {
   )
 }
 
-// ── Sorting ────────────────────────────────────────────────────────────────
 function sort(column: string): void {
   const newDirection =
     props.friends.meta.sort === column && props.friends.meta.direction === 'asc'
@@ -77,14 +79,15 @@ function sort(column: string): void {
   )
 }
 
-// ── Delete ─────────────────────────────────────────────────────────────────
-function deleteFriend(friend: Friend): void {
-  const translations = (usePage().props as Record<string, unknown>)
-    .translations as Record<string, string>
-  const msg = (
-    translations?.['friends.deleteConfirm'] ?? 'Delete "{name}"?'
-  ).replace('{name}', `${friend.first_name} ${friend.last_name}`)
-  if (confirm(msg)) {
+async function deleteFriend(friend: Friend): Promise<void> {
+  const confirmed = await confirm({
+    title: t('friends.deleteTitle'),
+    message: t('friends.deleteConfirm').replace('{name}', `${friend.first_name} ${friend.last_name}`),
+    confirmLabel: t('common.delete'),
+    cancelLabel: t('common.cancel'),
+    variant: 'danger',
+  })
+  if (confirmed) {
     router.delete(route('friends.destroy', friend.id))
   }
 }
@@ -143,7 +146,6 @@ function deleteFriend(friend: Friend): void {
           </div>
 
           <template v-else>
-            <!-- Desktop table -->
             <table class="hidden w-full text-left text-sm sm:table">
               <thead
                 class="border-b bg-gray-50 text-xs text-gray-700 uppercase dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
@@ -195,31 +197,30 @@ function deleteFriend(friend: Friend): void {
                     {{ friend.email || '—' }}
                   </td>
                   <td class="px-6 py-4 text-right">
-                    <Link
-                      :href="route('preferences.show', friend.id)"
-                      class="mr-3 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
-                    >
-                      {{ t('friends.preferences') }}
-                    </Link>
-                    <Link
-                      :href="route('friends.edit', friend.id)"
-                      class="mr-3 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
-                    >
-                      {{ t('friends.edit') }}
-                    </Link>
-                    <button
-                      class="text-red-600 hover:text-red-900 dark:text-red-400"
+                    <IconButton
+                      :icon="IconAdjustmentsAlt"
+                      :label="t('friends.preferences')"
+                      variant="preference"
+                      @click="router.visit(route('preferences.show', friend.id))"
+                    />
+                    <IconButton
+                      :icon="IconEdit"
+                      :label="t('friends.edit')"
+                      variant="default"
+                      @click="router.visit(route('friends.edit', friend.id))"
+                    />
+                    <IconButton
+                      :icon="IconTrash"
+                      :label="t('friends.delete')"
+                      variant="danger"
                       @click="deleteFriend(friend)"
-                    >
-                      {{ t('friends.delete') }}
-                    </button>
+                    />
                   </td>
                 </tr>
               </tbody>
             </table>
 
-            <!-- Mobile cards -->
-            <div class="divide-y sm:hidden dark:divide-gray-700">
+            <div class="divide-y divide-gray-100 sm:hidden dark:divide-gray-700">
               <div
                 v-for="friend in friends.data"
                 :key="friend.id"
@@ -228,36 +229,37 @@ function deleteFriend(friend: Friend): void {
                 <p class="font-medium text-gray-900 dark:text-gray-100">
                   {{ friend.first_name }} {{ friend.last_name }}
                 </p>
-                <p
-                  v-if="friend.email"
-                  class="text-sm text-gray-600 dark:text-gray-400"
-                >
+                <p v-if="friend.email" class="text-sm text-gray-600 dark:text-gray-400">
                   {{ friend.email }}
                 </p>
                 <div class="flex gap-4 pt-1">
-                  <Link
-                    :href="route('preferences.show', friend.id)"
-                    class="text-sm font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
-                  >
-                    {{ t('friends.preferences') }}
-                  </Link>
-                  <Link
-                    :href="route('friends.edit', friend.id)"
-                    class="text-sm font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
-                  >
-                    {{ t('friends.edit') }}
-                  </Link>
-                  <button
-                    class="text-sm font-medium text-red-600 hover:text-red-900 dark:text-red-400"
+                  <IconButton
+                    :icon="IconAdjustmentsAlt"
+                    :label="t('friends.preferences')"
+                    variant="preference"
+                    @click="router.visit(route('preferences.show', friend.id))"
+                  />
+                  <IconButton
+                    :icon="IconEdit"
+                    :label="t('friends.edit')"
+                    variant="default"
+                    @click="router.visit(route('friends.edit', friend.id))"
+                  />
+                  <IconButton
+                    :icon="IconTrash"
+                    :label="t('friends.delete')"
+                    variant="danger"
                     @click="deleteFriend(friend)"
-                  >
-                    {{ t('friends.delete') }}
-                  </button>
+                  />
                 </div>
               </div>
             </div>
 
-            <Pagination :meta="friends.meta" route-name="friends.index" />
+            <Pagination
+              :meta="friends.meta"
+              route-name="friends.index"
+              :extra-params="{ search: searchQuery, ...(friends.meta.sort ? { sort: friends.meta.sort } : {}), ...(friends.meta.direction ? { direction: friends.meta.direction } : {}) }"
+            />
           </template>
         </div>
       </div>

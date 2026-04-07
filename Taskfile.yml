@@ -69,6 +69,15 @@ tasks:
       - task: docker:stop
       - task: docker:run
 
+  docker:run:offline:
+    desc: "Run docker containers without pulling new images (offline-friendly)"
+    aliases: [run-offline]
+    preconditions:
+      - sh: test -f .env
+        msg: "Please create .env file"
+    cmds:
+      - cmd: docker compose up --detach
+
   docker:build:
     desc: "Build docker containers"
     aliases: [build]

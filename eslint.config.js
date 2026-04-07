@@ -1,18 +1,8 @@
-import blumilkDefault from '@blumilksoftware/eslint-config'
-import tsParser from '@typescript-eslint/parser'
-import vueParser from 'vue-eslint-parser'
+import blumilkTypescript from '@blumilksoftware/eslint-config/typescript-config.js'
 
 export default [
-  ...blumilkDefault,
+  ...blumilkTypescript,
   {
-    files: ['**/*.vue'],
-    languageOptions: {
-      parser: vueParser,
-      parserOptions: {
-        parser: tsParser,
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
+    ignores: ['resources/js/ziggy.js', 'resources/js/Types/ziggy.d.ts'],
   },
 ]

@@ -2,12 +2,16 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import Pagination from '@/Components/Pagination.vue'
 import SortableHeader from '@/Components/SortableHeader.vue'
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
 import { ref } from 'vue'
 import type { PaginatorMeta } from '@/Types/pagination'
+import IconButton from '@/Components/IconButton.vue'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
+import { IconEdit, IconTrash } from '@tabler/icons-vue'
 
 const { t } = useTranslate()
+const { confirm } = useConfirmDialog()
 
 interface Game {
   id: number
@@ -28,7 +32,6 @@ const props = defineProps<{
   }
 }>()
 
-// ── Search state ───────────────────────────────────────────────────────────
 const searchQuery = ref(props.games.meta.search ?? '')
 const playersFilter = ref<number | ''>(props.games.meta.players ?? '')
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
@@ -65,7 +68,6 @@ function clearFilters(): void {
 const hasActiveFilters = () =>
   searchQuery.value !== '' || playersFilter.value !== ''
 
-// ── Sorting ────────────────────────────────────────────────────────────────
 function sort(column: string): void {
   const newDirection =
     props.games.meta.sort === column && props.games.meta.direction === 'asc'
@@ -85,7 +87,6 @@ function sort(column: string): void {
   )
 }
 
-// ── Expandable descriptions ────────────────────────────────────────────────
 const expandedDescriptions = ref<Set<number>>(new Set())
 
 function toggleDescription(id: number): void {
@@ -98,13 +99,16 @@ function toggleDescription(id: number): void {
   expandedDescriptions.value = next
 }
 
-// ── Delete ─────────────────────────────────────────────────────────────────
-function deleteGame(game: Game): void {
-  const translations = (usePage().props as Record<string, unknown>)
-    .translations as Record<string, string>
-  const msg = (translations?.['games.deleteConfirm'] ?? 'Delete "{name}"?')
-    .replace('{name}', game.name)
-  if (confirm(msg)) {
+async function deleteGame(game: Game): Promise<void> {
+  const confirmed = await confirm({
+    title: t('games.deleteTitle'),
+    message: t('games.deleteConfirm').replace('{name}', game.name),
+    confirmLabel: t('common.delete'),
+    cancelLabel: t('common.cancel'),
+    variant: 'danger',
+  })
+
+  if (confirmed) {
     router.delete(route('games.destroy', game.id))
   }
 }
@@ -131,7 +135,6 @@ function deleteGame(game: Game): void {
     <div class="py-6 sm:py-12">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-          <!-- Search and filter bar -->
           <div class="flex flex-wrap items-end gap-3 border-b border-gray-200 px-4 py-3 dark:border-gray-700 sm:px-6">
             <div class="flex-1 min-w-45">
               <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -172,7 +175,6 @@ function deleteGame(game: Game): void {
           </div>
 
           <template v-else>
-            <!-- Desktop table -->
             <table class="hidden w-full text-left text-sm sm:table">
               <thead class="border-b bg-gray-50 text-xs uppercase text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
                 <tr>
@@ -220,7 +222,7 @@ function deleteGame(game: Game): void {
                     </div>
                     <template v-if="game.description">
                       <p
-                        class="mt-0.5 max-w-sm text-xs text-gray-400 dark:text-gray-500"
+                        class="mt-0.5 max-w-sm whitespace-pre-line text-xs text-gray-400 dark:text-gray-500"
                         :class="expandedDescriptions.has(game.id) ? '' : 'line-clamp-1'"
                       >
                         {{ game.description }}
@@ -260,25 +262,25 @@ function deleteGame(game: Game): void {
                   </td>
                   <td class="px-6 py-4 text-right">
                     <template v-if="!game.is_shared">
-                      <Link
-                        :href="route('games.edit', game.id)"
-                        class="mr-3 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
-                      >
-                        {{ t('games.edit') }}
-                      </Link>
-                      <button
-                        class="text-red-600 hover:text-red-900 dark:text-red-400"
+                      <IconButton
+                        :icon="IconEdit"
+                        :label="t('games.edit')"
+                        variant="default"
+                        @click="router.visit(route('games.edit', game.id))"
+                      />
+                      <IconButton
+                        :icon="IconTrash"
+                        :label="t('games.delete')"
+                        variant="danger"
                         @click="deleteGame(game)"
-                      >
-                        {{ t('games.delete') }}
-                      </button>
+                      />
                     </template>
+                    <span v-else class="text-gray-400 dark:text-gray-500">—</span>
                   </td>
                 </tr>
               </tbody>
             </table>
 
-            <!-- Mobile cards -->
             <div class="divide-y dark:divide-gray-700 sm:hidden">
               <div
                 v-for="game in games.data"
@@ -305,7 +307,7 @@ function deleteGame(game: Game): void {
                 </div>
                 <template v-if="game.description">
                   <p
-                    class="text-xs text-gray-400 dark:text-gray-500"
+                    class="whitespace-pre-line text-xs text-gray-400 dark:text-gray-500"
                     :class="expandedDescriptions.has(game.id) ? '' : 'line-clamp-2'"
                   >
                     {{ game.description }}
@@ -321,19 +323,22 @@ function deleteGame(game: Game): void {
                   {{ game.min_players }}–{{ game.max_players }} {{ t('games.playersCount') }}
                   · {{ game.copies }}× {{ t('games.copiesCount') }}
                 </p>
-                <div v-if="!game.is_shared" class="flex gap-4 pt-1">
-                  <Link
-                    :href="route('games.edit', game.id)"
-                    class="text-sm font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
-                  >
-                    {{ t('games.edit') }}
-                  </Link>
-                  <button
-                    class="text-sm font-medium text-red-600 hover:text-red-900 dark:text-red-400"
-                    @click="deleteGame(game)"
-                  >
-                    {{ t('games.delete') }}
-                  </button>
+                <div class="flex gap-4 pt-1">
+                  <template v-if="!game.is_shared">
+                    <IconButton
+                      :icon="IconEdit"
+                      :label="t('games.edit')"
+                      variant="default"
+                      @click="router.visit(route('games.edit', game.id))"
+                    />
+                    <IconButton
+                      :icon="IconTrash"
+                      :label="t('games.delete')"
+                      variant="danger"
+                      @click="deleteGame(game)"
+                    />
+                  </template>
+                  <span v-else class="text-gray-400 dark:text-gray-500">—</span>
                 </div>
               </div>
             </div>

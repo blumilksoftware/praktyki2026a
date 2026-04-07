@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Game;
 use App\Models\Session;
+use App\Services\SeatingService;
+use App\Services\SessionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -14,6 +16,11 @@ use Inertia\Response;
 
 class SessionController extends Controller
 {
+    public function __construct(
+        private SeatingService $seatingService,
+        private SessionService $sessionService,
+    ) {}
+
     public function index(Request $request): Response
     {
         $perPage = min(max($request->integer("per_page", 10), 10), 50);
@@ -76,11 +83,9 @@ class SessionController extends Controller
 
     public function create(Request $request): Response
     {
-        $userId = $request->user()->id;
-
         return Inertia::render("Sessions/Create", [
             "friends" => $request->user()->friends()->orderBy("last_name")->get(),
-            "games" => Game::where("user_id", $userId)->orWhere("is_shared", true)->orderBy("name")->get(),
+            "games" => Game::visibleTo($request->user()->id)->orderBy("name")->get(),
         ]);
     }
 
@@ -96,24 +101,14 @@ class SessionController extends Controller
             "game_ids.*" => ["integer", "exists:games,id"],
         ]);
 
-        $session = Session::create([
-            "user_id" => $request->user()->id,
-            "name" => $validated["name"],
-            "date" => $validated["date"],
-            "notes" => $validated["notes"] ?? null,
-        ]);
+        $session = $this->sessionService->create($request->user(), $validated);
 
-        $session->friends()->sync($validated["friend_ids"] ?? []);
-        $session->games()->sync($validated["game_ids"] ?? []);
-
-        return Redirect::route("sessions.index");
+        return Redirect::route("sessions.show", $session);
     }
 
-    public function show(Request $request, Session $session): Response
+    public function show(Session $session): Response
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("view", $session);
 
         $session->load(["friends", "games"]);
 
@@ -124,25 +119,20 @@ class SessionController extends Controller
 
     public function edit(Request $request, Session $session): Response
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("update", $session);
 
-        $userId = $request->user()->id;
         $session->load(["friends", "games"]);
 
         return Inertia::render("Sessions/Edit", [
             "session" => $session,
             "friends" => $request->user()->friends()->orderBy("last_name")->get(),
-            "games" => Game::where("user_id", $userId)->orWhere("is_shared", true)->orderBy("name")->get(),
+            "games" => Game::visibleTo($request->user()->id)->orderBy("name")->get(),
         ]);
     }
 
     public function update(Request $request, Session $session): RedirectResponse
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("update", $session);
 
         $validated = $request->validate([
             "name" => ["required", "string", "max:255"],
@@ -154,26 +144,31 @@ class SessionController extends Controller
             "game_ids.*" => ["integer", "exists:games,id"],
         ]);
 
-        $session->update([
-            "name" => $validated["name"],
-            "date" => $validated["date"],
-            "notes" => $validated["notes"] ?? null,
-        ]);
+        $this->sessionService->update($session, $validated);
 
-        $session->friends()->sync($validated["friend_ids"] ?? []);
-        $session->games()->sync($validated["game_ids"] ?? []);
-
-        return Redirect::route("sessions.index");
+        return Redirect::route("sessions.show", $session);
     }
 
-    public function destroy(Request $request, Session $session): RedirectResponse
+    public function destroy(Session $session): RedirectResponse
     {
-        if ($session->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("delete", $session);
 
         $session->delete();
 
         return Redirect::route("sessions.index");
+    }
+
+    public function arrange(Session $session): Response
+    {
+        $this->authorize("arrange", $session);
+
+        $session->load(["friends.games", "games"]);
+
+        $arrangement = $this->seatingService->arrangeFormatted($session->friends, $session->games);
+
+        return Inertia::render("Sessions/Show", [
+            "session" => $session,
+            "arrangement" => $arrangement,
+        ]);
     }
 }

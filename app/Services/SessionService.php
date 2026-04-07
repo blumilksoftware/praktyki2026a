@@ -1,0 +1,40 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services;
+
+use App\Models\Session;
+use App\Models\User;
+
+class SessionService
+{
+    public function create(User $user, array $data): Session
+    {
+        $session = Session::create([
+            "user_id" => $user->id,
+            "name" => $data["name"],
+            "date" => $data["date"],
+            "notes" => $data["notes"] ?? null,
+        ]);
+
+        $session->friends()->sync($data["friend_ids"] ?? []);
+        $session->games()->sync($data["game_ids"] ?? []);
+
+        return $session;
+    }
+
+    public function update(Session $session, array $data): Session
+    {
+        $session->update([
+            "name" => $data["name"],
+            "date" => $data["date"],
+            "notes" => $data["notes"] ?? null,
+        ]);
+
+        $session->friends()->sync($data["friend_ids"] ?? []);
+        $session->games()->sync($data["game_ids"] ?? []);
+
+        return $session;
+    }
+}

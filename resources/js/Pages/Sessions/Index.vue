@@ -2,12 +2,18 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import Pagination from '@/Components/Pagination.vue'
 import SortableHeader from '@/Components/SortableHeader.vue'
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
 import { ref } from 'vue'
-import type { PaginatorMeta } from '@/types/pagination'
+import type { PaginatorMeta } from '@/Types/pagination'
+import IconButton from '@/Components/IconButton.vue'
+import { useFormatDate } from '@/composables/useFormatDate'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
+import { IconEdit, IconTrash } from '@tabler/icons-vue'
 
 const { t } = useTranslate()
+const { confirm } = useConfirmDialog()
+const { formatDate } = useFormatDate()
 
 interface Friend {
   id: number
@@ -36,7 +42,6 @@ const props = defineProps<{
   }
 }>()
 
-// ── Search and date filter state ───────────────────────────────────────────
 const searchQuery = ref(props.sessions.meta.search ?? '')
 const dateFrom = ref(props.sessions.meta.date_from ?? '')
 const dateTo = ref(props.sessions.meta.date_to ?? '')
@@ -76,10 +81,7 @@ function clearFilters(): void {
 const hasActiveFilters = () =>
   searchQuery.value !== '' || dateFrom.value !== '' || dateTo.value !== ''
 
-// ── Sorting ────────────────────────────────────────────────────────────────
 function sort(column: string): void {
-  // Sessions default to descending, so flipping the active column goes
-  // from desc → asc, unlike Games which goes asc → desc.
   const newDirection =
     props.sessions.meta.sort === column && props.sessions.meta.direction === 'desc'
       ? 'asc'
@@ -99,14 +101,16 @@ function sort(column: string): void {
   )
 }
 
-// ── Delete ─────────────────────────────────────────────────────────────────
-function deleteSession(session: Session): void {
-  const translations = (usePage().props as Record<string, unknown>)
-    .translations as Record<string, string>
-  const msg = (
-    translations?.['sessions.deleteConfirm'] ?? 'Delete "{name}"?'
-  ).replace('{name}', session.name)
-  if (confirm(msg)) {
+async function deleteSession(session: Session): Promise<void> {
+  const confirmed = await confirm({
+    title: t('sessions.deleteTitle'),
+    message: t('sessions.deleteConfirm').replace('{name}', session.name),
+    confirmLabel: t('common.delete'),
+    cancelLabel: t('common.cancel'),
+    variant: 'danger',
+  })
+
+  if (confirmed) {
     router.delete(route('sessions.destroy', session.id))
   }
 }
@@ -118,7 +122,7 @@ function deleteSession(session: Session): void {
   <AuthenticatedLayout>
     <template #header>
       <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+        <h2 class="text-xl leading-tight font-semibold text-gray-800 dark:text-gray-200">
           {{ t('sessions.title') }}
         </h2>
         <Link
@@ -133,8 +137,6 @@ function deleteSession(session: Session): void {
     <div class="py-6 sm:py-12">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-
-          <!-- Search and date filter bar -->
           <div class="flex flex-wrap items-end gap-3 border-b border-gray-200 px-4 py-3 dark:border-gray-700 sm:px-6">
             <div class="flex-1 min-w-[180px]">
               <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -144,7 +146,7 @@ function deleteSession(session: Session): void {
                 v-model="searchQuery"
                 type="search"
                 :placeholder="t('sessions.searchPlaceholder')"
-                class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder-gray-400"
+                class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:placeholder:text-gray-400"
                 @input="navigate"
               >
             </div>
@@ -187,7 +189,6 @@ function deleteSession(session: Session): void {
           </div>
 
           <template v-else>
-            <!-- Desktop table -->
             <table class="hidden w-full text-left text-sm sm:table">
               <thead class="border-b bg-gray-50 text-xs uppercase text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
                 <tr>
@@ -214,18 +215,18 @@ function deleteSession(session: Session): void {
                 <tr
                   v-for="session in sessions.data"
                   :key="session.id"
-                  class="border-b dark:border-gray-700"
+                  class="border-b border-gray-100 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
                 >
                   <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
                     <Link
                       :href="route('sessions.show', session.id)"
-                      class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
+                      class="text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
                     >
                       {{ session.name }}
                     </Link>
                   </td>
                   <td class="px-6 py-4 text-gray-600 dark:text-gray-400">
-                    {{ session.date }}
+                    {{ formatDate(session.date) }}
                   </td>
                   <td class="px-6 py-4 text-gray-600 dark:text-gray-400">
                     {{ session.friends.length }}
@@ -234,24 +235,23 @@ function deleteSession(session: Session): void {
                     {{ session.games.length }}
                   </td>
                   <td class="px-6 py-4 text-right">
-                    <Link
-                      :href="route('sessions.edit', session.id)"
-                      class="mr-3 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
-                    >
-                      {{ t('sessions.edit') }}
-                    </Link>
-                    <button
-                      class="text-red-600 hover:text-red-900 dark:text-red-400"
+                    <IconButton
+                      :icon="IconEdit"
+                      :label="t('sessions.edit')"
+                      variant="default"
+                      @click="router.visit(route('sessions.edit', session.id))"
+                    />
+                    <IconButton
+                      :icon="IconTrash"
+                      :label="t('sessions.delete')"
+                      variant="danger"
                       @click="deleteSession(session)"
-                    >
-                      {{ t('sessions.delete') }}
-                    </button>
+                    />
                   </td>
                 </tr>
               </tbody>
             </table>
 
-            <!-- Mobile cards -->
             <div class="divide-y dark:divide-gray-700 sm:hidden">
               <div
                 v-for="session in sessions.data"
@@ -261,12 +261,12 @@ function deleteSession(session: Session): void {
                 <div class="flex items-center justify-between">
                   <Link
                     :href="route('sessions.show', session.id)"
-                    class="font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
+                    class="font-medium text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
                   >
                     {{ session.name }}
                   </Link>
                   <span class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ session.date }}
+                    {{ formatDate(session.date) }}
                   </span>
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -274,18 +274,18 @@ function deleteSession(session: Session): void {
                   {{ session.games.length }} {{ t('sessions.gamesCount') }}
                 </p>
                 <div class="flex gap-4 pt-1">
-                  <Link
-                    :href="route('sessions.edit', session.id)"
-                    class="text-sm font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400"
-                  >
-                    {{ t('sessions.edit') }}
-                  </Link>
-                  <button
-                    class="text-sm font-medium text-red-600 hover:text-red-900 dark:text-red-400"
+                  <IconButton
+                    :icon="IconEdit"
+                    :label="t('sessions.edit')"
+                    variant="default"
+                    @click="router.visit(route('sessions.edit', session.id))"
+                  />
+                  <IconButton
+                    :icon="IconTrash"
+                    :label="t('sessions.delete')"
+                    variant="danger"
                     @click="deleteSession(session)"
-                  >
-                    {{ t('sessions.delete') }}
-                  </button>
+                  />
                 </div>
               </div>
             </div>

@@ -4,8 +4,9 @@ import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
+import { useCancelWithWarning } from '@/composables/useCancelWithWarning'
 
 const { t } = useTranslate()
 
@@ -31,6 +32,8 @@ const form = useForm({
   year: props.game.year,
   copies: props.game.copies,
 })
+
+const { cancel } = useCancelWithWarning(form, route('games.index'), t)
 
 function submit(): void {
   form.put(route('games.update', props.game.id))
@@ -125,16 +128,17 @@ function submit(): void {
               <InputError :message="form.errors.description" class="mt-2" />
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center justify-end gap-4">
+              <button
+                type="button"
+                class="cursor-pointer text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                @click="cancel"
+              >
+                {{ t('games.cancel') }}
+              </button>
               <PrimaryButton :disabled="form.processing">
                 {{ t('games.save') }}
               </PrimaryButton>
-              <Link
-                :href="route('games.index')"
-                class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
-              >
-                {{ t('games.cancel') }}
-              </Link>
             </div>
           </form>
         </div>

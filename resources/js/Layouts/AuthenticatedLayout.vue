@@ -8,6 +8,7 @@ import NavLink from '@/Components/NavLink.vue'
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue'
 import { Link } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
+import ConfirmDialog from '@/Components/ConfirmDialog.vue'
 
 const { t } = useTranslate()
 const showingNavigationDropdown = ref(false)
@@ -24,9 +25,7 @@ const showingNavigationDropdown = ref(false)
             <div class="flex">
               <div class="flex shrink-0 items-center">
                 <Link :href="route('dashboard')">
-                  <ApplicationLogo
-                    class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200"
-                  />
+                  <ApplicationLogo />
                 </Link>
               </div>
 
@@ -230,4 +229,5 @@ const showingNavigationDropdown = ref(false)
       </main>
     </div>
   </div>
+  <ConfirmDialog />
 </template>

@@ -29,8 +29,7 @@ Route::get("/dashboard", function () {
 })->middleware(["auth", "verified"])->name("dashboard");
 
 Route::resource("/games", GameController::class)
-    ->middleware(["auth", "verified"])
-    ->except(["show"]);
+    ->middleware(["auth", "verified"]);
 
 Route::post("/games/import-from-bgg", [GameController::class, "importFromBgg"])
     ->name("games.importFromBgg")
@@ -45,6 +44,10 @@ Route::post("/games/{game}/increment-copies", [GameController::class, "increment
 Route::resource("/friends", FriendController::class)->middleware(["auth", "verified"])->except(["show"]);
 
 Route::resource("/sessions", SessionController::class)->middleware(["auth", "verified"]);
+
+Route::post("/sessions/{session}/arrange", [SessionController::class, "arrange"])
+    ->middleware(["auth", "verified"])
+    ->name("sessions.arrange");
 
 Route::get("/friends/{friend}/preferences", [PreferenceController::class, "show"])->middleware(["auth", "verified"])->name("preferences.show");
 

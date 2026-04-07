@@ -10,12 +10,23 @@ task vite
 ```
 Application will be running under [localhost:63851](localhost:63851) and [http://boardgameapp.blumilk.localhost/](http://boardgameapp.blumilk.localhost/) in Blumilk traefik environment. If you don't have a Blumilk traefik environment set up yet, follow the instructions from this [repository](https://github.com/blumilksoftware/environment).
 
+#### After initialization
+```
+task run
+task vite
+```
+You also have to set up https://github.com/blumilksoftware/environment in another directory and run it.
+
+#### After initialization (offline)
+```
+task run-offline
+task vite
+```
 #### Commands
 Before running any of the commands below, you must run shell:
 ```
 task shell
 ```
-
 | Command                 | Task                                        |
 |:------------------------|:--------------------------------------------|
 | `composer <command>`    | Composer                                    |
@@ -33,8 +44,8 @@ task shell
 
 #### Containers
 
-| service    | container name            | default host port               |
-|:-----------|:--------------------------|:--------------------------------|
+| service    | container name             | default host port               |
+|:-----------|:---------------------------|:--------------------------------|
 | `app`      | `boardgameapp-app-dev`     | [63851](http://localhost:63851) |
 | `database` | `boardgameapp-db-dev`      | 63853                           |
 | `redis`    | `boardgameapp-redis-dev`   | 63852                           |
