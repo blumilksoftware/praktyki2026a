@@ -11,6 +11,9 @@ on:
       - 'phpunit.xml'
       - '.env.ci'
 
+permissions:
+  contents: read
+
 jobs:
   test-and-lint-php:
     name: Test & lint PHP codebase
