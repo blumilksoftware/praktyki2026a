@@ -315,7 +315,7 @@ const bggFieldState = computed(() => {
                     :value="t('games.minPlayers')"
                   />
                   <TextInput
-                    id="min_players"
+                    id="min_players"oo
                     v-model.number="form.min_players"
                     type="number"
                     min="1"

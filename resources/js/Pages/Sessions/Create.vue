@@ -80,6 +80,7 @@ function submit() {
                 v-model="form.name"
                 type="text"
                 class="mt-1 block w-full"
+                :invalid="!!form.errors.name"
                 autofocus
               />
               <InputError :message="form.errors.name" class="mt-2" />
@@ -91,7 +92,9 @@ function submit() {
                 id="date"
                 v-model="form.date"
                 type="date"
+                lang="pl"
                 class="mt-1 block w-full"
+                :invalid="!!form.errors.date"
               />
               <InputError :message="form.errors.date" class="mt-2" />
             </div>
@@ -102,7 +105,8 @@ function submit() {
                 id="notes"
                 v-model="form.notes"
                 rows="3"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                class="mt-1 block w-full rounded-md shadow-sm focus:ring-indigo-500 dark:bg-gray-900 dark:text-gray-300"
+                :class="form.errors.notes ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-indigo-500 dark:border-gray-700'"
               />
               <InputError :message="form.errors.notes" class="mt-2" />
             </div>

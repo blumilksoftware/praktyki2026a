@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Models\User;
 
-// ── Happy paths ───────────────────────────────────────────────────────────
-
 test("games create page is displayed", function (): void {
     $user = User::factory()->create();
 
@@ -45,8 +43,6 @@ test("store game accepts max_players of exactly 100", function (): void {
         "max_players" => 100,
     ]);
 });
-
-// ── Sad paths ─────────────────────────────────────────────────────────────
 
 test("store game requires auth", function (): void {
     $this->post("/games", [

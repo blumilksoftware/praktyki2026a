@@ -7,6 +7,9 @@ namespace App\Http\Controllers;
 use App\Models\Game;
 use App\Services\BoardGameGeekService;
 use Illuminate\Http\JsonResponse;
+use App\Actions\CreateGameAction;
+use App\Actions\UpdateGameAction;
+use App\Http\Requests\GameRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -72,7 +75,7 @@ class GameController extends Controller
         ]);
     }
 
-    public function show(Request $request, Game $game): Response
+    public function show(Game $game): Response
     {
         $this->authorize("view", $game);
 
@@ -113,25 +116,9 @@ class GameController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(GameRequest $request, CreateGameAction $action): RedirectResponse
     {
-        $validated = $request->validate([
-            "name" => ["required", "string", "max:255"],
-            "min_players" => ["required", "integer", "min:1"],
-            "max_players" => ["required", "integer", "min:1", "max:100", "gte:min_players"],
-            "description" => ["nullable", "string"],
-            "year" => ["nullable", "integer", "min:1900", "max:2100"],
-            "copies" => ["nullable", "integer", "min:1", "max:100"],
-            "bgg_id" => ["nullable", "integer"],
-            "bgg_url" => ["nullable", "string", "url", "max:500"],
-            "min_age" => ["nullable", "integer", "min:0"],
-        ]);
-
-        Game::create([
-            ...$validated,
-            "copies" => $validated["copies"] ?? 1,
-            "user_id" => $request->user()->id,
-        ]);
+        $action->execute($request->user(), $request->validated());
 
         return Redirect::route("games.index");
     }
@@ -166,7 +153,7 @@ class GameController extends Controller
         }
     }
 
-    public function edit(Request $request, Game $game): Response
+    public function edit(Game $game): Response
     {
         $this->authorize("update", $game);
 
@@ -175,25 +162,16 @@ class GameController extends Controller
         ]);
     }
 
-    public function update(Request $request, Game $game): RedirectResponse
+    public function update(GameRequest $request, Game $game, UpdateGameAction $action): RedirectResponse
     {
         $this->authorize("update", $game);
 
-        $validated = $request->validate([
-            "name" => ["required", "string", "max:255"],
-            "min_players" => ["required", "integer", "min:1"],
-            "max_players" => ["required", "integer", "min:1", "max:100", "gte:min_players"],
-            "description" => ["nullable", "string"],
-            "year" => ["nullable", "integer", "min:1900", "max:2100"],
-            "copies" => ["nullable", "integer", "min:1", "max:100"],
-        ]);
-
-        $game->update($validated);
+        $action->execute($game, $request->validated());
 
         return Redirect::route("games.index");
     }
 
-    public function destroy(Request $request, Game $game): RedirectResponse
+    public function destroy(Game $game): RedirectResponse
     {
         $this->authorize("delete", $game);
 

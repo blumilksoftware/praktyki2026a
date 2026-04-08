@@ -1,13 +1,13 @@
 <script setup lang="ts">
+import { Head, Link } from '@inertiajs/vue3'
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue'
 import { useTranslate } from '@/composables/useTranslate'
-import { Head, Link } from '@inertiajs/vue3'
 
 const { t } = useTranslate()
 
 defineProps<{
-  canLogin: boolean
-  canRegister: boolean
+    canLogin: boolean
+    canRegister: boolean
 }>()
 </script>
 

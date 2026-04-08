@@ -49,6 +49,7 @@ function submit() {
                   v-model="form.first_name"
                   type="text"
                   class="mt-1 block w-full"
+                  :invalid="!!form.errors.first_name"
                   autofocus
                 />
                 <InputError :message="form.errors.first_name" class="mt-2" />
@@ -61,6 +62,7 @@ function submit() {
                   v-model="form.last_name"
                   type="text"
                   class="mt-1 block w-full"
+                  :invalid="!!form.errors.last_name"
                 />
                 <InputError :message="form.errors.last_name" class="mt-2" />
               </div>
@@ -73,6 +75,7 @@ function submit() {
                 v-model="form.email"
                 type="email"
                 class="mt-1 block w-full"
+                :invalid="!!form.errors.email"
               />
               <InputError :message="form.errors.email" class="mt-2" />
             </div>

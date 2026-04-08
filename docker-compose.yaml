@@ -51,7 +51,6 @@ services:
         ports:
             - ${DOCKER_APP_HOST_PORT:-63851}:80
             - ${DOCKER_VITE_HOST_PORT:-5173}:5173
-            - "5173:5173"
 
         networks:
             - boardgameapp-dev

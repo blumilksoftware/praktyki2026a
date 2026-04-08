@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\CreateFriendAction;
+use App\Actions\UpdateFriendAction;
+use App\Http\Requests\FriendRequest;
 use App\Models\Friend;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,51 +18,12 @@ class FriendController extends Controller
 {
     public function index(Request $request): Response
     {
-        $perPage = min(max($request->integer("per_page", 10), 10), 50);
-
-        $allowedSorts = ["last_name", "first_name", "email"];
-        $sortColumn = in_array($request->input("sort"), $allowedSorts, true)
-            ? $request->input("sort")
-            : "last_name";
-        $sortDirection = $request->input("direction") === "desc" ? "desc" : "asc";
-
-        $search = trim((string)$request->input("search", ""));
-
-        $query = Friend::where("user_id", $request->user()->id);
-
-        if ($search !== "") {
-            $query->where(function ($q) use ($search): void {
-                $q->where("first_name", "ilike", "%{$search}%")
-                    ->orWhere("last_name", "ilike", "%{$search}%")
-                    ->orWhere("email", "ilike", "%{$search}%");
-            });
-        }
-
-        $query->orderBy($sortColumn, $sortDirection);
-
-        if ($sortColumn === "last_name") {
-            $query->orderBy("first_name", $sortDirection);
-        } elseif ($sortColumn === "first_name") {
-            $query->orderBy("last_name", $sortDirection);
-        }
-
-        $friends = $query->paginate($perPage)->withQueryString();
+        $friends = Friend::where("user_id", $request->user()->id)
+            ->orderBy("last_name")
+            ->get();
 
         return Inertia::render("Friends/Index", [
-            "friends" => [
-                "data" => $friends->items(),
-                "meta" => [
-                    "current_page" => $friends->currentPage(),
-                    "last_page" => $friends->lastPage(),
-                    "per_page" => $friends->perPage(),
-                    "total" => $friends->total(),
-                    "from" => $friends->firstItem(),
-                    "to" => $friends->lastItem(),
-                    "sort" => $sortColumn,
-                    "direction" => $sortDirection,
-                    "search" => $search,
-                ],
-            ],
+            "friends" => $friends,
         ]);
     }
 
@@ -68,18 +32,9 @@ class FriendController extends Controller
         return Inertia::render("Friends/Create");
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(FriendRequest $request, CreateFriendAction $action): RedirectResponse
     {
-        $validated = $request->validate([
-            "first_name" => ["required", "string", "max:255"],
-            "last_name" => ["required", "string", "max:255"],
-            "email" => ["nullable", "email", "max:255"],
-        ]);
-
-        Friend::create([
-            ...$validated,
-            "user_id" => $request->user()->id,
-        ]);
+        $action->execute($request->user(), $request->validated());
 
         return Redirect::route("friends.index");
     }
@@ -93,17 +48,11 @@ class FriendController extends Controller
         ]);
     }
 
-    public function update(Request $request, Friend $friend): RedirectResponse
+    public function update(FriendRequest $request, Friend $friend, UpdateFriendAction $action): RedirectResponse
     {
         $this->authorize("update", $friend);
 
-        $validated = $request->validate([
-            "first_name" => ["required", "string", "max:255"],
-            "last_name" => ["required", "string", "max:255"],
-            "email" => ["nullable", "email", "max:255"],
-        ]);
-
-        $friend->update($validated);
+        $action->execute($friend, $request->validated());
 
         return Redirect::route("friends.index");
     }

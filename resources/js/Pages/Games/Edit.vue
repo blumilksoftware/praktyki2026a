@@ -61,6 +61,7 @@ function submit(): void {
                 v-model="form.name"
                 type="text"
                 class="mt-1 block w-full"
+                :invalid="!!form.errors.name"
                 autofocus
               />
               <InputError :message="form.errors.name" class="mt-2" />
@@ -75,6 +76,7 @@ function submit(): void {
                   type="number"
                   min="1"
                   class="mt-1 block w-full"
+                  :invalid="!!form.errors.min_players"
                 />
                 <InputError :message="form.errors.min_players" class="mt-2" />
               </div>
@@ -86,6 +88,7 @@ function submit(): void {
                   type="number"
                   min="1"
                   class="mt-1 block w-full"
+                  :invalid="!!form.errors.max_players"
                 />
                 <InputError :message="form.errors.max_players" class="mt-2" />
               </div>
