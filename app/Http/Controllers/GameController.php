@@ -121,7 +121,7 @@ class GameController extends Controller
             "max_players" => ["required", "integer", "min:1", "max:100", "gte:min_players"],
             "description" => ["nullable", "string"],
             "year" => ["nullable", "integer", "min:1900", "max:2100"],
-            "copies" => ["nullable", "integer", "min:1"],
+            "copies" => ["nullable", "integer", "min:1", "max:100"],
             "bgg_id" => ["nullable", "integer"],
             "bgg_url" => ["nullable", "string", "url", "max:500"],
             "min_age" => ["nullable", "integer", "min:0"],
@@ -142,7 +142,9 @@ class GameController extends Controller
             abort(403);
         }
 
-        $game->increment("copies");
+        if ($game->copies < 100) {
+            $game->increment("copies");
+        }
 
         return Redirect::route("games.index");
     }
@@ -183,7 +185,7 @@ class GameController extends Controller
             "max_players" => ["required", "integer", "min:1", "max:100", "gte:min_players"],
             "description" => ["nullable", "string"],
             "year" => ["nullable", "integer", "min:1900", "max:2100"],
-            "copies" => ["nullable", "integer", "min:1"],
+            "copies" => ["nullable", "integer", "min:1", "max:100"],
         ]);
 
         $game->update($validated);

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 
+import { IconArrowsUpDown, IconArrowDown, IconArrowUp } from '@tabler/icons-vue'
+
 defineProps<{
   column: string
   label: string
@@ -20,9 +22,12 @@ defineEmits<{
     <span class="flex items-center gap-1">
       {{ label }}
       <span v-if="currentSort === column" class="text-indigo-500">
-        {{ currentDirection === 'asc' ? '↑' : '↓' }}
+        <IconArrowUp v-if="currentDirection === 'asc'" />
+        <IconArrowDown v-else />
       </span>
-      <span v-else class="text-gray-300 dark:text-gray-600">↕</span>
+      <span v-else class="text-gray-300 dark:text-gray-600">
+        <IconArrowsUpDown />
+      </span>
     </span>
   </th>
 </template>

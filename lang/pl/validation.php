@@ -163,5 +163,11 @@ return [
         "max_players" => "maksymalna liczba graczy",
         "first_name" => "imię",
         "last_name" => "nazwisko",
+        "year" => "rok",
+        "copies" => "liczba kopii",
+        "url" => "adres URL",
+        "min_age" => "minimalny wiek",
+        "bgg_id" => "identyfikator BGG",
+        "bgg_url" => "adres BGG",
     ],
 ];

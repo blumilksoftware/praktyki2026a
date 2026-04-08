@@ -73,6 +73,7 @@ const form = useForm({
   min_players: 2,
   max_players: 4,
   description: '',
+  year: '',
   copies: 1,
 })
 
@@ -258,7 +259,7 @@ const bggFieldState = computed(() => {
           <div class="flex border-b border-gray-200 dark:border-gray-700">
             <button
               type="button"
-              class="flex-1 border-r border-gray-200 px-4 py-3 text-sm font-medium transition-colors focus:outline-none dark:border-gray-700"
+              class="flex-1 border-r border-r-gray-200 px-4 py-3 text-sm font-medium transition-colors focus:outline-none dark:border-r-gray-700"
               :class="
                 mode === 'manual'
                   ? 'cursor-default border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400'
@@ -288,6 +289,7 @@ const bggFieldState = computed(() => {
             <form
               v-if="mode === 'manual'"
               class="space-y-6"
+              novalidate
               @submit.prevent="submit"
             >
               <div>
@@ -336,21 +338,37 @@ const bggFieldState = computed(() => {
                   <InputError :message="form.errors.max_players" class="mt-2" />
                 </div>
               </div>
-
-              <div>
-                <InputLabel for="copies" :value="t('games.copies')" />
-                <TextInput
-                  id="copies"
-                  v-model.number="form.copies"
-                  type="number"
-                  min="1"
-                  class="mt-1 block w-full"
-                />
-                <InputError :message="form.errors.copies" class="mt-2" />
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <InputLabel for="year" :value="t('games.year')" />
+                  <TextInput
+                    id="year"
+                    v-model.number="form.year"
+                    type="number"
+                    min="1900"
+                    max="2100"
+                    class="mt-1 block w-full"
+                  />
+                  <InputError :message="form.errors.year" class="mt-2" />
+                </div>
+                <div>
+                  <InputLabel for="copies" :value="t('games.copies')" />
+                  <TextInput
+                    id="copies"
+                    v-model.number="form.copies"
+                    type="number"
+                    min="1"
+                    class="mt-1 block w-full"
+                  />
+                  <InputError :message="form.errors.copies" class="mt-2" />
+                </div>
               </div>
 
               <div>
-                <InputLabel for="description" :value="t('games.description')" />
+                <InputLabel
+                  for="description"
+                  :value="t('games.description')"
+                />
                 <textarea
                   id="description"
                   v-model="form.description"
@@ -560,7 +578,7 @@ const bggFieldState = computed(() => {
 
                   <template v-if="bggPreview.description">
                     <p
-                      class="mt-3 whitespace-pre-line text-sm text-gray-500 dark:text-gray-400"
+                      class="mt-3 text-sm whitespace-pre-line text-gray-500 dark:text-gray-400"
                       :class="bggDescriptionExpanded ? '' : 'line-clamp-3'"
                     >
                       {{ bggPreview.description }}
@@ -570,7 +588,11 @@ const bggFieldState = computed(() => {
                       class="mt-1 cursor-pointer text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400"
                       @click="bggDescriptionExpanded = !bggDescriptionExpanded"
                     >
-                      {{ bggDescriptionExpanded ? t('games.showLess') : t('games.showMore') }}
+                      {{
+                        bggDescriptionExpanded
+                          ? t('games.showLess')
+                          : t('games.showMore')
+                      }}
                     </button>
                   </template>
                 </div>

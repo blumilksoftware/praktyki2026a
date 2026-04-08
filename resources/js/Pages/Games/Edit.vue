@@ -53,7 +53,7 @@ function submit(): void {
     <div class="py-6 sm:py-12">
       <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
         <div class="bg-white p-4 shadow-sm sm:rounded-lg sm:p-6 dark:bg-gray-800">
-          <form class="space-y-6" @submit.prevent="submit">
+          <form class="space-y-6" novalidate @submit.prevent="submit">
             <div>
               <InputLabel for="name" :value="t('games.name')" />
               <TextInput
