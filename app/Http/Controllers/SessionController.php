@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Game;
-use App\Models\Session;
-use App\Services\SeatingService;
-use App\Services\SessionService;
 use App\Actions\CreateSessionAction;
 use App\Actions\UpdateSessionAction;
 use App\Http\Requests\SessionRequest;
+use App\Models\Game;
+use App\Models\Session;
+use App\Services\SeatingService;
+use App\Traits\BuildsPaginationMeta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -19,9 +19,10 @@ use Inertia\Response;
 
 class SessionController extends Controller
 {
+    use BuildsPaginationMeta;
+
     public function __construct(
         private SeatingService $seatingService,
-        private SessionService $sessionService,
     ) {}
 
     public function index(Request $request): Response
@@ -67,19 +68,13 @@ class SessionController extends Controller
         return Inertia::render("Sessions/Index", [
             "sessions" => [
                 "data" => $sessions->items(),
-                "meta" => [
-                    "current_page" => $sessions->currentPage(),
-                    "last_page" => $sessions->lastPage(),
-                    "per_page" => $sessions->perPage(),
-                    "total" => $sessions->total(),
-                    "from" => $sessions->firstItem(),
-                    "to" => $sessions->lastItem(),
+                "meta" => $this->paginationMeta($sessions, [
                     "sort" => $sortColumn,
                     "direction" => $sortDirection,
                     "search" => $search,
                     "date_from" => $dateFrom,
                     "date_to" => $dateTo,
-                ],
+                ]),
             ],
         ]);
     }

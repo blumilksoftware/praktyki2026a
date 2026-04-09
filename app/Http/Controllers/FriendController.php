@@ -8,6 +8,8 @@ use App\Actions\CreateFriendAction;
 use App\Actions\UpdateFriendAction;
 use App\Http\Requests\FriendRequest;
 use App\Models\Friend;
+use App\Services\FriendService;
+use App\Traits\BuildsPaginationMeta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -16,14 +18,22 @@ use Inertia\Response;
 
 class FriendController extends Controller
 {
+    use BuildsPaginationMeta;
+
+    public function __construct(
+        private FriendService $friendService,
+    ) {}
+
     public function index(Request $request): Response
     {
-        $friends = Friend::where("user_id", $request->user()->id)
-            ->orderBy("last_name")
-            ->get();
+        ["paginator" => $paginator, "sort" => $sort, "direction" => $direction, "search" => $search]
+            = $this->friendService->paginatedIndex($request, $request->user()->id);
 
         return Inertia::render("Friends/Index", [
-            "friends" => $friends,
+            "friends" => [
+                "data" => $paginator->items(),
+                "meta" => $this->paginationMeta($paginator, compact("sort", "direction", "search")),
+            ],
         ]);
     }
 

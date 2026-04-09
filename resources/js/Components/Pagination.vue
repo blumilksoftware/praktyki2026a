@@ -124,10 +124,10 @@ function pageWindow(): Array<number | '...'> {
         </span>
         <button
           v-else
-          class="min-w-8 cursor-pointer rounded px-2 py-1 text-sm transition-colors"
+          class="min-w-8 rounded px-2 py-1 text-sm transition-colors"
           :class="page === meta.current_page
-            ? 'bg-indigo-600 text-white font-medium'
-            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'"
+            ? 'cursor-default bg-indigo-600 text-white font-medium'
+            : 'cursor-pointer text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'"
           @click="goToPage(page)"
         >
           {{ page }}

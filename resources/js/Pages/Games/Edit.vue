@@ -101,9 +101,10 @@ function submit(): void {
                   id="year"
                   v-model.number="form.year"
                   type="number"
-                  min="1900"
-                  max="2100"
+                  min="1800"
+                  :max="new Date().getFullYear()"
                   class="mt-1 block w-full"
+                  :invalid="!!form.errors.year"
                 />
                 <InputError :message="form.errors.year" class="mt-2" />
               </div>
@@ -115,6 +116,7 @@ function submit(): void {
                   type="number"
                   min="1"
                   class="mt-1 block w-full"
+                  :invalid="!!form.errors.copies"
                 />
                 <InputError :message="form.errors.copies" class="mt-2" />
               </div>

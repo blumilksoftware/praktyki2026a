@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\SyncPreferencesAction;
+use App\Http\Requests\PreferenceRequest;
 use App\Models\Friend;
 use App\Models\Game;
 use App\Services\PreferenceService;
-use App\Actions\SyncPreferencesAction;
-use App\Http\Requests\PreferenceRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;

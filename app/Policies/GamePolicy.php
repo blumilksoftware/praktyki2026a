@@ -23,4 +23,9 @@ class GamePolicy
     {
         return !$game->is_shared && $game->user_id === $user->id;
     }
+
+    public function incrementCopies(User $user, Game $game): bool
+    {
+        return !$game->is_shared && $game->user_id === $user->id;
+    }
 }

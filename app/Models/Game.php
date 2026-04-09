@@ -25,6 +25,14 @@ class Game extends Model
         "copies",
     ];
 
+    public static function findDuplicate(int $userId, string $name): ?self
+    {
+        return static::query()
+            ->visibleTo($userId)
+            ->whereRaw("LOWER(name) = LOWER(?)", [$name])
+            ->first();
+    }
+
     public function scopeVisibleTo(Builder $query, int $userId): Builder
     {
         return $query->where("user_id", $userId)->orWhere("is_shared", true);

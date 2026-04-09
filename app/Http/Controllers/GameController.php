@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Game;
-use App\Services\BoardGameGeekService;
-use Illuminate\Http\JsonResponse;
 use App\Actions\CreateGameAction;
+use App\Actions\IncrementGameCopiesAction;
 use App\Actions\UpdateGameAction;
 use App\Http\Requests\GameRequest;
+use App\Models\Game;
+use App\Services\BoardGameGeekService;
+use App\Traits\BuildsPaginationMeta;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -20,6 +22,8 @@ use RuntimeException;
 
 class GameController extends Controller
 {
+    use BuildsPaginationMeta;
+
     public function index(Request $request): Response
     {
         $perPage = min(max($request->integer("per_page", 10), 10), 50);
@@ -34,10 +38,7 @@ class GameController extends Controller
         $players = $request->integer("players", 0);
         $players = $players > 0 ? $players : null;
 
-        $query = Game::where(function ($q) use ($request): void {
-            $q->where("user_id", $request->user()->id)
-                ->orWhere("is_shared", true);
-        });
+        $query = Game::query()->visibleTo($request->user()->id);
 
         if ($search !== "") {
             $query->where(function ($q) use ($search): void {
@@ -59,18 +60,12 @@ class GameController extends Controller
         return Inertia::render("Games/Index", [
             "games" => [
                 "data" => $games->items(),
-                "meta" => [
-                    "current_page" => $games->currentPage(),
-                    "last_page" => $games->lastPage(),
-                    "per_page" => $games->perPage(),
-                    "total" => $games->total(),
-                    "from" => $games->firstItem(),
-                    "to" => $games->lastItem(),
+                "meta" => $this->paginationMeta($games, [
                     "sort" => $sortColumn,
                     "direction" => $sortDirection,
                     "search" => $search,
                     "players" => $players,
-                ],
+                ]),
             ],
         ]);
     }
@@ -95,12 +90,7 @@ class GameController extends Controller
             "name" => ["required", "string", "max:255"],
         ]);
 
-        $match = Game::where(function ($query) use ($request): void {
-            $query->where("user_id", $request->user()->id)
-                ->orWhere("is_shared", true);
-        })
-            ->whereRaw("LOWER(name) = LOWER(?)", [$request->input("name")])
-            ->first();
+        $match = Game::findDuplicate($request->user()->id, $request->input("name"));
 
         if ($match === null) {
             return response()->json(["duplicate" => null]);
@@ -123,15 +113,11 @@ class GameController extends Controller
         return Redirect::route("games.index");
     }
 
-    public function incrementCopies(Request $request, Game $game): RedirectResponse
+    public function incrementCopies(Game $game, IncrementGameCopiesAction $action): RedirectResponse
     {
-        if ($game->is_shared || $game->user_id !== $request->user()->id) {
-            abort(403);
-        }
+        $this->authorize("incrementCopies", $game);
 
-        if ($game->copies < 100) {
-            $game->increment("copies");
-        }
+        $action->execute($game);
 
         return Redirect::route("games.index");
     }
