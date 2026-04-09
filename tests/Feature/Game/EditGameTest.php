@@ -23,12 +23,14 @@ test("user can update their own game", function (): void {
             "name" => "Updated Name",
             "min_players" => 2,
             "max_players" => 6,
+            "copies" => 2,
         ])
         ->assertRedirect("/games");
 
     $this->assertDatabaseHas("games", [
         "id" => $game->id,
         "name" => "Updated Name",
+        "copies" => 2,
     ]);
 });
 
@@ -41,6 +43,7 @@ test("update game accepts max_players of exactly 100", function (): void {
             "name" => "Catan",
             "min_players" => 2,
             "max_players" => 100,
+            "copies" => 1,
         ])
         ->assertRedirect("/games");
 
@@ -94,6 +97,7 @@ test("user cannot update another user's game", function (): void {
             "name" => "Updated",
             "min_players" => 2,
             "max_players" => 4,
+            "copies" => 1,
         ])
         ->assertForbidden();
 });
@@ -107,6 +111,7 @@ test("user cannot update shared game", function (): void {
             "name" => "Updated",
             "min_players" => 2,
             "max_players" => 4,
+            "copies" => 1,
         ])
         ->assertForbidden();
 });
