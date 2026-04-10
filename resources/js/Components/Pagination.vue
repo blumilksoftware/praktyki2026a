@@ -91,19 +91,22 @@ function pageWindow(): Array<number | '...'> {
         </template>
       </p>
 
-      <select
-        :value="meta.per_page"
-        class="rounded-md border-gray-300 py-1 pl-2 pr-7 text-sm text-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
-        @change="changePerPage"
-      >
-        <option
-          v-for="option in perPageOptions"
-          :key="option"
-          :value="option"
+      <label class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        {{ t('pagination.perPage') }}
+        <select
+          :value="meta.per_page"
+          class="rounded-md border-gray-300 py-1 pl-2 pr-7 text-sm text-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+          @change="changePerPage"
         >
-          {{ option }} {{ t('pagination.perPage') }}
-        </option>
-      </select>
+          <option
+            v-for="option in perPageOptions"
+            :key="option"
+            :value="option"
+          >
+            {{ option }}
+          </option>
+        </select>
+      </label>
     </div>
 
     <div class="flex items-center gap-1">

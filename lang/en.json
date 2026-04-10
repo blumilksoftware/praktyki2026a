@@ -144,7 +144,7 @@
     "pagination.results": "results",
     "pagination.previous": "Previous",
     "pagination.next": "Next",
-    "pagination.perPage": "Per page",
+    "pagination.perPage": "Rows per page:",
 
     "friends.title": "Friends",
     "friends.add": "Add friend",

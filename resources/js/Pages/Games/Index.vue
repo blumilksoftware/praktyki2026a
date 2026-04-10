@@ -148,7 +148,7 @@ async function deleteGame(game: Game): Promise<void> {
                 @input="navigate"
               >
             </div>
-            <div class="w-36">
+            <div class="w-66">
               <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
                 {{ t('games.playersFilterLabel') }}
               </label>
@@ -163,7 +163,7 @@ async function deleteGame(game: Game): Promise<void> {
             </div>
             <button
               v-if="hasActiveFilters()"
-              class="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              class="self-end rounded-md border border-transparent bg-gray-200 px-3 py-1.5 text-sm font-medium leading-6 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
               @click="clearFilters"
             >
               {{ t('games.clearFilters') }}

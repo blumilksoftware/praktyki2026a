@@ -28,7 +28,7 @@
     "pagination.results": "wyników",
     "pagination.previous": "Poprzednia",
     "pagination.next": "Następna",
-    "pagination.perPage": "Na stronę",
+    "pagination.perPage": "Wierszy na stronę:",
 
     "dashboard.title": "Panel",
     "dashboard.welcome": "Witaj,",

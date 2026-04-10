@@ -130,7 +130,7 @@ async function deleteFriend(friend: Friend): Promise<void> {
             >
             <button
               v-if="searchQuery"
-              class="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              class="rounded-md border border-transparent bg-gray-200 px-3 py-1.5 text-sm font-medium leading-6 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
               @click="clearSearch"
             >
               {{ t('friends.clearSearch') }}
