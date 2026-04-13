@@ -35,6 +35,10 @@ Route::post("/games/{game}/increment-copies", [GameController::class, "increment
     ->middleware(["auth", "verified"])
     ->name("games.incrementCopies");
 
+Route::post("/games/{game}/decrement-copies", [GameController::class, "decrementCopies"])
+    ->middleware(["auth", "verified"])
+    ->name("games.decrementCopies");
+
 Route::post("/games/check-duplicate", [GameController::class, "checkDuplicate"])
     ->middleware(["auth", "verified"])
     ->name("games.checkDuplicate");

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\CreateGameAction;
+use App\Actions\DecrementGameCopiesAction;
 use App\Actions\IncrementGameCopiesAction;
 use App\Actions\UpdateGameAction;
 use App\Http\Requests\GameRequest;
@@ -120,6 +121,26 @@ class GameController extends Controller
         $action->execute($game);
 
         return Redirect::route("games.index");
+    }
+
+    public function decrementCopies(Request $request, Game $game, DecrementGameCopiesAction $action): RedirectResponse
+    {
+        $this->authorize("update", $game);
+
+        $request->validate([
+            "amount" => ["required", "integer", "min:1", "max:{$game->copies}"],
+        ]);
+
+        $action->execute($game, $request->integer("amount"));
+
+        return Redirect::route("games.index", array_filter([
+            "sort" => $request->input("sort"),
+            "direction" => $request->input("direction"),
+            "search" => $request->input("search"),
+            "players" => $request->input("players"),
+            "per_page" => $request->input("per_page"),
+            "page" => $request->input("page"),
+        ], fn($v) => $v !== null && $v !== ''));
     }
 
     public function importFromBgg(Request $request, BoardGameGeekService $bgg): JsonResponse

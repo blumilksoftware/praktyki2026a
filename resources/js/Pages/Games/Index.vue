@@ -8,10 +8,30 @@ import { ref } from 'vue'
 import type { PaginatorMeta } from '@/Types/pagination'
 import IconButton from '@/Components/IconButton.vue'
 import { useConfirmDialog } from '@/composables/useConfirmDialog'
-import { IconEdit, IconTrash } from '@tabler/icons-vue'
+import { IconEdit, IconTrash, IconCircleMinus } from '@tabler/icons-vue'
 
 const { t } = useTranslate()
 const { confirm } = useConfirmDialog()
+
+const decrementDialog = ref<{ game: Game; amount: number } | null>(null)
+
+function openDecrementDialog(game: Game): void {
+  decrementDialog.value = { game, amount: 1 }
+}
+
+function submitDecrement(): void {
+  if (!decrementDialog.value) return
+  router.post(route('games.decrementCopies', decrementDialog.value.game.id), {
+    amount: decrementDialog.value.amount,
+    sort: props.games.meta.sort,
+    direction: props.games.meta.direction,
+    search: props.games.meta.search,
+    players: props.games.meta.players,
+    per_page: props.games.meta.per_page,
+    page: props.games.meta.current_page,
+  })
+  decrementDialog.value = null
+}
 
 interface Game {
   id: number
@@ -118,6 +138,58 @@ async function deleteGame(game: Game): Promise<void> {
   <Head :title="t('games.title')" />
 
   <AuthenticatedLayout>
+    <Teleport to="body">
+      <div
+        v-if="decrementDialog"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        @keydown.esc="decrementDialog = null"
+      >
+        <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {{ t('games.decrementTitle') }}
+          </h3>
+          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            {{ t('games.decrementMessage').replace('{name}', decrementDialog.game.name) }}
+          </p>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {{ t('games.duplicateCopies').replace('{count}', String(decrementDialog.game.copies)) }}
+          </p>
+          <div class="mt-4">
+            <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
+              {{ t('games.decrementAmount') }}
+            </label>
+            <input
+              v-model.number="decrementDialog.amount"
+              type="number"
+              min="1"
+              :max="decrementDialog.game.copies"
+              class="w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+            >
+            <p v-if="decrementDialog.amount >= decrementDialog.game.copies" class="mt-1 text-xs text-red-500">
+              {{ t('games.decrementWillDelete') }}
+            </p>
+          </div>
+          <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              @click="decrementDialog = null"
+            >
+              {{ t('common.cancel') }}
+            </button>
+            <button
+              type="button"
+              class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+              :disabled="!decrementDialog.amount || decrementDialog.amount < 1"
+              @click="submitDecrement"
+            >
+              {{ t('common.delete') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
     <template #header>
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
@@ -263,6 +335,12 @@ async function deleteGame(game: Game): Promise<void> {
                   <td class="px-6 py-4 text-right">
                     <template v-if="!game.is_shared">
                       <IconButton
+                        :icon="IconCircleMinus"
+                        :label="t('games.decrementCopies')"
+                        variant="danger"
+                        @click="openDecrementDialog(game)"
+                      />
+                      <IconButton
                         :icon="IconEdit"
                         :label="t('games.edit')"
                         variant="default"
@@ -325,6 +403,12 @@ async function deleteGame(game: Game): Promise<void> {
                 </p>
                 <div class="flex gap-4 pt-1">
                   <template v-if="!game.is_shared">
+                    <IconButton
+                      :icon="IconCircleMinus"
+                      :label="t('games.decrementCopies')"
+                      variant="danger"
+                      @click="openDecrementDialog(game)"
+                    />
                     <IconButton
                       :icon="IconEdit"
                       :label="t('games.edit')"

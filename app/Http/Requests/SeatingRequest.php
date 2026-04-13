@@ -20,6 +20,7 @@ class SeatingRequest extends FormRequest
             "friend_ids.*" => ["integer", "exists:friends,id"],
             "game_ids" => ["required", "array", "min:1"],
             "game_ids.*" => ["integer", "exists:games,id"],
+            "coverage_weight" => ["sometimes", "numeric", "between:0,1"],
         ];
     }
 }

@@ -136,13 +136,19 @@ class SessionController extends Controller
         return Redirect::route("sessions.index");
     }
 
-    public function arrange(Session $session): Response
+    public function arrange(Request $request, Session $session): Response
     {
         $this->authorize("arrange", $session);
 
+        $request->validate([
+            "coverage_weight" => ["sometimes", "numeric", "between:0,1"],
+        ]);
+
         $session->load(["friends.games", "games"]);
 
-        $arrangement = $this->seatingService->arrangeFormatted($session->friends, $session->games);
+        $coverageWeight = (float) $request->input("coverage_weight", 0.6);
+
+        $arrangement = $this->seatingService->arrangeFormatted($session->friends, $session->games, $coverageWeight);
 
         return Inertia::render("Sessions/Show", [
             "session" => $session,

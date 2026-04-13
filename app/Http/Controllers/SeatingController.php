@@ -29,8 +29,10 @@ class SeatingController extends Controller
             ->whereIn("id", $validated["game_ids"])
             ->get();
 
+        $coverageWeight = (float) ($validated["coverage_weight"] ?? 0.6);
+
         return response()->json(
-            $this->seatingService->arrangeFormatted($friends, $games),
+            $this->seatingService->arrangeFormatted($friends, $games, $coverageWeight),
         );
     }
 }

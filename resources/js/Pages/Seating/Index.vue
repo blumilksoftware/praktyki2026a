@@ -42,6 +42,29 @@
             />
           </div>
 
+          <div class="priority-card">
+            <div class="priority-header">
+              <span class="priority-label">Arrangement priority</span>
+              <span class="priority-value">
+                <template v-if="coverageWeight > 0.65">Seating more people</template>
+                <template v-else-if="coverageWeight < 0.35">Better game fit</template>
+                <template v-else>Balanced</template>
+              </span>
+            </div>
+            <div class="slider-row">
+              <span class="slider-end-label">Better game fit</span>
+              <input
+                v-model.number="coverageWeight"
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                class="priority-slider"
+              >
+              <span class="slider-end-label">Seat more people</span>
+            </div>
+          </div>
+
           <div class="action-footer">
             <div class="selection-summary">
               <span>{{ selectedFriends.length }} friends</span>
@@ -51,7 +74,7 @@
             <button
               class="arrange-btn"
               :disabled="!canArrange || loading"
-              @click="arrange"
+              @click="arrange(coverageWeight)"
             >
               <span v-if="loading" class="btn-spinner" />
               <span v-else>✦</span>
@@ -71,11 +94,13 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useSeating } from '../composables/useSeating'
 import FriendSelector  from '../components/FriendSelector.vue'
 import GameSelector    from '../components/GameSelector.vue'
 import SeatingResults  from '../components/SeatingResults.vue'
+
+const coverageWeight = ref(0.6)
 
 const {
   friends, games,
@@ -239,6 +264,88 @@ onMounted(loadData)
 
 @media (max-width: 640px) {
     .selectors-row { grid-template-columns: 1fr; }
+}
+
+.priority-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.priority-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.priority-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.priority-value {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.slider-end-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.priority-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(
+        to right,
+        var(--accent2) 0%,
+        var(--accent2) calc(v-bind(coverageWeight) * 100%),
+        var(--border-strong) calc(v-bind(coverageWeight) * 100%),
+        var(--border-strong) 100%
+    );
+    outline: none;
+    cursor: pointer;
+}
+
+.priority-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    border: 2px solid var(--surface);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+}
+
+.priority-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    border: 2px solid var(--surface);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
 }
 
 .action-footer {

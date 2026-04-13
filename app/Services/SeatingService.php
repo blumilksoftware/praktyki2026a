@@ -10,9 +10,9 @@ use Illuminate\Support\Collection;
 
 class SeatingService
 {
-    public function arrangeFormatted(Collection $friends, Collection $games): array
+    public function arrangeFormatted(Collection $friends, Collection $games, float $coverageWeight = 0.6): array
     {
-        $raw = $this->arrange($friends, $games);
+        $raw = $this->arrange($friends, $games, $coverageWeight);
 
         return [
             "tables" => collect($raw["tables"])->map(fn($table) => [
@@ -37,16 +37,20 @@ class SeatingService
         ];
     }
 
-    public function arrange(Collection $friends, Collection $games): array
+    public function arrange(Collection $friends, Collection $games, float $coverageWeight = 0.6): array
     {
         $friends->loadMissing("games");
+
+        $copiesRemaining = $games->mapWithKeys(fn(Game $game) => [$game->id => $game->copies])->toArray();
 
         $unseated = collect();
         $tables = [];
         $remaining = $friends->keyBy("id");
 
         while ($remaining->isNotEmpty()) {
-            $best = $this->findBestTable($remaining, $games);
+            $availableGames = $games->filter(fn(Game $game) => ($copiesRemaining[$game->id] ?? 0) > 0);
+
+            $best = $this->findBestTable($remaining, $availableGames, $coverageWeight);
 
             if ($best === null) {
                 $unseated = $unseated->merge($remaining);
@@ -56,6 +60,9 @@ class SeatingService
 
             $tables[] = $best;
 
+            $gameId = $best["game"]->id;
+            $copiesRemaining[$gameId] = ($copiesRemaining[$gameId] ?? 0) - 1;
+
             foreach ($best["friends"] as $friend) {
                 $remaining->forget($friend->id);
             }
@@ -64,9 +71,10 @@ class SeatingService
         return ["tables" => $tables, "unseated" => $unseated];
     }
 
-    private function findBestTable(Collection $remaining, Collection $games): ?array
+    private function findBestTable(Collection $remaining, Collection $games, float $coverageWeight): ?array
     {
         $candidates = [];
+        $satisfactionWeight = 1.0 - $coverageWeight;
 
         foreach ($games as $game) {
             $eligible = $this->eligibleFriends($remaining, $game);
@@ -84,8 +92,6 @@ class SeatingService
                     : $eligible;
 
                 $avgRating = $this->averageRating($selected, $game);
-                $coverageWeight = 0.7;
-                $satisfactionWeight = 0.3;
                 $score = $this->compositeScore($selected->count(), $avgRating, $remaining->count(), $coverageWeight, $satisfactionWeight);
 
                 $candidates[] = [
