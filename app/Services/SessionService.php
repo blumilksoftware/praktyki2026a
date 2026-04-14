@@ -15,12 +15,13 @@ class SessionService
     public function findDuplicate(int $userId, string $name, string $date): ?array
     {
         $match = Session::findDuplicate($userId, $name, $date);
+
         if ($match === null) {
             return null;
         }
 
         return [
-            "id"   => $match->id,
+            "id" => $match->id,
             "name" => $match->name,
             "date" => $match->date->toDateString(),
         ];

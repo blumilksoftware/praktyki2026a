@@ -170,7 +170,7 @@
     "friends.cancel": "Cancel",
     "friends.searchPlaceholder": "Search friends",
     "friends.noResults": "No matching results",
-    "friends.clearSearch": "Clear search",
+    "friends.clearFilters": "Clear search",
     "friends.deleteTitle": "Delete friend",
     "friends.duplicateTitle": "Duplicate Friend",
     "friends.duplicateNameMessage": "A friend named {name} already exists.",
@@ -238,7 +238,7 @@
     "preferences.playersCount": "players",
     "preferences.save": "Save preferences",
     "preferences.cancel": "Cancel",
-    
+
     "common.cancelConfirm": "You have unsaved changes. Are you sure you want to leave?",
     "common.delete": "Delete",
     "common.cancel": "Cancel",

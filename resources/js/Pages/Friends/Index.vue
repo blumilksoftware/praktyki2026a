@@ -1,14 +1,14 @@
 <script setup lang="ts">
+import IconButton from '@/Components/IconButton.vue'
 import Pagination from '@/Components/Pagination.vue'
 import SortableHeader from '@/Components/SortableHeader.vue'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 import { useTranslate } from '@/composables/useTranslate'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import type { PaginatorMeta } from '@/Types/pagination'
 import { Head, Link, router } from '@inertiajs/vue3'
+import { IconAdjustmentsAlt, IconEdit, IconTrash } from '@tabler/icons-vue'
 import { ref } from 'vue'
-import IconButton from '@/Components/IconButton.vue'
-import { useConfirmDialog } from '@/composables/useConfirmDialog'
-import { IconEdit, IconTrash, IconAdjustmentsAlt } from '@tabler/icons-vue'
 
 const { t } = useTranslate()
 const { confirm } = useConfirmDialog()
@@ -47,7 +47,7 @@ function onSearch(): void {
   }, 300)
 }
 
-function clearSearch(): void {
+function clearFilters(): void {
   if (debounceTimer) clearTimeout(debounceTimer)
   searchQuery.value = ''
   router.get(
@@ -82,7 +82,10 @@ function sort(column: string): void {
 async function deleteFriend(friend: Friend): Promise<void> {
   const confirmed = await confirm({
     title: t('friends.deleteTitle'),
-    message: t('friends.deleteConfirm').replace('{name}', `${friend.first_name} ${friend.last_name}`),
+    message: t('friends.deleteConfirm').replace(
+      '{name}',
+      `${friend.first_name} ${friend.last_name}`,
+    ),
     confirmLabel: t('common.delete'),
     cancelLabel: t('common.cancel'),
     variant: 'danger',
@@ -130,10 +133,10 @@ async function deleteFriend(friend: Friend): Promise<void> {
             >
             <button
               v-if="searchQuery"
-              class="rounded-md border border-transparent bg-gray-200 px-3 py-1.5 text-sm font-medium leading-6 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
-              @click="clearSearch"
+              class="rounded-md border cursor-pointer border-transparent bg-gray-200 px-3 py-1.5 text-sm leading-6 font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+              @click="clearFilters"
             >
-              {{ t('friends.clearSearch') }}
+              {{ t('friends.clearFilters') }}
             </button>
           </div>
 
@@ -200,7 +203,9 @@ async function deleteFriend(friend: Friend): Promise<void> {
                       :icon="IconAdjustmentsAlt"
                       :label="t('friends.preferences')"
                       variant="preference"
-                      @click="router.visit(route('preferences.show', friend.id))"
+                      @click="
+                        router.visit(route('preferences.show', friend.id))
+                      "
                     />
                     <IconButton
                       :icon="IconEdit"
@@ -219,7 +224,9 @@ async function deleteFriend(friend: Friend): Promise<void> {
               </tbody>
             </table>
 
-            <div class="divide-y divide-gray-100 sm:hidden dark:divide-gray-700">
+            <div
+              class="divide-y divide-gray-100 sm:hidden dark:divide-gray-700"
+            >
               <div
                 v-for="friend in friends.data"
                 :key="friend.id"
@@ -228,7 +235,10 @@ async function deleteFriend(friend: Friend): Promise<void> {
                 <p class="font-medium text-gray-900 dark:text-gray-100">
                   {{ friend.first_name }} {{ friend.last_name }}
                 </p>
-                <p v-if="friend.email" class="text-sm text-gray-600 dark:text-gray-400">
+                <p
+                  v-if="friend.email"
+                  class="text-sm text-gray-600 dark:text-gray-400"
+                >
                   {{ friend.email }}
                 </p>
                 <div class="flex gap-4 pt-1">
@@ -257,7 +267,13 @@ async function deleteFriend(friend: Friend): Promise<void> {
             <Pagination
               :meta="friends.meta"
               route-name="friends.index"
-              :extra-params="{ search: searchQuery, ...(friends.meta.sort ? { sort: friends.meta.sort } : {}), ...(friends.meta.direction ? { direction: friends.meta.direction } : {}) }"
+              :extra-params="{
+                search: searchQuery,
+                ...(friends.meta.sort ? { sort: friends.meta.sort } : {}),
+                ...(friends.meta.direction
+                  ? { direction: friends.meta.direction }
+                  : {}),
+              }"
             />
           </template>
         </div>

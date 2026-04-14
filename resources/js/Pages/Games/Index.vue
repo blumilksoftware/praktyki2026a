@@ -235,7 +235,7 @@ async function deleteGame(game: Game): Promise<void> {
             </div>
             <button
               v-if="hasActiveFilters()"
-              class="self-end rounded-md border border-transparent bg-gray-200 px-3 py-1.5 text-sm font-medium leading-6 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+              class="self-end cursor-pointer rounded-md border border-transparent bg-gray-200 px-3 py-1.5 text-sm font-medium leading-6 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
               @click="clearFilters"
             >
               {{ t('games.clearFilters') }}

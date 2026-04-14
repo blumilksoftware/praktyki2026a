@@ -157,12 +157,11 @@ function hideArrangement() {
 
         <div v-if="canArrange" class="bg-white p-4 shadow-sm sm:rounded-lg sm:p-6 dark:bg-gray-800">
           <h3 class="mb-6 text-lg font-medium text-gray-900 dark:text-gray-100">{{ t('sessions.arrangementPriority') }}</h3>
-          <div class="flex items-center gap-3">
-            <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">{{ t('sessions.priorityBetterFit') }}</span>
-            <div class="relative flex-1 pt-6">
+          <div class="space-y-2">
+            <div class="relative pt-6">
               <span
                 class="pointer-events-none absolute top-0 whitespace-nowrap text-xs font-medium text-gray-900 dark:text-gray-100 -translate-x-1/2"
-                :style="{ left: `calc(${coverageWeight * 100}% + ${(0.5 - coverageWeight) * 16}px)` }"
+                :style="{ left: `clamp(0%, calc(${coverageWeight * 100}% + ${(0.5 - coverageWeight) * 16}px), 100%)` }"
               >
                 <template v-if="coverageWeight > 0.65">{{ t('sessions.prioritySeatMore') }}</template>
                 <template v-else-if="coverageWeight < 0.35">{{ t('sessions.priorityBetterFit') }}</template>
@@ -177,7 +176,10 @@ function hideArrangement() {
                 class="w-full cursor-pointer accent-indigo-600"
               >
             </div>
-            <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">{{ t('sessions.prioritySeatMore') }}</span>
+            <div class="flex justify-between">
+              <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('sessions.priorityBetterFit') }}</span>
+              <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('sessions.prioritySeatMore') }}</span>
+            </div>
           </div>
           <label class="mt-4 flex cursor-pointer items-center gap-3">
             <input

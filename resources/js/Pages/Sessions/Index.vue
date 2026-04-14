@@ -157,7 +157,7 @@ async function deleteSession(session: Session): Promise<void> {
               <input
                 v-model="dateFrom"
                 type="date"
-                class="rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                class="date-input rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                 @change="navigate"
               >
             </div>
@@ -168,13 +168,13 @@ async function deleteSession(session: Session): Promise<void> {
               <input
                 v-model="dateTo"
                 type="date"
-                class="rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+                class="date-input rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
                 @change="navigate"
               >
             </div>
             <button
               v-if="hasActiveFilters()"
-              class="self-end rounded-md border border-transparent bg-gray-200 px-3 py-1.5 text-sm font-medium leading-6 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+              class="self-end cursor-pointer rounded-md border border-transparent bg-gray-200 px-3 py-1.5 text-sm font-medium leading-6 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
               @click="clearFilters"
             >
               {{ t('sessions.clearFilters') }}
@@ -300,3 +300,9 @@ async function deleteSession(session: Session): Promise<void> {
     </div>
   </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+</style>
