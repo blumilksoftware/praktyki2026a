@@ -7,6 +7,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
+import { IconCircleArrowLeftFilled } from '@tabler/icons-vue'
 
 const { t } = useTranslate()
 
@@ -43,8 +44,9 @@ const submit = () => {
 
     <Link
       href="/"
-      class="mb-4 inline-flex items-center text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+      class="mb-4 inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
     >
+      <IconCircleArrowLeftFilled class="size-4" />
       {{ t('auth.back') }}
     </Link>
 

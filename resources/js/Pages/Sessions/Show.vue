@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import IconButton from '@/Components/IconButton.vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
 import { useFormatDate } from '@/composables/useFormatDate'
 import { ref } from 'vue'
+import { IconEdit, IconCircleArrowLeftFilled } from '@tabler/icons-vue'
 
 const { t } = useTranslate()
 const { formatDate } = useFormatDate()
@@ -82,16 +84,17 @@ function hideArrangement() {
           {{ session.name }}
         </h2>
         <div class="flex items-center gap-4">
-          <Link
-            :href="route('sessions.edit', session.id)"
-            class="text-sm text-indigo-600 hover:text-indigo-500 hover:underline dark:text-indigo-400 dark:hover:text-indigo-300"
-          >
-            {{ t('sessions.edit') }}
-          </Link>
+          <IconButton
+            :icon="IconEdit"
+            :label="t('sessions.edit')"
+            variant="default"
+            @click="router.visit(route('sessions.edit', session.id))"
+          />
           <Link
             :href="route('sessions.index')"
-            class="text-sm text-gray-600 hover:text-gray-900 hover:underline dark:text-gray-400 dark:hover:text-gray-100"
+            class="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 hover:underline dark:text-gray-400 dark:hover:text-gray-100"
           >
+            <IconCircleArrowLeftFilled class="size-4" />
             {{ t('sessions.back') }}
           </Link>
         </div>

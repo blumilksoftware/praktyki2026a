@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { useTranslate } from '@/composables/useTranslate'
+import { IconCircleArrowLeftFilled } from '@tabler/icons-vue'
 
 const { t } = useTranslate()
 
@@ -31,8 +32,9 @@ defineProps<{
         </h2>
         <Link
           :href="route('games.index')"
-          class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          class="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
         >
+          <IconCircleArrowLeftFilled class="size-4" />
           {{ t('games.back') }}
         </Link>
       </div>
