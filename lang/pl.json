@@ -210,6 +210,7 @@
     "sessions.prioritySeatMore": "Posadź więcej osób razem",
     "sessions.priorityBetterFit": "Lepsze dopasowanie gier",
     "sessions.priorityBalanced": "Zrównoważony",
+    "sessions.allowUnknownPreference": "Traktuj znajomych bez zapisanej preferencji do gry jako neutralnych (5,5)",
     "sessions.arrangementTitle": "Rozkład miejsc",
     "sessions.table": "Stolik {number}",
     "sessions.avgRating": "Śr. ocena",

@@ -49,6 +49,7 @@ const props = defineProps<{
 const arranging = ref(false)
 const showArrangement = ref(!!props.arrangement)
 const coverageWeight = ref(0.6)
+const allowUnknownPreference = ref(true)
 
 const canArrange = props.session.friends.length > 0 && props.session.games.length > 0
 
@@ -56,6 +57,7 @@ function arrange() {
   arranging.value = true
   router.post(route('sessions.arrange', props.session.id), {
     coverage_weight: coverageWeight.value,
+    allow_unknown_preference: allowUnknownPreference.value,
   }, {
     preserveScroll: true,
     onFinish: () => {
@@ -150,14 +152,13 @@ function hideArrangement() {
           </ul>
         </div>
 
-        <h3 v-if="canArrange" class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ t('sessions.arrangementPriority') }}</h3>
-
-        <div v-if="canArrange" class="rounded-lg bg-white p-4 shadow-sm sm:rounded-lg sm:p-6 dark:bg-gray-800">
+        <div v-if="canArrange" class="bg-white p-4 shadow-sm sm:rounded-lg sm:p-6 dark:bg-gray-800">
+          <h3 class="mb-6 text-lg font-medium text-gray-900 dark:text-gray-100">{{ t('sessions.arrangementPriority') }}</h3>
           <div class="flex items-center gap-3">
             <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">{{ t('sessions.priorityBetterFit') }}</span>
-            <div class="relative flex-1">
+            <div class="relative flex-1 pt-6">
               <span
-                class="absolute -top-6 whitespace-nowrap text-xs font-medium text-gray-900 dark:text-gray-100 -translate-x-1/2"
+                class="pointer-events-none absolute top-0 whitespace-nowrap text-xs font-medium text-gray-900 dark:text-gray-100 -translate-x-1/2"
                 :style="{ left: `calc(${coverageWeight * 100}% + ${(0.5 - coverageWeight) * 16}px)` }"
               >
                 <template v-if="coverageWeight > 0.65">{{ t('sessions.prioritySeatMore') }}</template>
@@ -175,6 +176,14 @@ function hideArrangement() {
             </div>
             <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">{{ t('sessions.prioritySeatMore') }}</span>
           </div>
+          <label class="mt-4 flex cursor-pointer items-center gap-3">
+            <input
+              v-model="allowUnknownPreference"
+              type="checkbox"
+              class="size-4 rounded border-gray-300 accent-indigo-600 dark:border-gray-600"
+            >
+            <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('sessions.allowUnknownPreference') }}</span>
+          </label>
         </div>
 
         <div class="flex items-center gap-3">

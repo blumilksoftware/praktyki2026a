@@ -21,6 +21,7 @@ class SeatingRequest extends FormRequest
             "game_ids" => ["required", "array", "min:1"],
             "game_ids.*" => ["integer", "exists:games,id"],
             "coverage_weight" => ["sometimes", "numeric", "between:0,1"],
+            "allow_unknown_preference" => ["sometimes", "boolean"],
         ];
     }
 }

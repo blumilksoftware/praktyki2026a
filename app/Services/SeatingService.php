@@ -10,9 +10,11 @@ use Illuminate\Support\Collection;
 
 class SeatingService
 {
-    public function arrangeFormatted(Collection $friends, Collection $games, float $coverageWeight = 0.6): array
+    private bool $allowUnknownPreference = true;
+
+    public function arrangeFormatted(Collection $friends, Collection $games, float $coverageWeight = 0.6, bool $allowUnknownPreference = true): array
     {
-        $raw = $this->arrange($friends, $games, $coverageWeight);
+        $raw = $this->arrange($friends, $games, $coverageWeight, $allowUnknownPreference);
 
         return [
             "tables" => collect($raw["tables"])->map(fn($table) => [
@@ -37,10 +39,13 @@ class SeatingService
         ];
     }
 
-    public function arrange(Collection $friends, Collection $games, float $coverageWeight = 0.6): array
+    public function arrange(Collection $friends, Collection $games, float $coverageWeight = 0.6, bool $allowUnknownPreference = true): array
     {
+        $this->allowUnknownPreference = $allowUnknownPreference;
+
         $friends->loadMissing("games");
 
+        /** @var array<int, int> $copiesRemaining */
         $copiesRemaining = $games->mapWithKeys(fn(Game $game) => [$game->id => $game->copies])->toArray();
 
         $unseated = collect();
@@ -130,7 +135,11 @@ class SeatingService
                 return true;
             }
 
-            return $friend->games->contains("id", $game->id);
+            if ($friend->games->contains("id", $game->id)) {
+                return true;
+            }
+
+            return $this->allowUnknownPreference;
         });
     }
 
@@ -182,18 +191,22 @@ class SeatingService
         return $total / $friends->count();
     }
 
-    private function ratingFor(Friend $friend, Game $game): int
+    private function ratingFor(Friend $friend, Game $game): float
     {
         $pivot = $friend->games->find($game->id)?->pivot;
 
         if ($pivot !== null) {
-            return $pivot->rating ?? 0;
+            return (float) ($pivot->rating ?? 0);
         }
 
         if ($friend->games->isEmpty()) {
-            return 5;
+            return 5.0;
         }
 
-        return 0;
+        if ($this->allowUnknownPreference) {
+            return 5.5;
+        }
+
+        return 0.0;
     }
 }

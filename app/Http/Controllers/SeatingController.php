@@ -30,9 +30,10 @@ class SeatingController extends Controller
             ->get();
 
         $coverageWeight = (float) ($validated["coverage_weight"] ?? 0.6);
+        $allowUnknownPreference = (bool) ($validated["allow_unknown_preference"] ?? true);
 
         return response()->json(
-            $this->seatingService->arrangeFormatted($friends, $games, $coverageWeight),
+            $this->seatingService->arrangeFormatted($friends, $games, $coverageWeight, $allowUnknownPreference),
         );
     }
 }

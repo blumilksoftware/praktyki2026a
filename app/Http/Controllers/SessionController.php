@@ -142,13 +142,15 @@ class SessionController extends Controller
 
         $request->validate([
             "coverage_weight" => ["sometimes", "numeric", "between:0,1"],
+            "allow_unknown_preference" => ["sometimes", "boolean"],
         ]);
 
         $session->load(["friends.games", "games"]);
 
         $coverageWeight = (float) $request->input("coverage_weight", 0.6);
+        $allowUnknownPreference = (bool) $request->input("allow_unknown_preference", true);
 
-        $arrangement = $this->seatingService->arrangeFormatted($session->friends, $session->games, $coverageWeight);
+        $arrangement = $this->seatingService->arrangeFormatted($session->friends, $session->games, $coverageWeight, $allowUnknownPreference);
 
         return Inertia::render("Sessions/Show", [
             "session" => $session,
