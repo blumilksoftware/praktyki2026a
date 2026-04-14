@@ -140,7 +140,7 @@ class GameController extends Controller
             "players" => $request->input("players"),
             "per_page" => $request->input("per_page"),
             "page" => $request->input("page"),
-        ], fn($v) => $v !== null && $v !== ''));
+        ], fn($v) => $v !== null && $v !== ""));
     }
 
     public function importFromBgg(Request $request, BoardGameGeekService $bgg): JsonResponse

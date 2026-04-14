@@ -13,7 +13,7 @@ class DecrementGameCopiesAction
         if ($amount >= $game->copies) {
             $game->delete();
         } else {
-            $game->decrement('copies', $amount);
+            $game->decrement("copies", $amount);
         }
     }
 }

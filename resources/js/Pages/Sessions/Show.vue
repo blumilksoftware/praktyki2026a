@@ -96,7 +96,7 @@ function hideArrangement() {
           >
             <IconCircleArrowLeftFilled class="size-4" />
             {{ t('sessions.back') }}
-          </Link>
+          </Link> 
         </div>
       </div>
     </template>

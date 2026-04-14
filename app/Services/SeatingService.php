@@ -196,7 +196,7 @@ class SeatingService
         $pivot = $friend->games->find($game->id)?->pivot;
 
         if ($pivot !== null) {
-            return (float) ($pivot->rating ?? 0);
+            return (float)($pivot->rating ?? 0);
         }
 
         if ($friend->games->isEmpty()) {

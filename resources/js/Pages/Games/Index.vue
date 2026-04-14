@@ -13,7 +13,7 @@ import { IconEdit, IconTrash, IconCircleMinus } from '@tabler/icons-vue'
 const { t } = useTranslate()
 const { confirm } = useConfirmDialog()
 
-const decrementDialog = ref<{ game: Game; amount: number } | null>(null)
+const decrementDialog = ref<{ game: Game, amount: number } | null>(null)
 
 function openDecrementDialog(game: Game): void {
   decrementDialog.value = { game, amount: 1 }
