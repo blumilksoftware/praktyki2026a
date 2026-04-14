@@ -21,6 +21,15 @@ class Session extends Model
         "notes",
     ];
 
+    public static function findDuplicate(int $userId, string $name, string $date): ?self
+    {
+        return static::query()
+            ->where("user_id", $userId)
+            ->whereRaw("LOWER(name) = LOWER(?)", [$name])
+            ->whereDate("date", $date)
+            ->first();
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

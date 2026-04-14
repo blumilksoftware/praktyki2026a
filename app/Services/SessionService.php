@@ -9,6 +9,23 @@ use App\Models\User;
 
 class SessionService
 {
+    /**
+     * @return array{id: int, name: string, date: string}|null
+     */
+    public function findDuplicate(int $userId, string $name, string $date): ?array
+    {
+        $match = Session::findDuplicate($userId, $name, $date);
+        if ($match === null) {
+            return null;
+        }
+
+        return [
+            "id"   => $match->id,
+            "name" => $match->name,
+            "date" => $match->date->toDateString(),
+        ];
+    }
+
     public function create(User $user, array $data): Session
     {
         $session = Session::create([

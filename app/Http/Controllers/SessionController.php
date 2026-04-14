@@ -10,7 +10,9 @@ use App\Http\Requests\SessionRequest;
 use App\Models\Game;
 use App\Models\Session;
 use App\Services\SeatingService;
+use App\Services\SessionService;
 use App\Traits\BuildsPaginationMeta;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -77,6 +79,22 @@ class SessionController extends Controller
                 ]),
             ],
         ]);
+    }
+
+    public function checkDuplicate(Request $request, SessionService $sessionService): JsonResponse
+    {
+        $request->validate([
+            "name" => ["required", "string", "max:255"],
+            "date" => ["required", "date"],
+        ]);
+
+        $duplicate = $sessionService->findDuplicate(
+            $request->user()->id,
+            $request->input("name"),
+            $request->input("date"),
+        );
+
+        return response()->json(compact("duplicate"));
     }
 
     public function create(Request $request): Response

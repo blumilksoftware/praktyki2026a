@@ -14,6 +14,35 @@ class FriendService
     private const DEFAULT_SORT = "last_name";
 
     /**
+     * @return array{id: int, name: string, match_type: string, email?: string}|null
+     */
+    public function findDuplicate(int $userId, string $firstName, string $lastName, ?string $email): ?array
+    {
+        $nameMatch = Friend::findDuplicateByName($userId, $firstName, $lastName);
+        if ($nameMatch !== null) {
+            return [
+                "id"         => $nameMatch->id,
+                "name"       => "{$nameMatch->first_name} {$nameMatch->last_name}",
+                "match_type" => "name",
+            ];
+        }
+
+        if ($email) {
+            $emailMatch = Friend::findDuplicateByEmail($userId, $email);
+            if ($emailMatch !== null) {
+                return [
+                    "id"         => $emailMatch->id,
+                    "name"       => "{$emailMatch->first_name} {$emailMatch->last_name}",
+                    "email"      => $emailMatch->email,
+                    "match_type" => "email",
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @return array{paginator: LengthAwarePaginator, sort: string, direction: string, search: string}
      */
     public function paginatedIndex(Request $request, int $userId): array

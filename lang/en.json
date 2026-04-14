@@ -172,6 +172,11 @@
     "friends.noResults": "No matching results",
     "friends.clearSearch": "Clear search",
     "friends.deleteTitle": "Delete friend",
+    "friends.duplicateTitle": "Duplicate Friend",
+    "friends.duplicateNameMessage": "A friend named {name} already exists.",
+    "friends.duplicateEmailMessage": "A friend with email {email} already exists.",
+    "friends.duplicateSaveAnyway": "Continue",
+    "friends.duplicateChecking": "Checking for duplicates…",
 
     "sessions.title": "Sessions",
     "sessions.add": "Add session",
@@ -222,6 +227,10 @@
     "sessions.rearrange": "Re-arrange",
     "sessions.hideArrangement": "Hide arrangement",
     "sessions.deleteTitle": "Delete session",
+    "sessions.duplicateTitle": "Duplicate Session",
+    "sessions.duplicateMessage": "A session named \"{name}\" on {date} already exists.",
+    "sessions.duplicateSaveAnyway": "Continue",
+    "sessions.duplicateChecking": "Checking for duplicates…",
 
     "preferences.title": "Preferences — {name}",
     "preferences.noGames": "No games available. Add games to your collection first.",

@@ -4,11 +4,24 @@ import InputError from '@/Components/InputError.vue'
 import InputLabel from '@/Components/InputLabel.vue'
 import PrimaryButton from '@/Components/PrimaryButton.vue'
 import TextInput from '@/Components/TextInput.vue'
-import { Head, useForm } from '@inertiajs/vue3'
+import { Head, useForm, router } from '@inertiajs/vue3'
+import { ref } from 'vue'
+import axios from 'axios'
 import { useTranslate } from '@/composables/useTranslate'
 import { useCancelWithWarning } from '@/composables/useCancelWithWarning'
 
 const { t } = useTranslate()
+
+interface DuplicateMatch {
+  id: number
+  name: string
+  match_type: 'name' | 'email'
+  email?: string
+}
+
+const duplicateMatch = ref<DuplicateMatch | null>(null)
+const showDuplicateDialog = ref(false)
+const duplicateChecking = ref(false)
 
 const form = useForm({
   first_name: '',
@@ -18,7 +31,49 @@ const form = useForm({
 
 const { cancel } = useCancelWithWarning(form, route('friends.index'), t)
 
-function submit() {
+async function runDuplicateCheck(): Promise<void> {
+  if (!form.first_name.trim() || !form.last_name.trim()) return
+
+  duplicateChecking.value = true
+  try {
+    const { data } = await axios.post(route('friends.checkDuplicate'), {
+      first_name: form.first_name,
+      last_name: form.last_name,
+      email: form.email || null,
+    })
+    if (data.duplicate) {
+      duplicateMatch.value = data.duplicate
+      showDuplicateDialog.value = true
+    }
+  } catch {
+    // silently ignore — don't block saving on check failure
+  } finally {
+    duplicateChecking.value = false
+  }
+}
+
+function onLastNameBlur(): void {
+  runDuplicateCheck()
+}
+
+function onEmailBlur(): void {
+  if (form.email.trim()) runDuplicateCheck()
+}
+
+function saveAnyway(): void {
+  showDuplicateDialog.value = false
+  duplicateMatch.value = null
+}
+
+function cancelDuplicate(): void {
+  router.visit(route('friends.index'))
+}
+
+function submit(): void {
+  if (duplicateMatch.value) {
+    showDuplicateDialog.value = true
+    return
+  }
   form.post(route('friends.store'))
 }
 </script>
@@ -34,6 +89,39 @@ function submit() {
         {{ t('friends.addTitle') }}
       </h2>
     </template>
+
+    <Teleport to="body">
+      <div
+        v-if="showDuplicateDialog && duplicateMatch"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      >
+        <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {{ t('friends.duplicateTitle') }}
+          </h3>
+          <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <template v-if="duplicateMatch.match_type === 'name'">
+              {{ t('friends.duplicateNameMessage').replace('{name}', duplicateMatch.name) }}
+            </template>
+            <template v-else>
+              {{ t('friends.duplicateEmailMessage').replace('{email}', duplicateMatch.email ?? '') }}
+            </template>
+          </p>
+          <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              class="cursor-pointer rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              @click="cancelDuplicate"
+            >
+              {{ t('friends.cancel') }}
+            </button>
+            <PrimaryButton type="button" @click="saveAnyway">
+              {{ t('friends.duplicateSaveAnyway') }}
+            </PrimaryButton>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <div class="py-6 sm:py-12">
       <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
@@ -63,8 +151,12 @@ function submit() {
                   type="text"
                   class="mt-1 block w-full"
                   :invalid="!!form.errors.last_name"
+                  @blur="onLastNameBlur"
                 />
                 <InputError :message="form.errors.last_name" class="mt-2" />
+                <p v-if="duplicateChecking" class="mt-1 text-xs text-gray-400">
+                  {{ t('friends.duplicateChecking') }}
+                </p>
               </div>
             </div>
 
@@ -76,6 +168,7 @@ function submit() {
                 type="email"
                 class="mt-1 block w-full"
                 :invalid="!!form.errors.email"
+                @blur="onEmailBlur"
               />
               <InputError :message="form.errors.email" class="mt-2" />
             </div>
@@ -89,9 +182,7 @@ function submit() {
                 {{ t('friends.cancel') }}
               </button>
               <PrimaryButton :disabled="form.processing">
-                {{
-                  t('friends.save')
-                }}
+                {{ t('friends.save') }}
               </PrimaryButton>
             </div>
           </form>

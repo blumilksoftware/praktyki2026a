@@ -172,6 +172,11 @@
     "friends.noResults": "Brak wyników",
     "friends.clearSearch": "Wyczyść filtry",
     "friends.deleteTitle" : "Usuń znajomego",
+    "friends.duplicateTitle": "Duplikat znajomego",
+    "friends.duplicateNameMessage": "Znajomy o imieniu i nazwisku {name} już istnieje.",
+    "friends.duplicateEmailMessage": "Znajomy z adresem e-mail {email} już istnieje.",
+    "friends.duplicateSaveAnyway": "Kontynuuj",
+    "friends.duplicateChecking": "Sprawdzanie duplikatów…",
 
     "sessions.title": "Sesje",
     "sessions.add": "Dodaj sesję",
@@ -222,6 +227,10 @@
     "sessions.rearrange": "Rozdziel ponownie",
     "sessions.hideArrangement": "Ukryj rozkład",
     "sessions.deleteTitle" : "Usuń sesję",
+    "sessions.duplicateTitle": "Duplikat sesji",
+    "sessions.duplicateMessage": "Sesja o nazwie \"{name}\" w dniu {date} już istnieje.",
+    "sessions.duplicateSaveAnyway": "Kontynuuj",
+    "sessions.duplicateChecking": "Sprawdzanie duplikatów…",
 
     "preferences.title": "Preferencje — {name}",
     "preferences.noGames": "Brak dostępnych gier. Najpierw dodaj gry do swojej kolekcji.",

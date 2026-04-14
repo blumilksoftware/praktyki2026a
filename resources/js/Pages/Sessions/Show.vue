@@ -174,7 +174,7 @@ function hideArrangement() {
                 min="0"
                 max="1"
                 step="0.05"
-                class="w-full accent-indigo-600"
+                class="w-full cursor-pointer accent-indigo-600"
               >
             </div>
             <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">{{ t('sessions.prioritySeatMore') }}</span>
@@ -183,7 +183,7 @@ function hideArrangement() {
             <input
               v-model="allowUnknownPreference"
               type="checkbox"
-              class="size-4 rounded border-gray-300 accent-indigo-600 dark:border-gray-600"
+              class="size-4 cursor-pointer rounded border-gray-300 accent-indigo-600 dark:border-gray-600"
             >
             <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('sessions.allowUnknownPreference') }}</span>
           </label>

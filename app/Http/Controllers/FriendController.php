@@ -10,6 +10,7 @@ use App\Http\Requests\FriendRequest;
 use App\Models\Friend;
 use App\Services\FriendService;
 use App\Traits\BuildsPaginationMeta;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -41,6 +42,25 @@ class FriendController extends Controller
     {
         return Inertia::render("Friends/Create");
     }
+
+    public function checkDuplicate(Request $request): JsonResponse
+    {
+        $request->validate([
+            "first_name" => ["required", "string", "max:255"],
+            "last_name"  => ["required", "string", "max:255"],
+            "email"      => ["nullable", "string", "email", "max:255"],
+        ]);
+
+        $duplicate = $this->friendService->findDuplicate(
+            $request->user()->id,
+            $request->input("first_name"),
+            $request->input("last_name"),
+            $request->input("email"),
+        );
+
+        return response()->json(compact("duplicate"));
+    }
+
 
     public function store(FriendRequest $request, CreateFriendAction $action): RedirectResponse
     {

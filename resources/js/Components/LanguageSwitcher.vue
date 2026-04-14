@@ -23,7 +23,7 @@ function switchLocale(code: string) {
     <template #trigger>
       <button
         type="button"
-        class="inline-flex items-center rounded-md px-2 py-1 text-sm font-medium text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+        class="inline-flex items-center cursor-pointer rounded-md px-2 py-1 text-sm font-medium text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
       >
         {{ (page.props.locale as string).toUpperCase() }}
         <svg class="-me-0.5 ms-1 size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -37,7 +37,7 @@ function switchLocale(code: string) {
         v-for="lang in languages"
         :key="lang.code"
         type="button"
-        class="block w-full px-4 py-2 text-start text-sm leading-5 transition duration-150 ease-in-out"
+        class="block w-full px-4 py-2 text-start cursor-pointer text-sm leading-5 transition duration-150 ease-in-out"
         :class="page.props.locale === lang.code
           ? 'font-semibold text-gray-900 bg-gray-100 dark:text-gray-100 dark:bg-gray-800'
           : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'"
