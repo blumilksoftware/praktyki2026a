@@ -27,7 +27,7 @@ class Session extends Model
             ->where("user_id", $userId)
             ->whereRaw("LOWER(name) = LOWER(?)", [$name])
             ->whereDate("date", $date)
-            ->when($excludeId !== null, fn($q) => $q->where("id", "!=", $excludeId))
+            ->when($excludeId !== null, fn($query) => $query->where("id", "!=", $excludeId))
             ->first();
     }
 
