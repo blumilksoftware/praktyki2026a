@@ -17,21 +17,21 @@ class SeatingService
         $raw = $this->arrange($friends, $games, $coverageWeight, $allowUnknownPreference);
 
         return [
-            "tables" => collect($raw["tables"])->map(fn($table) => [
+            "tables" => collect($raw["tables"])->map(fn(array $table): array => [
                 "game" => [
                     "id" => $table["game"]->id,
                     "name" => $table["game"]->name,
                     "min_players" => $table["game"]->min_players,
                     "max_players" => $table["game"]->max_players,
                 ],
-                "friends" => $table["friends"]->map(fn($friend) => [
+                "friends" => $table["friends"]->map(fn(Friend $friend): array => [
                     "id" => $friend->id,
                     "first_name" => $friend->first_name,
                     "last_name" => $friend->last_name,
                 ])->values(),
                 "avg_rating" => $table["avg_rating"],
             ]),
-            "unseated" => $raw["unseated"]->map(fn($friend) => [
+            "unseated" => $raw["unseated"]->map(fn(Friend $friend): array => [
                 "id" => $friend->id,
                 "first_name" => $friend->first_name,
                 "last_name" => $friend->last_name,
@@ -45,14 +45,14 @@ class SeatingService
 
         $friends->loadMissing("games");
 
-        $copiesRemaining = $games->mapWithKeys(fn(Game $game) => [$game->id => $game->copies])->toArray();
+        $copiesRemaining = $games->mapWithKeys(fn(Game $game): array => [$game->id => $game->copies])->toArray();
 
         $unseated = collect();
         $tables = [];
         $remaining = $friends->keyBy("id");
 
         while ($remaining->isNotEmpty()) {
-            $availableGames = $games->filter(fn(Game $game) => ($copiesRemaining[$game->id] ?? 0) > 0);
+            $availableGames = $games->filter(fn(Game $game): bool => ($copiesRemaining[$game->id] ?? 0) > 0);
 
             $best = $this->findBestTable($remaining, $availableGames, $coverageWeight);
 
@@ -112,7 +112,7 @@ class SeatingService
         }
 
         $bestScore = max(array_column($candidates, "score"));
-        $tied = array_values(array_filter($candidates, fn($c) => abs($c["score"] - $bestScore) < 0.0001));
+        $tied = array_values(array_filter($candidates, fn(array $candidate): bool => abs($candidate["score"] - $bestScore) < 0.0001));
         $winner = $tied[array_rand($tied)];
         unset($winner["score"]);
 
@@ -129,7 +129,7 @@ class SeatingService
 
     private function eligibleFriends(Collection $remaining, Game $game): Collection
     {
-        return $remaining->filter(function (Friend $friend) use ($game) {
+        return $remaining->filter(function (Friend $friend) use ($game): bool {
             if ($friend->games->isEmpty()) {
                 return true;
             }
@@ -145,7 +145,7 @@ class SeatingService
     private function topRatedFriends(Collection $eligible, Game $game, int $limit): Collection
     {
         return $eligible
-            ->sortByDesc(fn(Friend $f) => $this->ratingFor($f, $game))
+            ->sortByDesc(fn(Friend $friend): float => $this->ratingFor($friend, $game))
             ->take($limit)
             ->values();
     }
@@ -185,7 +185,7 @@ class SeatingService
             return 0.0;
         }
 
-        $total = $friends->sum(fn(Friend $f) => $this->ratingFor($f, $game));
+        $total = $friends->sum(fn(Friend $friend): float => $this->ratingFor($friend, $game));
 
         return $total / $friends->count();
     }

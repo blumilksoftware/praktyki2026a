@@ -30,7 +30,7 @@ class Game extends Model
         return static::query()
             ->where("user_id", $userId)
             ->whereRaw("LOWER(name) = LOWER(?)", [$name])
-            ->when($excludeId !== null, fn($q) => $q->where("id", "!=", $excludeId))
+            ->when($excludeId !== null, fn(Builder $query): Builder => $query->where("id", "!=", $excludeId))
             ->first();
     }
 

@@ -61,15 +61,15 @@ class BoardGameGeekService
                 ]);
 
             $response->throw();
-        } catch (ConnectionException $e) {
-            Log::error("BGG API connection failed", ["bgg_id" => $bggId, "error" => $e->getMessage()]);
+        } catch (ConnectionException $exception) {
+            Log::error("BGG API connection failed", ["bgg_id" => $bggId, "error" => $exception->getMessage()]);
 
             throw new RuntimeException("Could not connect to BoardGameGeek API. Please try again later.");
-        } catch (RequestException $e) {
+        } catch (RequestException $exception) {
             Log::error("BGG API request failed", [
                 "bgg_id" => $bggId,
-                "status" => $e->response->status(),
-                "body" => $e->response->body(),
+                "status" => $exception->response->status(),
+                "body" => $exception->response->body(),
             ]);
 
             throw new RuntimeException("BoardGameGeek API returned an error for game ID {$bggId}.");

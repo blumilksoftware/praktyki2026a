@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Friend;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class FriendService
@@ -52,8 +53,8 @@ class FriendService
         $query = Friend::where("user_id", $userId);
 
         if ($search !== "") {
-            $query->where(function ($q) use ($search): void {
-                $q->where("first_name", "ilike", "%{$search}%")
+            $query->where(function (Builder $subQuery) use ($search): void {
+                $subQuery->where("first_name", "ilike", "%{$search}%")
                     ->orWhere("last_name", "ilike", "%{$search}%")
                     ->orWhere("email", "ilike", "%{$search}%");
             });

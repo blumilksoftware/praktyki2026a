@@ -12,6 +12,7 @@ use App\Actions\UpdateGameAction;
 use App\Http\Requests\GameRequest;
 use App\Models\Game;
 use App\Services\BoardGameGeekService;
+use Illuminate\Database\Eloquent\Builder;
 use App\Traits\BuildsPaginationMeta;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -43,8 +44,8 @@ class GameController extends Controller
         $query = Game::query()->visibleTo($request->user()->id);
 
         if ($search !== "") {
-            $query->where(function ($q) use ($search): void {
-                $q->where("name", "ilike", "%{$search}%")
+            $query->where(function (Builder $subQuery) use ($search): void {
+                $subQuery->where("name", "ilike", "%{$search}%")
                     ->orWhere("description", "ilike", "%{$search}%");
             });
         }
@@ -162,7 +163,7 @@ class GameController extends Controller
             "players" => $request->input("players"),
             "per_page" => $request->input("per_page"),
             "page" => $request->input("page"),
-        ], fn($v) => $v !== null && $v !== ""));
+        ], fn(mixed $value): bool => $value !== null && $value !== ""));
     }
 
     public function importFromBgg(Request $request, BoardGameGeekService $bgg): JsonResponse
@@ -175,10 +176,10 @@ class GameController extends Controller
             $data = $bgg->fetchPreview($request->input("url"));
 
             return response()->json(["game" => $data]);
-        } catch (InvalidArgumentException $e) {
-            return response()->json(["message" => $e->getMessage()], 422);
-        } catch (RuntimeException $e) {
-            return response()->json(["message" => $e->getMessage()], 502);
+        } catch (InvalidArgumentException $exception) {
+            return response()->json(["message" => $exception->getMessage()], 422);
+        } catch (RuntimeException $exception) {
+            return response()->json(["message" => $exception->getMessage()], 502);
         }
     }
 

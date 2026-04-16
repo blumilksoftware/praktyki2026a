@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,7 +28,7 @@ class Session extends Model
             ->where("user_id", $userId)
             ->whereRaw("LOWER(name) = LOWER(?)", [$name])
             ->whereDate("date", $date)
-            ->when($excludeId !== null, fn($query) => $query->where("id", "!=", $excludeId))
+            ->when($excludeId !== null, fn(Builder $query): Builder => $query->where("id", "!=", $excludeId))
             ->first();
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,7 +27,7 @@ class Friend extends Model
             ->where("user_id", $userId)
             ->whereRaw("LOWER(first_name) = LOWER(?)", [$firstName])
             ->whereRaw("LOWER(last_name) = LOWER(?)", [$lastName])
-            ->when($excludeId !== null, fn($q) => $q->where("id", "!=", $excludeId))
+            ->when($excludeId !== null, fn(Builder $query): Builder => $query->where("id", "!=", $excludeId))
             ->first();
     }
 
@@ -35,7 +36,7 @@ class Friend extends Model
         return static::query()
             ->where("user_id", $userId)
             ->whereRaw("LOWER(email) = LOWER(?)", [$email])
-            ->when($excludeId !== null, fn($q) => $q->where("id", "!=", $excludeId))
+            ->when($excludeId !== null, fn(Builder $query): Builder => $query->where("id", "!=", $excludeId))
             ->first();
     }
 
