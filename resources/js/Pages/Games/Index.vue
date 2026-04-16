@@ -119,6 +119,13 @@ function toggleDescription(id: number): void {
   expandedDescriptions.value = next
 }
 
+function needsToggle(description: string | null, maxLines: number): boolean {
+  if (!description) return false
+  const lineCount = description.split('\n').length
+  if (lineCount > maxLines) return true
+  return description.length > maxLines * 60
+}
+
 async function deleteGame(game: Game): Promise<void> {
   const confirmed = await confirm({
     title: t('games.deleteTitle'),
@@ -300,6 +307,7 @@ async function deleteGame(game: Game): Promise<void> {
                         {{ game.description }}
                       </p>
                       <button
+                        v-if="needsToggle(game.description, 1)"
                         class="mt-0.5 text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400"
                         @click="toggleDescription(game.id)"
                       >
@@ -312,7 +320,7 @@ async function deleteGame(game: Game): Promise<void> {
                   </td>
                   <td class="px-6 py-4">
                     <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                      {{ game.copies }}×
+                      {{ game.copies }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-gray-600 dark:text-gray-400">
@@ -391,6 +399,7 @@ async function deleteGame(game: Game): Promise<void> {
                     {{ game.description }}
                   </p>
                   <button
+                    v-if="needsToggle(game.description, 2)"
                     class="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400"
                     @click="toggleDescription(game.id)"
                   >
