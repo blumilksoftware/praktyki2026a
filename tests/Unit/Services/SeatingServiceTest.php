@@ -58,6 +58,8 @@ class SeatingServiceTest extends TestCase
         $result = $this->service->arrange(
             new Collection([$alice, $bob, $carol, $dave]),
             new Collection([$chess, $poker]),
+            0.6,
+            false,
         );
 
         $this->assertCount(2, $result["tables"], "Expected two separate tables");
@@ -197,6 +199,8 @@ class SeatingServiceTest extends TestCase
         $result = $this->service->arrange(
             new Collection([$alice, $bob]),
             new Collection([$chess]),
+            0.6,
+            false,
         );
 
         $unseatedIds = $result["unseated"]->pluck("id")->toArray();
@@ -285,6 +289,7 @@ class SeatingServiceTest extends TestCase
             "min_players" => $min,
             "max_players" => $max,
             "is_shared" => false,
+            "copies" => 1,
         ]);
 
         $game->id = $id;

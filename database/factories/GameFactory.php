@@ -17,6 +17,7 @@ class GameFactory extends Factory
             "is_shared" => false,
             "min_players" => 2,
             "max_players" => 4,
+            "copies" => 1,
         ];
     }
 
