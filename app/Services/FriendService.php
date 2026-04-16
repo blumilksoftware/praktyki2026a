@@ -6,19 +6,15 @@ namespace App\Services;
 
 use App\Models\Friend;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class FriendService
 {
     private const ALLOWED_SORTS = ["first_name", "last_name", "email"];
     private const DEFAULT_SORT = "last_name";
 
-    /**
-     * @return array{id: int, name: string, match_type: string, email?: string}|null
-     */
-    public function findDuplicate(int $userId, string $firstName, string $lastName, ?string $email): ?array
+    public function findDuplicate(int $userId, string $firstName, string $lastName, ?string $email, ?int $excludeId = null): ?array
     {
-        $nameMatch = Friend::findDuplicateByName($userId, $firstName, $lastName);
+        $nameMatch = Friend::findDuplicateByName($userId, $firstName, $lastName, $excludeId);
 
         if ($nameMatch !== null) {
             return [
@@ -29,7 +25,7 @@ class FriendService
         }
 
         if ($email) {
-            $emailMatch = Friend::findDuplicateByEmail($userId, $email);
+            $emailMatch = Friend::findDuplicateByEmail($userId, $email, $excludeId);
 
             if ($emailMatch !== null) {
                 return [
@@ -44,9 +40,6 @@ class FriendService
         return null;
     }
 
-    /**
-     * @return array{paginator: LengthAwarePaginator, sort: string, direction: string, search: string}
-     */
     public function paginatedIndex(Request $request, int $userId): array
     {
         $perPage = min(max($request->integer("per_page", 10), 10), 50);

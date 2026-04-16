@@ -65,8 +65,6 @@ async function runDuplicateCheck(): Promise<void> {
     } else {
       duplicateMatch.value = null
     }
-  } catch {
-    // silently ignore — don't block saving on check failure
   } finally {
     duplicateChecking.value = false
   }

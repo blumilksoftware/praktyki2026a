@@ -45,7 +45,6 @@ class SeatingService
 
         $friends->loadMissing("games");
 
-        /** @var array<int, int> $copiesRemaining */
         $copiesRemaining = $games->mapWithKeys(fn(Game $game) => [$game->id => $game->copies])->toArray();
 
         $unseated = collect();

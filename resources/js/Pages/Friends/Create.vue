@@ -45,8 +45,6 @@ async function runDuplicateCheck(): Promise<void> {
       duplicateMatch.value = data.duplicate
       showDuplicateDialog.value = true
     }
-  } catch {
-    // silently ignore — don't block saving on check failure
   } finally {
     duplicateChecking.value = false
   }

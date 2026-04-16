@@ -25,11 +25,12 @@ class Game extends Model
         "copies",
     ];
 
-    public static function findDuplicate(int $userId, string $name): ?self
+    public static function findDuplicate(int $userId, string $name, ?int $excludeId = null): ?self
     {
         return static::query()
-            ->visibleTo($userId)
+            ->where("user_id", $userId)
             ->whereRaw("LOWER(name) = LOWER(?)", [$name])
+            ->when($excludeId !== null, fn($q) => $q->where("id", "!=", $excludeId))
             ->first();
     }
 

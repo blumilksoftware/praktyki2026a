@@ -86,12 +86,14 @@ class SessionController extends Controller
         $request->validate([
             "name" => ["required", "string", "max:255"],
             "date" => ["required", "date"],
+            "exclude_id" => ["nullable", "integer"],
         ]);
 
         $duplicate = $sessionService->findDuplicate(
             $request->user()->id,
             $request->input("name"),
             $request->input("date"),
+            $request->integer("exclude_id") ?: null,
         );
 
         return response()->json(compact("duplicate"));

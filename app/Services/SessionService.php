@@ -9,12 +9,9 @@ use App\Models\User;
 
 class SessionService
 {
-    /**
-     * @return array{id: int, name: string, date: string}|null
-     */
-    public function findDuplicate(int $userId, string $name, string $date): ?array
+    public function findDuplicate(int $userId, string $name, string $date, ?int $excludeId = null): ?array
     {
-        $match = Session::findDuplicate($userId, $name, $date);
+        $match = Session::findDuplicate($userId, $name, $date, $excludeId);
 
         if ($match === null) {
             return null;

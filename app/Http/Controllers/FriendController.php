@@ -49,6 +49,7 @@ class FriendController extends Controller
             "first_name" => ["required", "string", "max:255"],
             "last_name" => ["required", "string", "max:255"],
             "email" => ["nullable", "string", "email", "max:255"],
+            "exclude_id" => ["nullable", "integer"],
         ]);
 
         $duplicate = $this->friendService->findDuplicate(
@@ -56,6 +57,7 @@ class FriendController extends Controller
             $request->input("first_name"),
             $request->input("last_name"),
             $request->input("email"),
+            $request->integer("exclude_id") ?: null,
         );
 
         return response()->json(compact("duplicate"));

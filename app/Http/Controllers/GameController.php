@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Actions\CreateGameAction;
 use App\Actions\DecrementGameCopiesAction;
 use App\Actions\IncrementGameCopiesAction;
+use App\Actions\MergeGameCopiesAction;
 use App\Actions\UpdateGameAction;
 use App\Http\Requests\GameRequest;
 use App\Models\Game;
@@ -89,9 +90,14 @@ class GameController extends Controller
     {
         $request->validate([
             "name" => ["required", "string", "max:255"],
+            "exclude_id" => ["nullable", "integer"],
         ]);
 
-        $match = Game::findDuplicate($request->user()->id, $request->input("name"));
+        $match = Game::findDuplicate(
+            $request->user()->id,
+            $request->input("name"),
+            $request->integer("exclude_id") ?: null,
+        );
 
         if ($match === null) {
             return response()->json(["duplicate" => null]);
@@ -119,6 +125,22 @@ class GameController extends Controller
         $this->authorize("incrementCopies", $game);
 
         $action->execute($game);
+
+        return Redirect::route("games.index");
+    }
+
+    public function mergeInto(Request $request, Game $source, MergeGameCopiesAction $action): RedirectResponse
+    {
+        $this->authorize("update", $source);
+
+        $request->validate([
+            "target_id" => ["required", "integer"],
+        ]);
+
+        $target = Game::findOrFail($request->integer("target_id"));
+        $this->authorize("incrementCopies", $target);
+
+        $action->execute($source, $target);
 
         return Redirect::route("games.index");
     }

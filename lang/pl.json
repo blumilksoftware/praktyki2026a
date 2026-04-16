@@ -136,6 +136,7 @@
     "games.duplicateSaveNew": "Zapisz nową",
     "games.duplicateIncrement": "Zwiększ istniejącą liczbę",
     "games.duplicateChecking": "Sprawdzanie duplikatów…",
+    "games.duplicateMerge": "Scal z istniejącą (+{count} kopii)",
     "games.decrementCopies": "Usuń kopie",
     "games.decrementTitle": "Usuń kopie",
     "games.decrementMessage": "Ile kopii gry \"{name}\" chcesz usunąć?",

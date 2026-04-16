@@ -21,12 +21,13 @@ class Session extends Model
         "notes",
     ];
 
-    public static function findDuplicate(int $userId, string $name, string $date): ?self
+    public static function findDuplicate(int $userId, string $name, string $date, ?int $excludeId = null): ?self
     {
         return static::query()
             ->where("user_id", $userId)
             ->whereRaw("LOWER(name) = LOWER(?)", [$name])
             ->whereDate("date", $date)
+            ->when($excludeId !== null, fn($q) => $q->where("id", "!=", $excludeId))
             ->first();
     }
 

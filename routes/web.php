@@ -31,6 +31,10 @@ Route::get("/dashboard", function () {
 Route::resource("/games", GameController::class)
     ->middleware(["auth", "verified"]);
 
+Route::post("/games/{source}/merge-into", [GameController::class, "mergeInto"])
+    ->middleware(["auth", "verified"])
+    ->name("games.mergeInto");
+
 Route::post("/games/{game}/increment-copies", [GameController::class, "incrementCopies"])
     ->middleware(["auth", "verified"])
     ->name("games.incrementCopies");

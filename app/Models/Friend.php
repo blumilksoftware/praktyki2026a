@@ -20,20 +20,22 @@ class Friend extends Model
         "email",
     ];
 
-    public static function findDuplicateByName(int $userId, string $firstName, string $lastName): ?self
+    public static function findDuplicateByName(int $userId, string $firstName, string $lastName, ?int $excludeId = null): ?self
     {
         return static::query()
             ->where("user_id", $userId)
             ->whereRaw("LOWER(first_name) = LOWER(?)", [$firstName])
             ->whereRaw("LOWER(last_name) = LOWER(?)", [$lastName])
+            ->when($excludeId !== null, fn($q) => $q->where("id", "!=", $excludeId))
             ->first();
     }
 
-    public static function findDuplicateByEmail(int $userId, string $email): ?self
+    public static function findDuplicateByEmail(int $userId, string $email, ?int $excludeId = null): ?self
     {
         return static::query()
             ->where("user_id", $userId)
             ->whereRaw("LOWER(email) = LOWER(?)", [$email])
+            ->when($excludeId !== null, fn($q) => $q->where("id", "!=", $excludeId))
             ->first();
     }
 

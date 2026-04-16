@@ -128,6 +128,7 @@
     "games.duplicateSaveNew": "Save New",
     "games.duplicateIncrement": "Increment",
     "games.duplicateChecking": "Checking for duplicates…",
+    "games.duplicateMerge": "Merge into existing (+{count} copies)",
     "games.decrementCopies": "Remove copies",
     "games.decrementTitle": "Remove copies",
     "games.decrementMessage": "How many copies of \"{name}\" do you want to remove?",
