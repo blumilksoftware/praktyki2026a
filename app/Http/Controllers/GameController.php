@@ -148,13 +148,12 @@ class GameController extends Controller
         $action->execute($game, $request->integer("amount"));
 
         return Redirect::route("games.index", array_filter(
-            $request->only(["sort", "direction", "search", "players", "per_page", "page"])
+            $request->only(["sort", "direction", "search", "players", "per_page", "page"]),
         ));
     }
 
     public function importFromBgg(ImportFromBggRequest $request, BoardGameGeekService $bgg): JsonResponse
     {
-
         try {
             $data = $bgg->fetchPreview($request->input("url"));
 

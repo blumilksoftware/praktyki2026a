@@ -16,8 +16,8 @@ class CheckDuplicateSessionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name"       => ["required", "string", "max:255"],
-            "date"       => ["required", "date"],
+            "name" => ["required", "string", "max:255"],
+            "date" => ["required", "date"],
             "exclude_id" => ["nullable", "integer"],
         ];
     }

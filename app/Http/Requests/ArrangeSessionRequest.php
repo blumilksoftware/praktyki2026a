@@ -16,7 +16,7 @@ class ArrangeSessionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "coverage_weight"        => ["sometimes", "numeric", "between:0,1"],
+            "coverage_weight" => ["sometimes", "numeric", "between:0,1"],
             "allow_unknown_preference" => ["sometimes", "boolean"],
         ];
     }
