@@ -30,7 +30,7 @@ class FriendGame extends Pivot
     protected function casts(): array
     {
         return [
-            "rating" => "integer",
+            "rating" => "float",
         ];
     }
 }

@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreateSessionAction;
 use App\Actions\UpdateSessionAction;
+use App\Http\Requests\ArrangeSessionRequest;
+use App\Http\Requests\CheckDuplicateSessionRequest;
 use App\Http\Requests\SessionRequest;
 use App\Models\Game;
 use App\Models\Session;
@@ -81,14 +83,8 @@ class SessionController extends Controller
         ]);
     }
 
-    public function checkDuplicate(Request $request, SessionService $sessionService): JsonResponse
+    public function checkDuplicate(CheckDuplicateSessionRequest $request, SessionService $sessionService): JsonResponse
     {
-        $request->validate([
-            "name" => ["required", "string", "max:255"],
-            "date" => ["required", "date"],
-            "exclude_id" => ["nullable", "integer"],
-        ]);
-
         $duplicate = $sessionService->findDuplicate(
             $request->user()->id,
             $request->input("name"),
@@ -156,14 +152,9 @@ class SessionController extends Controller
         return Redirect::route("sessions.index");
     }
 
-    public function arrange(Request $request, Session $session): Response
+    public function arrange(ArrangeSessionRequest $request, Session $session): Response
     {
         $this->authorize("arrange", $session);
-
-        $request->validate([
-            "coverage_weight" => ["sometimes", "numeric", "between:0,1"],
-            "allow_unknown_preference" => ["sometimes", "boolean"],
-        ]);
 
         $session->load(["friends.games", "games"]);
 

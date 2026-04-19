@@ -308,7 +308,7 @@ async function deleteGame(game: Game): Promise<void> {
                       </p>
                       <button
                         v-if="needsToggle(game.description, 1)"
-                        class="mt-0.5 text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400"
+                        class="mt-0.5 text-xs cursor-pointer text-indigo-500 hover:text-indigo-700 dark:text-indigo-400"
                         @click="toggleDescription(game.id)"
                       >
                         {{ expandedDescriptions.has(game.id) ? t('games.showLess') : t('games.showMore') }}
@@ -400,7 +400,7 @@ async function deleteGame(game: Game): Promise<void> {
                   </p>
                   <button
                     v-if="needsToggle(game.description, 2)"
-                    class="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400"
+                    class="text-xs text-indigo-500 cursor-pointer hover:text-indigo-700 dark:text-indigo-400"
                     @click="toggleDescription(game.id)"
                   >
                     {{ expandedDescriptions.has(game.id) ? t('games.showLess') : t('games.showMore') }}

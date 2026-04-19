@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreateFriendAction;
 use App\Actions\UpdateFriendAction;
+use App\Http\Requests\CheckDuplicateFriendRequest;
 use App\Http\Requests\FriendRequest;
 use App\Models\Friend;
 use App\Services\FriendService;
@@ -43,15 +44,8 @@ class FriendController extends Controller
         return Inertia::render("Friends/Create");
     }
 
-    public function checkDuplicate(Request $request): JsonResponse
+    public function checkDuplicate(CheckDuplicateFriendRequest $request): JsonResponse
     {
-        $request->validate([
-            "first_name" => ["required", "string", "max:255"],
-            "last_name" => ["required", "string", "max:255"],
-            "email" => ["nullable", "string", "email", "max:255"],
-            "exclude_id" => ["nullable", "integer"],
-        ]);
-
         $duplicate = $this->friendService->findDuplicate(
             $request->user()->id,
             $request->input("first_name"),

@@ -9,7 +9,11 @@ use App\Actions\DecrementGameCopiesAction;
 use App\Actions\IncrementGameCopiesAction;
 use App\Actions\MergeGameCopiesAction;
 use App\Actions\UpdateGameAction;
+use App\Http\Requests\CheckDuplicateGameRequest;
+use App\Http\Requests\DecrementGameCopiesRequest;
 use App\Http\Requests\GameRequest;
+use App\Http\Requests\ImportFromBggRequest;
+use App\Http\Requests\MergeGameRequest;
 use App\Models\Game;
 use App\Services\BoardGameGeekService;
 use App\Traits\BuildsPaginationMeta;
@@ -87,13 +91,8 @@ class GameController extends Controller
         return Inertia::render("Games/Create");
     }
 
-    public function checkDuplicate(Request $request): JsonResponse
+    public function checkDuplicate(CheckDuplicateGameRequest $request): JsonResponse
     {
-        $request->validate([
-            "name" => ["required", "string", "max:255"],
-            "exclude_id" => ["nullable", "integer"],
-        ]);
-
         $match = Game::findDuplicate(
             $request->user()->id,
             $request->input("name"),
@@ -130,13 +129,9 @@ class GameController extends Controller
         return Redirect::route("games.index");
     }
 
-    public function mergeInto(Request $request, Game $source, MergeGameCopiesAction $action): RedirectResponse
+    public function mergeInto(MergeGameRequest $request, Game $source, MergeGameCopiesAction $action): RedirectResponse
     {
         $this->authorize("update", $source);
-
-        $request->validate([
-            "target_id" => ["required", "integer"],
-        ]);
 
         $target = Game::findOrFail($request->integer("target_id"));
         $this->authorize("incrementCopies", $target);
@@ -146,31 +141,19 @@ class GameController extends Controller
         return Redirect::route("games.index");
     }
 
-    public function decrementCopies(Request $request, Game $game, DecrementGameCopiesAction $action): RedirectResponse
+    public function decrementCopies(DecrementGameCopiesRequest $request, Game $game, DecrementGameCopiesAction $action): RedirectResponse
     {
         $this->authorize("update", $game);
 
-        $request->validate([
-            "amount" => ["required", "integer", "min:1", "max:{$game->copies}"],
-        ]);
-
         $action->execute($game, $request->integer("amount"));
 
-        return Redirect::route("games.index", array_filter([
-            "sort" => $request->input("sort"),
-            "direction" => $request->input("direction"),
-            "search" => $request->input("search"),
-            "players" => $request->input("players"),
-            "per_page" => $request->input("per_page"),
-            "page" => $request->input("page"),
-        ], fn(mixed $value): bool => $value !== null && $value !== ""));
+        return Redirect::route("games.index", array_filter(
+            $request->only(["sort", "direction", "search", "players", "per_page", "page"])
+        ));
     }
 
-    public function importFromBgg(Request $request, BoardGameGeekService $bgg): JsonResponse
+    public function importFromBgg(ImportFromBggRequest $request, BoardGameGeekService $bgg): JsonResponse
     {
-        $request->validate([
-            "url" => ["required", "string", "url"],
-        ]);
 
         try {
             $data = $bgg->fetchPreview($request->input("url"));
