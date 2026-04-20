@@ -41,7 +41,7 @@ class GameController extends Controller
             : "name";
         $sortDirection = $request->input("direction") === "desc" ? "desc" : "asc";
 
-        $search = trim((string)$request->input("search", ""));
+        $search = trim($request->string("search")->value());
         $players = $request->integer("players", 0);
         $players = $players > 0 ? $players : null;
 

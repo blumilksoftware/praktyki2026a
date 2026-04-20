@@ -95,13 +95,14 @@ function pageWindow(): Array<number | '...'> {
         {{ t('pagination.perPage') }}
         <select
           :value="meta.per_page"
-          class="rounded-md border-gray-300 py-1 pl-2 pr-7 text-sm text-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
+          class="cursor-pointer rounded-md border-gray-300 py-1 pl-2 pr-7 text-sm text-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300"
           @change="changePerPage"
         >
           <option
             v-for="option in perPageOptions"
             :key="option"
             :value="option"
+            class="cursor-pointer"
           >
             {{ option }}
           </option>

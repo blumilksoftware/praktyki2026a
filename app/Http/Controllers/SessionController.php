@@ -39,7 +39,7 @@ class SessionController extends Controller
             : "date";
         $sortDirection = $request->input("direction") === "asc" ? "asc" : "desc";
 
-        $search = trim((string)$request->input("search", ""));
+        $search = trim($request->string("search")->value());
         $dateFrom = $request->input("date_from", "");
         $dateTo = $request->input("date_to", "");
         $dateFrom = (is_string($dateFrom) && $dateFrom !== "" && strtotime($dateFrom) !== false)
@@ -158,8 +158,8 @@ class SessionController extends Controller
 
         $session->load(["friends.games", "games"]);
 
-        $coverageWeight = (float)$request->input("coverage_weight", 0.6);
-        $allowUnknownPreference = (bool)$request->input("allow_unknown_preference", true);
+        $coverageWeight = $request->float("coverage_weight", 0.6);
+        $allowUnknownPreference = $request->boolean("allow_unknown_preference", true);
 
         $arrangement = $this->seatingService->arrangeFormatted($session->friends, $session->games, $coverageWeight, $allowUnknownPreference);
 

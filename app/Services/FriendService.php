@@ -48,7 +48,7 @@ class FriendService
             ? $request->input("sort")
             : self::DEFAULT_SORT;
         $direction = $request->input("direction") === "desc" ? "desc" : "asc";
-        $search = trim((string)$request->input("search", ""));
+        $search = trim($request->string("search")->value());
 
         $query = Friend::where("user_id", $userId);
 
