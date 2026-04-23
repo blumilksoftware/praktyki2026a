@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       # renovate: datasource=github-releases depName=php packageName=containerbase/php-prebuild
-      PHP_VERSION: 8.4.16
+      PHP_VERSION: 8.5.4
     services:
       pgsql:
         image: postgis/postgis:18-3.6@sha256:c8ec4cf290ed06e8a87df34e89462c84dc3cffbc8c2185463db6bb2d721cbefe
